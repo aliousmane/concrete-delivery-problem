@@ -1,0 +1,22 @@
+[Feng04] Feng CW, Cheng TM, Wu HT. Optimizing the schedule of dispatching RMC trucks through
+ genetic algorithms. Automation in Construction. 2004 May 1;13(3):327-40.
+ [Kinable14] Kinable J, Wauters T, Berghe GV. The concrete delivery problem. Computers & Operations
+  Research. 2014 Aug 1;48:53-68.
+ [Maghrebi16] Maghrebi M, Waller T, Sammut C. Matching experts' decisions in concrete delivery
+ dispatching centers by ensemble learning algorithms: Tactical level. Automation in Construction. 2016
+ Aug 1;68:146-55.
+ [Maghrebi17] Maghrebi M, Waller ST. An Intelligent Decision Support Tool for Supply Perishable
+ Materials: Case Study of Concrete Delivery. 2017.
+ [Muniz18] Júlia Muniz de Miranda Sá & Mojtaba Maghrebi (2018) A more realistic approach towards
+ concrete delivery dispatching problem: using real distance instead spatial distance, Australian Journal of
+ Civil Engineering, 16:1, 1-11, DOI: 10.1080/14488353.2017.1408736.
+ [Naso07] Naso D, Surico M, Turchiano B, Kaymak U. Genetic algorithms for supply-chain scheduling: A
+ case study in the distribution of ready-mixed concrete. European Journal of Operational Research. 2007
+ Mar 16;177(3):2069-99.
+ [Sarkar19] Sarkar D, Gohel J, Dabasia K. Optimization of ready mixed concrete delivery for commercial
+ batching plants of Ahmedabad, India. International Journal of Construction Management. 2019 Apr
+ 20:1-20.
+ [Weiszer20] Weiszer M, Fedorko G, Molnár V, Tučková Z, Poliak M. Dispatching policy evaluation for
+ transport of ready mixed concrete. Open Engineering. 2020 Jan 31;10(1):120-8.
+
+ 

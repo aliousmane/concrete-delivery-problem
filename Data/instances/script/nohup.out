@@ -1,0 +1,8 @@
+  File "matrices.py", line 20
+    f"{url}origins={de}&destinations={vers}&key={API_KEY}")
+                                                         ^
+SyntaxError: invalid syntax
+  File "matrices.py", line 19
+    r = requests.get(f"{url}origins={de}&destinations={vers}&key={API_KEY}")
+                                                                          ^
+SyntaxError: invalid syntax

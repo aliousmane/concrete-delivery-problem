@@ -1,0 +1,352 @@
+\documentclass{article}
+
+\usepackage{epsfig}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[algo2e]{algorithm2e}
+\usepackage[compatible,noend]{algpseudocode}
+\usepackage{enumitem}
+\usepackage{xspace}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{amsfonts}
+\usepackage{pifont}
+\usepackage{bbding}
+\usepackage{tikz}
+\usetikzlibrary{automata,topaths,calc,positioning,shapes,backgrounds}
+\usepackage{caption}
+\usepackage{tabularx}
+\usepackage[T1]{fontenc}
+\usepackage{natbib}
+\usepackage{datatool}
+\usepackage{array}
+\usepackage{pgfplotstable}
+\pgfplotsset{width=7cm,compat=newest}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{pdflscape}
+\usepackage{afterpage}
+\usepackage{capt-of}
+\usepackage{adjustbox}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage[text={15cm,21cm},centering]{geometry}
+\usepackage{setspace}
+\usepackage{array}
+\allowdisplaybreaks
+\usepackage{lipsum} 
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newcommand{\pcmaxc}{P$|\mbox{\em cont}|$C$_{\max}$\xspace}
+\newcommand{\alns}{adaptive large neighborhood search\xspace}
+\newcommand{\Alns}{Adaptive large neighborhood search\xspace}
+\renewcommand{\algorithmicforall}{\textbf{for each}}
+\SetKwFor{ForEach}{for each}{}{}%
+\renewcommand{\algorithmiccomment}[2][1\linewidth]{%
+\leavevmode\hfill\makebox[#1][l]{/* \textbf{~#2} */}}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\newcommand{\F}{$\mathcal{F}$\xspace}
+\newcommand{\B}{$\mathcal{B}$\xspace}
+\newcommand{\C}{$\mathcal{C}$\xspace}
+\renewcommand{\tabcolsep}{4pt}
+
+\oddsidemargin=0.5in
+\topmargin=-0.25in
+\textwidth=5.5in
+\textheight=8.25in
+
+%\journal{European Journal of Operational Research}
+
+%\begin{frontmatter}
+
+		
+\title{A GRASP algorithm for the concrete delivery problem. }
+\author{Ousmane Ali$^{(1)}$, Jean-Fran\c cois C\^ot\'e$^{(2)}$, Leandro C.~Coelho$^{(3)}$\\
+ $(1)$ {\tt nassoma-wattara-ousmane.ali.1@ulaval.ca}\\
+ $(2)$ {\tt Jean-Francois.Cote@fsa.ulaval.ca}\\
+ $(3)$ {\tt Leandro.Coelho@fsa.ulaval.ca}\\
+}
+
+% \date{\today}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+	%We study the daily scheduling of concrete delivery. Truck drivers are dispatched based on assignment priority and remaining working time over the horizon planning. A customer may be served from several available production plants. Due to the heterogeneity of the fleet, the number of visits to a customer location is not known ahead of time. The objective is to schedule drivers while minimizing travel times, waiting duration, idle time, and overtime. We solve this problem using a greedy randomized adaptive search procedure. Computational experiments with real data show the performance of our methods over the approach used by a local company. 
+\end{abstract}
+
+% \begin{keyword}
+\noindent{\textbf{Keywords:} Vehicle routing; scheduling; ready-mixed concrete; concrete delivery
+% \end{keyword}
+
+%\end{frontmatter}
+
+\section{Introduction}
+\label{sec:intro}
+ 
+Construction projects involve a huge movement of equipment, people, and materials. Among the latter, concrete is one of the most used. It is a perishable product with many factors affecting its quality \citep{sinha_quality_2021}. It comes in two types: ready-mixed concrete (RMC) and site-mixed concrete (SMC). As its name implies, SMC is produced on the spot using raw materials (water, aggregates, and cement) stored on the construction site, while RMC is manufactured in a batch plant and delivered to the construction site. SMC can avoid delays caused by road traffic, but has a slower and more difficult production process, requires storage for mixing materials and equipment, and is suitable for low amounts of concrete. It is quite the opposite for the RMC, which has better quality and benefits from lower production cost \citep{muresan_comparing_nodate}. Nevertheless, the batch plant manager must employ a fleet of high-cost revolving drum trucks (concrete mixers) to dispatch the ready-mixed concrete. Hence, the key to reaping the RMC benefits is to ensure efficient and prompt delivery on the construction site.  
+
+ Concrete delivery under the form of RMC is subject to many operational constraints that make it a challenging problem met in Operations Research and addressed by the Concrete Delivery Problem (CDP). In this paper, we study a variant of the Concrete Delivery Problem to schedule the daily production and dispatching of RMC for a company located in the province of Quebec, Canada. This company produces RMC in multiple batching plants with different production rates, using a fleet of concrete mixers of various capacities. Each plant has its specific fleet, but a truck can load elsewhere if deemed necessary, except it must return to its home plant at the end of the day. They own two types of trucks with different capacities but can call on an external fleet when needed. They serve a construction site from any batch plant, with the first delivery starting at the time specified by the customer.  Loading and unloading a concrete mixer depends on the truck capacity, a plant's loading, and a construction site's unloading rate, respectively. The problem is like the one addressed in \cite {schmid2009hybrid, schmid2010hybridization}, except for the plant's production rate and the lack of unloading instrumentation in our case. Also, as per union rules, they assign a truck driver to a delivery task based on his seniority. The company uses a centralized dispatcher system to schedule all daily orders, but this system has issues satisfying all daily demands without using an external fleet. 
+
+According to \cite{blazewicz2019handbook}, the concrete delivery problem combines vehicle routing with scheduling issues to plan routes to deliver concrete from batch plants (depots) to customers' construction sites. Ready-mixed concrete is an on-demand product with a short life cycle from production through end use. It cannot be stored and cannot stay too long in a truck, or it will harden. Hence, concrete mixers must deliver RMC at the planned construction site shortly after its production. RMC production and delivery is then an example of a Just-In-Time (JIT) production system in construction \citep{tommelein1999just}. A customer quantity requirement is often greater than the truck size and must be fulfilled by multiple deliveries. In that sense, CDP is like the Vehicle Routing Problem (VRP) with split delivery (VRPSD) \citep{archetti2008split}, except that the same truck may visit a customer more than once. 
+
+Since concrete hardens quickly, in case of multiple deliveries, back-to-back deliveries must be continuous or at least close in time to avoid the problem of cold joint that negatively affects the quality of the concrete. Customers request to be served within a specific time window, complicating truck loading schedules when a plant can only load one truck at a time. Likewise, often only one truck can unload at a time at a customer location, sometimes leading to concrete mixers queuing and waiting their turn to deliver. Furthermore, with trucks of varied sizes, loading, travel, and unloading times that may be uncertain, the Concrete Delivery Problem is a complex problem to solve and has been proven by \cite{asbach2009analysis} to be NP-hard. With a single batching plant, the objective is to maximize the service level (serve all customers and avoid delays between subsequent deliveries and truck queuing). With additional production centers to choose from, a minimization of the total travel time is added to the objective. %However, these objectives can be conflictive.   
+
+The remainder of the paper is organized as follows. Section \ref{lit_review} presents an overview of the CDP related literature.  Section \ref{desc_form} provides a formal description of the problem. Then in Section \ref{method}, we describe the Greedy Randomized Search Procedure (GRASP) algorithm and the constructive heuristics we design to solve this variant of the CDP. Computational experiments and our conclusions follow in Sections \ref{comp_exp} and \ref{concl}, respectively. 
+
+ 
+\section{Literature review}
+\label{lit_review}
+
+A text mining approach for reviewing the ready-mixed concrete literature \citep{maghrebi2015text} showed that concrete technology and material science are the main core of research in this area. The first academic research on concrete batching and delivery began in the late 1990s. \cite{tommelein1999just} describe RMC as a prototypical example of a Just-In-Time production system in construction and identify two practices occurring when delivering it. An alternative is for the customer to haul the product from the batch plant with their concrete mixer. The other approach is where the batch plant delivers the concrete to the customer's location. This latter approach is the one studied in all related papers found in the literature.  
+
+Several works on the CDP mainly focussed on Simulation related methods, either standalone \citep{zayed2001simulation, wang2001scheduling, tian_simulation_based_2010, panas_simulation_based_2013, galic2016simulation}, etc. or hybridized with optimization methods \citep{feng2004optimizing, lu2005optimized, feng_integrating_2006}, etc. to schedule and dispatch concrete production and delivery. \cite{wang2001scheduling} developed a simulation model to reveal the effect and value of the concrete mixers' inter-arrival time on the productivity of hired unloading equipment on site. With a combination of Genetic Algorithm (GA) and simulation process, \cite{feng2004optimizing} tried to minimize the total waiting time for trucks at a customer site. Loading trucks with identical capacities is carried out at the same batch plant. Loading and unloading durations are fixed. GA is used to find the most efficient and effective loading sequence of RMC trucks to be assigned to different construction sites. The simulation process determines the loading, arrival, departure and waiting time of trucks and thus evaluates the cost of each dispatching sequence. They evaluated the method using data from a batch plant in Taiwan with up to nine customers served. \cite{mayteekrieangkrai2015optimized} solved the same problem with the same data using a bee algorithm (BA) and found better solutions than the GA. \cite{lu2005optimized} used the same combination of GA and simulation to decide on the optimal number of concrete mixers to be deployed together with an optimal schedule for batching and delivering concrete. Their objective is to minimize the site crew idle times due to late concrete deliveries plus truck queuing time. The particularity of this setting is that mortar must be delivered on-site before concrete to lubricate an unloading pump. Therefore, mortar batching and delivery are also modelled in the simulation. Finding the best RMC truck size was also the purpose of the discrete-event simulation model proposed by \cite{panas_simulation_based_2013}. 
+
+Besides simulation-based methods, we find in the literature works using metaheuristics \citep{faria2006distributed, misir2011selection, maghrebi2016sequential, yang2022concrete}, exact methods \citep{yan2007optimal, kinable2014concrete}, matheuristics \citep{schmid2009hybrid, schmid2010hybridization}, Benders Decomposition \citep{maghrebi2014benders}, Column Generation (CG) \citep{maghrebi2014solving, maghrebi2016column}, Lagrangian relaxation \citep{narayanan2015using}, and machine learning approach \citep{graham2006modeling, maghrebi2014exploring, maghrebi2016matching}. \cite{matsatsinis2004towards} designed a decision support system (DSS) for the dynamic routing of both concrete and pumps that may be necessary for some sites to help the concrete unloading. Three plants are available, but vehicles fulfilling the same order must all load at the same plant. An order that cannot be executed may be postponed for the next day. The routing of the pumps is modelled as a multi-depot VRP with time windows. \cite{naso2007genetic} proposed a sequential GA method combined with constructive heuristics to solve a more general variant of the CDP. In this problem, besides batching concrete delivered to a customer site, the plant's production schedule must include orders picked up by the customers themselves. The algorithm first schedules the plant loading operations before scheduling truck job deliveries. A non-linear model minimizing transportation costs, waiting times, outsourced costs and overtime work is also developed. The authors ran experiments using real-world instances of a concrete supply chain in the Netherlands. They found a reduction in the number of requests redirected to external companies. \cite{yan2007optimal} also emphasized overtime considerations in their paper scheduling RMC for one batching plant with two loading docks. After 4 PM, operations at plant and construction sites are in overtime with a higher hourly wage. A mixed integer programming (MIP) model on a time-space network is developed to minimize travel times and operating costs at both normal and overtime working hours at the plant and the construction sites. Real data consisting of 3 days of operation is tested using a two-stage algorithm. First, they solved the MIP relaxation with CPLEX. Then they simplify the original model by fixing some decision variables before solving it. This algorithm seems to improve the actual plant operation by 10\%. A time-space network is the principal component of the real-time DSS developed by \cite{durbin2008or} to solve a dynamic CDP every five minutes. The DSS can receive new orders, schedule them on the fly, and deal with unexpected events such as plant closures, truck breakdowns, delays in transportation times, etc. Combined with a Tabu Search (TS) heuristic to warm start CPLEX, the model is performant enough to solve instances with up to 1,500 loads per day with up to 250 trucks. The real-time planning and monitoring of CDP are studied more in detail by \cite{garza2021dynamic} in his thesis. Another variant of the CDP is modelled by \cite{schmid2009hybrid} as an integer multicommodity network flow (MCNF) problem on a time-space network. In this paper, concrete is delivered using a heterogeneous fleet of vehicles, and each plant can load an illimited number of trucks simultaneously. Among the trucks, some have specialized equipment and must arrive first at certain construction sites to assist concrete-mixers unloading. The objective is to fulfill all orders, minimize the travel cost, and avoid delays between two consecutive unloading operations for an order. The model is typically solved using a matheuristic algorithm that combines the MCNF with a variable neighbourhood search (VNS) heuristic. The method can solve large problem instances with more than 60 orders per day quickly without encountering any memory issues. The same problem is addressed by \cite{schmid2010hybridization}. The authors proposed a MIP model combined with a VNS and a very large neighbourhood search (VLNS) to develop two matheuristics approaches. Comparisons between both matheuristics and a standalone VNS show that the former methods are much better and are suitable for solving larger problem instances. These methods also provide better solutions for small to medium instances than the matheuristic used in \cite{schmid2009hybrid}. A pure VNS approach with the same problem but without the use of instrumentation has been applied by \cite{payr2009optimizing}. 
+
+Regarding objectives, most authors have been interested in minimizing travel time and delays between consecutive deliveries. Some authors, however, were more interested in maximizing only customer satisfaction. We find these situations in the works of \cite{durbin2008or, kinable2014concrete, kinable2014logic, sulaman2017simulated}. \cite{kinable2014concrete} introduce a more general MIP and constraint programming (CP) models of the CDP reflecting the main constraints commonly found in all CDP works: time lag and no overlapping between consecutive deliveries, covering of all customers' demands, delivery time window, and heterogeneous fleet. However, the model did not include constraints limiting the time that concrete may reside in a truck. The authors also propose a constructive heuristic that schedules the visits to the customers one by one according to the start time of the visit and the truck capacity. The procedure is invoked multiple times for different permutations of the customer's order which is determined using a steepest descent (SD) local search procedure. One of the paper's main contributions is the creation of the first public test instances for the CDP with up to 50 customers, four batching plants, and 20 concrete mixers.  They found the CP model to be highly effective in finding high-quality solutions in relatively little time or improving existing schedules, while the MIP model can be used to compute bounds, as it seems ineffective in solving large problem instances. Finally, the heuristic often yields good solutions in less than a second. A detailed analysis of the MIP model presented in cite{kinable2014concrete}and of two more compact models can be found in the thesis of \cite{hernandez_lopez_study_2020}. In \cite{kinable2014logic}, we find an attempt to solve the previous problem with a Logic Based Benders' approach. \cite{sulaman2017simulated} expand upon the SD heuristic proposed in \cite{kinable2014concrete}, proposing a Simulated Annealing (SA) with a Time-Slot Heuristic (TH). TH mechanism is to look for a slot between existing visits of a truck to schedule a new delivery instead of assigning it to the time slot strictly after the truck's latest assigned delivery. The goal is to reduce the large time gaps that can be present in a schedule created with SD due to ignoring the intermediate available time slots. Experimental results indicated that SATH outperforms SD in speed and solution quality. A generalization of the MIP model of \cite{kinable2014concrete} is addressed in \cite{asbach2009analysis}. This model simultaneously minimizes the total sum of travel costs and the penalty costs for customers with unfulfilled demand. A customer can request that all concrete deliveries come from the same plant or a subset of plants and that a delivery truck belongs to a subset of the vehicle fleet. The MIP model is used in a local search scheme as a black-box solver to reoptimize an incumbent solution in which a neighbourhood operator has unfixed some variables.  
+
+%We provide in the Table an extensive summary of the available literature for the Concrete Delivery Problem. 
+
+ 
+
+ 
+
+\section{Problem description}
+\label{desc_form}
+The problem studied within this paper is about the distribution of ready-mixed concrete from a Canadian company operating in the greater Montreal area. Concrete order from a customer arrives at a central center and is assigned to one of the batching plants from where the product will be produced and delivered to the customer. We define an instance of our problem on a set of batching plants, a set of customer orders, and a set of drivers. 
+
+\subsection*{Batching plant} 
+
+ 
+
+The company serves its customers from 8 concrete batching plants geographically scattered. Each plant has only one loading bay and can load one truck at a time, leading to trucks lining up. The plants are heterogeneous, as each has its hourly loading rate. A plant's rate and truck capacity influence the time needed for loading. After loading, a driver adjusts the concrete in his truck before departing to the customer site. Any batch plant can serve a construction site if the travelled time between them is less than the concrete lifespan. Each plant has its assigned fleet, but it can get a vehicle from another plant or even hire an external fleet. 
+
+ For a batching plant, the decision is to determine which driver must load at a given time. 
+
+\subsection*{Customer orders} 
+
+A constructor requests one or several types of concrete to be delivered to his site. When placing an order, he specifies the quantity of concrete of each type, the arrival time of the first concrete mixer, and his unloading rate. If the amount of concrete usually exceeds any truck capacity, several deliveries are scheduled to satisfy the customer. The arrival time of the first delivery must be respected, and to prevent cold joint in concrete, subsequent deliveries must be in just in time, or at least close in time. We define a maximum time lag beyond which no next delivery should be allowed. The construction site unloading rate gives the time necessary to discharge a truckload. When a construction site requires several types of concrete, all quantities of each type must be thoroughly delivered before delivering the other types. Once a plant is chosen to produce a customer's first order, it must be the provider of all subsequent deliveries of this customer. 
+
+\subsection*{Drivers}  
+
+A driver is an important entity here, as we must incorporate some union constraints into our model. The company has two types of trucks with a capacity of 8 $m^3$ of 12 $m^3$. Each driver is assigned to one of these trucks. A driver is assigned to a plant from where he starts and ends his shift day. When a driver is scheduled for a day, he must work a minimum of four hours for a maximum of 8 hours in normal time plus two hours of overtime. A driver mainly loads RMC at his home plant but can still drive at other plants and load there if needed. Batching plant produces concrete on-demand with recipes specific to customers, which means that truck cannot hold orders for more than one client, even if it has spare capacity. Thus, a driver must refill at a plant between two consecutive deliveries. After unloading the RMC, a driver must clean the concrete mixer before travelling to his next loading plant. When assigning a driver to a delivery, priority is given to the employees with the highest seniority. 
+
+ 
+Let us consider a small example to illustrate our problem. 
+\iffalse
+
+% We now introduce a mathematical model to our variant of the CDP. The model we present here is inspired from the works of \citet{asbach2009analysis}. Let $I =\{i_1,...,i_n\}$ be the set of $n$ customers, $J = \{j_1,...,j_m\}$ be the set of $m$ concrete production facilities (depots), and $K=\{k_1,...,k_p\}$ the set of $p$ vehicles used to deliver concrete from the depots to the customers.  
+
+To each vehicle $k$ is assigned a start ($o_k$) and end ($f_k$) depot. The sets $O$ and $F$ define the $p$ starting depots $o_k$ and ending depots $f_k$, respectively.   
+
+A customer $i \in I$ requires $q_i$ amount of concrete with an incurred penalty of $\beta_i$ if we do not deliver all demands within the working horizon. %Service times are mainly determined by the customer while different vehicles have no significant effect. 
+
+A vehicle has to start delivery at customer $i$ within the time window $\left[a_i,b_i\right]$. A first delivery deadline may be required by the customer, and hence, the first delivery of the day must not start later than at time $b^{'}_i$. Let consider the subset of the depots $J_i \subset J$ from which customer $i$ may only be supplied. $K_i \in K$ is also the subset of vehicles than can serve customer $i$. The total demand $q_i$ may be scheduled into $n_i=\left\lceil {\frac{q_i}{K^i_{min}}} \right\rceil$  maximal number of deliveries chronologically ordered in non-decreasing times, with $K^i_{min}$ being the minimum size of a vehicle in $K_i$. Thus, we represent each customer $i \in I$ by the set $C_i = \{c^i_{1},...,c^i_{n_i}\}$ customers nodes. To prevent the concrete becoming solid at customer $i$ location before the arrival of subsequent deliveries, a parameter maximum time lag $maxtl_i$ is used to enforce that two consecutive deliveries are not too far in time. Furthermore, as only one vehicle can unload concrete at the same time, the parameter minimum time lag $mintl_i$ is used to ensure that two consecutive deliveries are not too close in time.
+
+Similar to the customers, a depot $j \in J$ also has service time $s_j$ for operations such as parking the vehicles at the depot, loading the concrete, etc. A time window $[a_j,b_j]$ is also assigned to a depot to restrict the times of reloading. Each depot $j$ is represented by the set $ D_j = \{d^j_{1},...,D^j_{n_j}\}$ depots nodes, where $n_j=\left\lceil {\frac{b_j-a_j}{mintl_j}+1} \right\rceil$ is an upper bound for the maximum number of possible reloads of vehicles and $mintl_j$ is the minimum time lag between two consecutive reloading at depot $j$.
+
+A vehicle $k$ has capacity $q^k$ which specify how many units of concrete a vehicle may deliver. Using a particular vehicle $k$ for delivering concrete during the working day accumulates vehicle usage costs $\alpha(k)$. Each vehicle $k$ is also given a time window $[a_k,b_k]$ in which it may supply customers, reload at depots, start its tour at $o_k$ and finally finish its tour at $f_k$. Finally, the parameter $\gamma$ represents the maximum time that concrete may reside in the vehicles before hardening.
+
+We define our problem on a complete directed graph $G = (V, E)$ where $V=\{ I \cup J \cup O \cup F\}$ is the set of nodes. The arc sets are $E = \{(i,j,k) \hspace*{1mm} \vert \hspace*{1mm} i, j \in V \hspace{1mm} k\in K \}$ which corresponds to a movement of vehicle $k$ from node $i$ to node $j$. The outcoming arc sets of node $i$ using vehicle $k$ are $\delta_k^{+}(i) = \{(i, j,k) \hspace*{1mm} \vert \hspace*{1mm}  j \in V \}$ while the incoming arc sets of node $i$ using $k$ are $\delta_k^{-}(i) = \{(j, i,k) \hspace*{1mm} \vert \hspace*{1mm}  j \in V \}$.  For each arc $(i,j,k)$, a cost $c_{ijk}$ and a travel time $t_{ijk}$ are assumed.
+
+% We define the directed, twofold weighted, multi-graph $G=\{V,E,t,z\}$ as follows. The edges of graph G have the form $(u, v, k)$, where $u$ and $v$ are nodes of $V$ and $k$ is a vehicle from the vehicle fleet $K$. An edge $(u, v, k) \in E$ corresponds to a movement of vehicle $k$ from node $u$ to node $v$. First, for every vehicle $k \in K$, there is an edge $(O_k, F_k, k) \in E$.Second, for every vehicle $k \in K$, there is an edge $(O_k, d, k) \in E$ to every depot node $d \in D$. These edges correspond to the first trip of a used vehicle to a depot to be filled up with concrete. An operating vehicle uses exactly one of these edges. Third, $E$ comprises for every vehicle $k \in K$, for every depot node $D_{i,n_i}$ and for every customer node $C_{j,n_j}$ one edge $(D_{i,n_i},C_{j,n_j},k)$, which relates to a loaded trip of vehicle $k$ from depot $D_i$ to customer $C_j$.  Fourth, $E$ contains for every vehicle $k \in K$, for every customer node $C_{i,n_i}$ and for every depot node $D_{j,n_j}$ one edge $(C_{i,n_i},D_{j,n_j},k)$, which corresponds to an unloaded trip of vehicle $k$ from customer $C_i$ to depot $D_j$. Finally, we have for every vehicle $k \in K$ and for every customer node $C_{i,n_i}$ one edge $e =(C_{i,n_i},F_k,k)$. Edge $e$ corresponds to the last movement of vehicle $k$ from customer $C_{i}$ to the ending location $F_k$.
+
+We use the following decision variables. Let binary variable $x_{ijk}$ be equal to 1 if vehicle $k$ travels from $i$ to $j$, and 0 otherwise. For each node $i$, the continuous decision time variable $w_i$ determine which routes the vehicles take and at which times vehicles either supply, reload, begin or end their route at $i$. The binary decision variable $y_i$ for customer $i$ indicates whether his demand is satisfied in the current schedule. We define the boolean decision variables $\sigma_{ij}$ that determine which depot $j$ produces concrete for customer $i$. The objective function of the problem is to minimize the total travel costs of all routes while ensuring that all customers are fully satisfied. The mathematical model is as follows:
+
+\begin{align}
+	\label{obj:sch}  \min &  \sum_{(i,j,k) \in E} c_{ijk}x_{ijk} +  \sum_{i \in I}(1-y_i)\beta_i  &   \\ 
+	\label{sch_1}   & \sum_{j \in \delta^{+}_{k}(o_k)}x_{o_kjk} = 1 &  k \in K   \\
+	\label{sch_2}   & \sum_{i \in \delta^{-}_{k}(f_k)}x_{if_kk} = 1 &  k \in K  \\
+	\label{sch_3}   & \sum_{i \in \delta^{-}_{k}(j)}x_{ijk} - \sum_{i \in \delta^{+}_{k}(j)}x_{jik} = 0 &  k \in K, j \in I \cup J   \\
+	\label{sch_4}   &  \sum_{k \in K}\sum_{j \in \delta^{+}_{k}(i)}x_{ijk} \leq 1 &   i \in I    \\
+	\label{sch_5}   &  \sum_{k \in K} \sum_{v \in \delta^{+}_{k}(c^{i}_{j+1})}\hspace{-0mm}x_{c^{i}_{j+1}vk} - \sum_{k \in K}\sum_{v \in \delta^{+}_{k}(c^{i}_{j})}\hspace{-0mm}x_{c^{i}_{j}vk}\leq 0 &  \\ \nonumber
+      & i \in C, j \in \{1,..n_i-1\} &   \\
+    \label{sch_6}   &  \sum_{u \in C_i}\sum_{k \in K}\sum_{j \in \delta^{+}_{k}(u)}q^k x_{ujk}  \geq q_iy_{i} &   i \in C   \\
+	\label{sch_7}   &  \sum_{k \in K}\sum_{i \in \delta^{+}_{k}(j)}x_{jik} \leq 1 &   j \in J    \\
+	\label{sch_8}   & s_i + t_{ijk} - M(1-x_{ijk})  \leq \omega_j - \omega_i  & \hspace{-20mm}   (i,j,k) \in E    \\
+	\label{sch_9}   & \gamma + s_i +  M(1-x_{ijk})  \geq \omega_j - \omega_i  & \hspace{-20mm}  (i,j,k) \in E, i \in D, j \in I    \\
+	% \label{sch_10}   & \omega_i \geq  a_i - M\left(1-\sum_{k \in K}\sum_{j \in \delta^+(i)}x_{ijk}\right)   &   i \in V    \\
+	\label{sch_10}   & \omega_i \geq  a_i   &   i \in V    \\
+	% \label{sch_11}   &  \omega_i \leq b_i + M\left(1-\sum_{k \in K}\sum_{j \in \delta^{-}(i)}x_{jik}\right)   &   i \in V    \\
+	\label{sch_11}   &  \omega_i \leq b_i   &   i \in V    \\
+	\label{sch_12}   &  \omega_{c^{i}_{1}} \leq b^{'}_{i} &   i \in C    \\
+	\label{sch_13}   &  \omega_{c^{i}_{j+1}} - \omega_{c^{i}_{j}} \geq mintl(i) &  \hspace{-20mm}    i \in I, j \in \{1,...n_i-1\}    \\
+	\label{sch_14}   &  \omega_{d^{i}_{j+1}} - \omega_{d^{i}_{j}} \geq mintl(i) &   \hspace{-20mm}  i \in J, j \in \{1,...n_i-1\}    \\
+	\label{sch_15}   &  \omega_{c^{i}_{j+1}} - \omega_{c^{i}_{j}} \leq maxtl(i) &   \hspace{-20mm}  i \in I, j \in \{1,...n_i-1\}    \\
+    \label{sch_16}   & \sum_{k \in K} \sum_{u \in D_j}\sum_{v \in C_i}x_{uvk}  \leq M\sigma_{ij} &   i \in I, j \in J   \\
+    \label{sch_17}   &  \sum_{j \in J}\sigma_{ij} \leq 1 &   i \in I   \\
+    \label{sch_18}   & x_{ijk} \in \{0,1\} &   (i,j,k) \in E   \\
+    \label{sch_19}   &  \omega_i \geq 0 &   i \in V   \\
+    \label{sch_20}   & y_{i} \in \{0,1\} &   i \in I   \\
+    \label{sch_21}   &  \sigma_{ij} \in \{0,1\} &   i \in I, j \in J.   
+\end{align}
+
+\label{sec_formulation}
+
+% The objective function (\ref{obj:sch}) minimizes simultaneously the total sum of travel costs of edges used by any vehicle and penalty costs $ \beta_c $ for customers $c$ whose demand is not fully satisfied. Constraints (\ref{sch_1})--(\ref{sch_2}) ensure that each vehicle $k$ leaves( comes back) to its starting (terminal) location exactly once.  Constraints (\ref{sch_3}) are flow conservation constraints for all nodes except the technical sources and sinks $O(k$ and $F_k$.  Constraints (\ref{sch_4}) state that each customer node may be used at most once. Constraints (\ref{sch_5}) ensure that a customer node $C_{i,j}$ is served before node $C_{i,j'}$ if $j < j'$.  Constraints (\ref{sch_6}) make sure that the $y_c$ variables indicate whether the demand of customer $c$ is satisfied. constraints  (\ref{sch_7}) ensure that no depot node is used more than once.
+% Constraints (\ref{sch_10}) and (\ref{sch_11}) are time windows constraints.
+
+\fi
+
+
+\iffalse
+We now introduce a formal definition for the problem. It is defined on a complete directed graph $G = (V, A)$ where $V = \{D \cup P \cup O \cup F\}$ is the set of nodes.  $D = \{1,\dots, n\}$ is the set of customer nodes and $D^I \subseteq D$ is the subset of all customers requiring having a demand greater than the lowest vehicle capacity.
+
+The arc sets are $A = \{(i, j) \hspace*{1mm} \vert \hspace*{1mm} i, j \in V \}$ and $A^I = \{(i, j) \hspace*{1mm} \vert \hspace*{1mm} i, j \in D^I \cup P\}$. The outcoming arc sets of node $i$ are $\delta^{+}(i) = \{(i, j) \hspace*{1mm} \vert \hspace*{1mm}  j \in D \}$ and $\delta^{+}_I(i) = \{(i, j) \hspace*{1mm} \vert \hspace*{1mm}  j \in D^I \}$. The incoming arc sets of node $i$ are $\delta^{-}(i) = \{(j, i) \hspace*{1mm} \vert \hspace*{1mm}  j \in D \}$ and $\delta^{-}_I(i) = \{(j, i) \hspace*{1mm} \vert \hspace*{1mm} j \in D^I \}$. A time window $[a_{i},b_{i}]$ is associated to each node $i$, with $a_{i}$ and $b_{i}$ being respectively the earliest and latest time the service must begin at node $i$.
+
+Let $K$ be the set of heterogeneous delivery vehicles partitioned into the subset. For each arc $(i,j)$, a cost $c_{ijk}$ and a time $t_{ijk}$ are known. They are respectively the transportation cost and the travelling time from node $i$ to node $j$ by vehicle $k$.  The capacity of each delivery vehicle $k$ is $Q^k$.
+
+Let $P_i$ be the set of products ordered by the customer $i$. A customer can order between one to three product categories: furniture, home appliance and electronic products. Each delivery node $i$ has a total demand $q_{i}$ which is the sum of the specific demand $q^{p}_{i} $ of each product of type $p$ that the customer will receive. The service time $s_{i}^{D}$ for each delivery node $i$ is standard for all delivery vehicles. The service time of an installation node $i$ depends on the delivered products and the driver that performs it. Knowing that vehicle $k \in K^D \cup K^I$ performs the installation of product $p$, the service time will be $s_{ikp}^{I}$. All products of a customer must be installed by the same worker. Thus, the total installation time is $s_{ik}^{I} = \sum_{p \in P_i} s_{ikp}^{I}$ for vehicle $k$ and node $i \in D^I$.
+
+We formulate the problem with the following decision variables. Let binary variable $x_{ijk}$ be equal to 1 if a deliveryman travels from $i$ to $j$ using vehicle $k$, and 0 otherwise.
+
+$z_{ik}$ is equal to 1 if the delivery service at customer $i$ is done by driver $k$ and 0 otherwise.
+
+$z_{ikp}$ equals 1 if the product $p$ of customer $i$ is installed by the driver $k$, 0 otherwise.
+
+
+Binary variable $y_{ijk}$ equals 1 if an installer travels from $i$ to $j$ using vehicle $k$, and 0 otherwise. Binary variable $z_{i}$ equals 1 if the installation service at customer $i$ is done by a deliveryman, and 0 if it is done by an installer. The use of $z_i$ allows our formulation to be flexible; by setting $z_i=1$, we have a VRPTW model with flexible service time which we can relate to the VRPTWDST. With $z_i=0$, we can relate to a VRPTW model with temporal precedence and synchronization constraints similar to the VRPMS. Finally, let $S_{i}$ be the beginning time of delivery service at node $i \in D$ and $S^I_{i}$ be the beginning time of installation service at node $i \in D^I$. The objective function of the DIRP is to minimize the total transportation costs of all the routes traveled by the vehicle fleets. The mathematical model of the DIRP is as follows:
+\fi
+
+% In model (1)--(\ref{cend}), we assumed that only one worker installs at a customer location. But, as different product categories are being dealt with and a delivery crew may be versed in assembling a product, but less so in installing another product, we wanted to investigate the effect of allowing more workers to install the products of a customer. To the decision variables of model (1)--(\ref{cend}), we added the binary variable $z_{ik}$ and $z_{ikp}$. $z_{ik}$ is equal to 1 if the installation service at customer $i$ is done by driver $k$ and 0 otherwise. $z_{ikp}$ equals 1 if the product $p$ of customer $i$ is installed by the driver $k$, 0 otherwise. The mathematical formulation of this new model ($\mathcal{M}_3$) is derived from model (1)--(\ref{cend}) by replacing constraints (\ref{c7}) by constraints (\ref{c47})--(\ref{c51}), constraints (\ref{c9}) by (\ref{c53}) and constraints (\ref{c10}) by (\ref{c54}). These new constraints allow a deliveryman to share the installation of the products of a client with an installer. We solved this new formulation with CPLEX using our instances and show the results in . The column $\%Inst$ in the table denotes the average ratio of the number of products installed by the deliverymen over the total number of products to install.
+\iffalse
+\begin{align}
+\label{model:obj} \min  &  \sum_{k \in K^{D}}\sum_{(i,j) \in A} c_{ijk}x_{ijk} + \sum_{k \in K^{I}}\sum_{(i,j) \in A^I} \hspace{-2mm}c_{ijk}y_{ijk}  &\\
+\label{c1} &\hspace{-10mm} \sum_{j \in \delta^{+}(0)}x_{0jk}\ \leq 1 & \hspace{-40mm}  k \in K^{D} \hspace{0mm}\\
+\label{c2} &\hspace{-10mm} \sum_{j \in \delta^{+}_I(0)}y_{0jk}\ \leq 1 & \hspace{-40mm}  k \in K^{I} \hspace{0mm}  \\
+\label{c3} & \hspace{-10mm}  \sum_{k \in K^{D}}\sum_{j \in \delta^{+}(i)}x_{ijk}\ = 1 & \hspace{-40mm}i \in D \hspace{0mm}  \\
+\label{c4} & \hspace{-10mm}  \sum_{j \in \delta^{-}(i)}x_{jik} - \sum_{j \in \delta^{+}(i)}x_{ijk} = 0 &\hspace{-40mm}i \in D ,\ k \in K^{D} \hspace{0mm} \\
+\label{c5} & \hspace{-10mm}  \sum_{j \in \delta^{-}_I(i)}y_{jik} - \sum_{j \in \delta^{+}_I(i)}y_{ijk} = 0 & \hspace{-40mm}  i \in D^I ,\ k \in K^{I} \hspace{0mm}  \\
+\label{c6} & \hspace{-10mm}  \sum_{i \in D}q_{i} \sum_{j \in \delta^{+}(i)}x_{ijk}\ \leq Q & \hspace{-40mm}k \in K^{D} \hspace{0mm}  \\
+\label{c7} & \hspace{-10mm}  \sum_{k \in K^{I}}\sum_{j \in \delta^{+}_I(i)}y_{ijk}\ = 1 - z_{i} & \hspace{-40mm}  i \in D^I \hspace{0mm} \\
+\label{c8} &\hspace{-10mm}  S_j \geq \hspace{-0mm} S_i +  s_i^D + \sum_{k \in K^{D}} t_{ijk} x_{ijk} - M\left(1-\sum_{k \in K^{D}} x_{ijk}\right) & \hspace{-15mm}  (i,j) \in A, i \not\in D^I \hspace{0mm} \\
+\label{c9} & \hspace{-10mm}  S_j \hspace{-0mm} \geq \hspace{-0mm} S_i \hspace{-0mm}+ s^D_i \hspace{-0mm}+ \hspace{-0mm}\sum_{k \in K^{D}}\hspace{-1mm}(s_{ik}^I + t_{ijk} )x_{ijk} \hspace{-0mm}- \hspace{-0mm}M\hspace{-0mm}\left(\hspace{-0mm}2-\hspace{-3mm}\sum_{k \in K^{D}} \hspace{-2mm}x_{ijk}-z_{i}\hspace{-1mm}\right)  &  \hspace{-4mm}(i,j) \in A, i \in D^I \hspace{0mm}  \\
+\label{c10} & \hspace{-10mm} S^I_j \geq \hspace{-0mm} S^I_i +  \sum_{k \in K^{I}}(s_{ik}^I + t_{ijk} )y_{ijk} - M\left(1-\sum_{k \in K^{I}} y_{ijk}\right)  & \hspace{-40mm}  (i,j) \in A^I \hspace{0mm} \\
+\label{c11} & \hspace{-10mm} S^I_{i} \geq S_{i} + s^{D}_{i} & \hspace{-40mm}i \in D^I \hspace{0mm}  \\
+\label{c12}  & \hspace{-10mm} a_i \leq S_i \leq b_{i} & \hspace{-40mm}  i \in D \hspace{0mm} \\
+\label{c13}  &  \hspace{-10mm} a_i \leq S^I_i \leq b_{i} & \hspace{-40mm}  i \in D^I \hspace{0mm}  \\
+\label{c14} & \hspace{-10mm} x_{ijk} \in \{0,1\} & \hspace{-50mm}  (i,j) \in A , k \in K^D  \hspace{0mm} \\
+\label{c15} & \hspace{-10mm} y_{ijk} \in \{0,1\} & \hspace{-50mm} (i,j) \in A^I , k \in K^I  \hspace{0mm} \\
+\label{cend} & \hspace{-10mm} z_{i} \in \{0,1\} & \hspace{-40mm}  i \in D^I. \hspace{0mm}
+\end{align}
+\fi
+
+\iffalse
+\begin{align}
+    \label{model:obj2} \min  &  \sum_{k \in K^{D}}\sum_{(i,j) \in A} c_{ijk}x_{ijk} + \sum_{k \in K^{I}}\sum_{(i,j) \in A^I} \hspace{-2mm}c_{ijk}y_{ijk}  &\\
+    \label{mod1:c1} & s.t. \hspace{2mm} (\ref{c1})\text{--}(\ref{c6}), \hspace{2mm} (\ref{c8}), \hspace{2mm} (\ref{c11})\text{--}(\ref{cend}) & \\
+    \label{c47} & \hspace{2mm}  \sum_{j \in \delta^{+}_I(i)}y_{ijk} = z_{ik} & \hspace{-40mm}  i \in {D^I},k \in K^{I} \hspace{5mm} \\
+    \label{c470}  & \hspace{2mm} \sum_{j \in \delta^{+}_I(i)}x_{ijk} \geq z_{ik} & \hspace{-40mm}  i \in D^I,k \in K^D \hspace{5mm} \\
+    \label{c471} & \hspace{2mm} \sum_{k \in K^D} z_{ik} = z_i & \hspace{-40mm}  i \in {D^I} \hspace{5mm} \\
+    \label{c48} & \hspace{2mm} \sum_{k \in K^I} z_{ik} \geq 1-z_i & \hspace{-40mm} i \in {D^I} \hspace{5mm} \\
+    \label{c49} & \hspace{2mm} \sum_{k \in K^D}\sum_{p \in P_i} z_{ikp} \geq z_i & \hspace{-40mm} i \in {D^I} \hspace{5mm} \\
+    \label{c50}& \hspace{2mm} \sum_{k \in K} z_{ikp} = 1 & \hspace{-40mm} i \in {D^I}, p \in P_i \hspace{5mm} \\
+    \label{c51} & \hspace{2mm} z_{ikp} \leq z_{ik} & \hspace{-40mm} i \in {D^I}, p \in P_i, k \in K \hspace{5mm} \\
+    \label{c53} & \hspace{2mm}  S_j \hspace{-0mm} \geq S_i + s^D_i + \hspace{-2mm} \sum_{k \in K^D} \hspace{-1mm} \left( \sum_{p \in P_i}s_{ipk}^Iz_{ikp} +\left( t_{ijk} + M \right) x_{ijk} \right) - M(2-z_i)   & \hspace{-3mm} (i,j) \in {A}, i \in D^I \hspace{5mm} \\
+    \label{c54} & \hspace{2mm} S^I_j \geq \hspace{-0mm} S^I_{i} + \sum_{p \in P_i}s_{ipk}^I z_{ikp} + t_{ijk}y_{ijk} - M(1-y_{ijk})  & \hspace{-30mm}  (i,j) \in A^I, k \in K^{I} \hspace{5mm} \\
+    \label{c61} & \hspace{2mm} z_{ik} \in \{0,1\} & \hspace{-50mm}  i \in D , k \in K  \hspace{5mm} \\
+    \label{cend2} & \hspace{2mm} z_{ikp} \in \{0,1\} & \hspace{-50mm} i \in D^I , k \in K, p \in P_i.  \hspace{5mm}
+\end{align}
+\fi
+
+\section{A GRASP heuristic}
+\label{method}
+
+\subsection{Priority insertion greedy heuristic}
+This algorithm (PIGH) uses a minimum priority queue data structure to schedule the loading and unloading operations. We define a priority queue \F that contains an estimated delivery time for each delivery node. We start the algorithm outlined in Algorithm~\ref{alg:prioIns} by initializing \F with a big value $M$ for all nodes. Then we select for each customer $i$ a random order $o^p_i$. We update in the priority queue the value of the first delivery node $d^p_{0i}$ of each customer with $a_i$. Next, we repeat in a loop the instructions between lines 6 and 16 as long as \F is not empty. At each iteration, we first retrieve the node with the earliest delivery time and we schedule its loading and unloading tasks with the procedure described in Algorithm~\ref{alg_ScheduleTask}. Next, we update the solution and the remaining quantities that the order and customer must receive. If an order $o^p$ is not yet fulfilled after the visiting $d^p_{ij}$, we update in \F the next delivery node $d^p_{ij+1}$ with the expected start time plus a random value. Otherwise, if the customer has remaining orders, we select another random order $p'$ and update the value of its first delivery node in \F with also its expected start delivery time plus a random value. We add this random value to ensure the randomization of the algorithm.
+
+{\setstretch{1}
+{\small
+    % \vspace{-4mm}
+    \begin{algorithm}[hbt]         
+        \caption{Delivery priority insertion heuristic }
+        \label{alg:prioIns}
+        \DontPrintSemicolon
+        \LinesNumbered
+        \setcounter{AlgoLine}{0}
+        \KwIn{  $S$: empty solution $S$}
+
+        \F: priority queue
+
+        \ForEach(delivery node j){}{
+        
+            \F[$j$]=$M$ // \textit{M: big value}
+
+        }
+
+        \ForEach(customer i){}{
+        Select a random order $o^p_i$
+
+        Push $d^p_{i0}$ into \F: \F[$d^p_{i0}$]=$a_i$
+        }
+
+        \While{\F $\neq \emptyset$}
+        {
+        Pop $d^p_{ij}$ with the earliest delivery time from \F
+
+        $l^p_{ij}$, $u^p_{ij}$ = ScheduleTasks($d^p_{ij},S$)
+
+        $S \leftarrow S \cup (l^p_{ij}$, $u^p_{ij})  $
+
+        $q_i \leftarrow q_i-q^p_{ij}$;  $q^p_i \leftarrow q^p_i-q^p_{ij}$
+
+        \uIf {$q^p_i \neq 0$ }{
+
+        Push $d^p_{ij+1}$  into \F
+
+        \F$[d^p_{ij+1}]=$ $ES_{d^p_{ij+1}]} \pm$ rand().
+        }
+        \uElseIf{ $q_i \neq 0$}{
+
+        Select another order $o^{p'}_i$
+
+        Push $d^{p'}_{i0}$ into \F: \F[$d^{p'}_{i0}$]=$ES_{d^{p'}_{i0}} \pm$ rand().
+        }
+    }
+
+        \KwRet{$S$}
+    \end{algorithm}
+}
+}
+
+
+\section{Computational experiments}
+\label{comp_exp}
+\iffalse
+\begin{table}
+    \begin{tabular}[]{cc}
+        \toprule
+        Depot &  Capacity \\
+        \hline
+        005 & 90    \\
+        010 & 80    \\
+        020 & 80	\\
+        \bottomrule
+    \end{tabular}
+\end{table}
+\fi
+\section{Conclusion}
+\label{concl}
+
+\vspace{0.1in}
+
+
+\vspace{1.5cm} \noindent \textbf{Acknowledgments}
+
+Financial support for this work was provided by the Canadian Natural Sciences and Engineering Research Council (NSERC) under grants 2015-04893 and 2019-00094. This support is gratefully acknowledged.
+
+
+\bibliographystyle{plainnat}
+\bibliography{References}
+
+
+
+
+
+
+
+
+\end{document}

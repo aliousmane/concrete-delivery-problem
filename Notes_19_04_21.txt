@@ -1,0 +1,13 @@
+
+Input horaire
+
+Conception des routes en fonction des
+horaires.  
+
+pickup and delivery 
+pickup à l'usine
+delivery au chantier
+synchronisation
+problème de scheduling
+usine = machine
+chantier = machine

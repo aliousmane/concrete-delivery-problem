@@ -1,0 +1,14 @@
+- Creer instances pour les operations journalières
+    -  Trier les commandes par jour ( chaque journée correspond à une instance)
+        - informations client
+            - id position (x, y)
+        - info commandes
+            - Quantité
+            - fenêtre horaire
+        - info sur vehicules disponibles
+        - info sur chauffeur disponibles
+            - horaire de travail
+            - rang
+            - restriction sur le camion à utiliser
+        - position des dépôts
+        

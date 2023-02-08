@@ -1,0 +1,20 @@
+  #1  2 3 4 5 6 7 8 9 10 11 12
+set T := A B C D E AU BU CU DU EU;
+set LINK :=  (B, A),
+(C,B),
+(D, C),
+(E, D),(E, B),
+(AU,A),
+(BU, B),
+(CU, C),(CU, BU),
+(DU,D),(DU, CU)
+(EU,E),(EU,DU),(EU,BU);
+
+
+param dur := A 7 B 1 C 7 D 3  E 3 AU 16 BU 2 CU 16 DU 6 EU 7;
+
+param LB:= A  420  B 0 C 0 D 0 E 0
+AU  0  BU 445 CU 0 DU 0 EU 0;
+
+param UB:= A  1440  B 1440 C 1440 D 1440 E 1440 
+AU  1440  BU 1440 CU 1440 DU 1440 EU 488;
