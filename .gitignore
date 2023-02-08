@@ -13,3 +13,5 @@ Data/instances/script/instances/*
 Data/instances/script/Instance2/
 Data/instances/script/tickets/
 Data/instances/script/backup/
+.ipynb_checkpoints/
+.vscode/
