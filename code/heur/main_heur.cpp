@@ -1,0 +1,30 @@
+#include <iostream>
+#include "../Data.h"
+#include "../Prompt.h"
+#include "../Parameters.h"
+#include "../TimeSlot.h"
+#include "Solver.h"
+#include "../model/SolverExact.h"
+using namespace std;
+int main(int argc, const char **argv) {
+    std::cout << "Ciment Quebec" << std::endl;
+    if (argc < Parameters::NB_MANDATORY_ARGS) {
+        Prompt::ShowMissingArgument(argc);
+        exit(1);
+    }
+    Data data;
+    data.input = argv[1];
+    cout<<data.input<<endl;
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    data.Load();
+    Solver solver(&data);
+    solver.run();
+
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count();
+    cout << "\nTemps " << elapsed_time / 1000.0 << " s "<<(elapsed_time / 1000.0)/60<<" min"<< std::endl;
+//    data.ShowData();
+
+
+    return 0;
+}

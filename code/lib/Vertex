@@ -1,0 +1,4 @@
+#ifndef VERTEX
+#define VERTEX
+
+#endif // !GRAPH

@@ -1,8 +1,0 @@
-- Temps de chargement
-action manuelle du répartiteur
-extrapoler les données qui sont bonnes
-
-- Remplacer les zeros par la moyenne
-
-deux pauses 15 min
-dîner 30 min

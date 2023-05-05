@@ -1,0 +1,75 @@
+MaxTimeLag:	5
+Vehicles:	14
+k0	10	10
+k1	10	10
+k2	10	10
+k3	10	10
+k4	10	10
+k5	10	10
+k6	10	10
+k7	10	10
+k8	10	10
+k9	20	20
+k10	20	20
+k11	20	20
+k12	20	20
+k13	20	20
+Customers:	20
+c0	10	190	210
+c1	10	340	360
+c2	20	240	270
+c3	20	320	360
+c4	20	70	110
+c5	20	210	240
+c6	30	450	490
+c7	30	110	170
+c8	35	370	430
+c9	35	430	480
+c10	35	390	440
+c11	35	160	240
+c12	40	320	400
+c13	45	150	210
+c14	45	370	440
+c15	50	150	210
+c16	50	60	160
+c17	55	190	270
+c18	55	250	360
+c19	55	190	280
+Stations:	2
+s0
+s1
+Locations:	24
+v0	50	50
+v1	50	50
+s0	48	30
+s1	63	53
+c0	42	13
+c1	53	50
+c2	21	21
+c3	54	42
+c4	36	13
+c5	76	51
+c6	42	31
+c7	65	57
+c8	59	23
+c9	87	38
+c10	49	33
+c11	76	78
+c12	37	57
+c13	72	48
+c14	41	29
+c15	77	62
+c16	40	31
+c17	62	54
+c18	50	27
+c19	67	54
+-----------------------
+minVehicleCap: 10
+maxVehicleCap: 25
+vehicleClasses: 3
+minCustDemand: 10
+maxCustDemand: 75
+timeWindowScaleFactor: 1.1
+maxDistanceToNearestStation: 30
+maxDistanceStationToDepot: 27
+timeHorizon: 500

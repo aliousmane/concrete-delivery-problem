@@ -1,0 +1,52 @@
+cmake_minimum_required(VERSION 3.25)
+project(code)
+
+set(CMAKE_CXX_STANDARD 23)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
+add_executable(code heur/main_heur.cpp Data.cpp Data.h Parameters.cpp Parameters.h Prompt.cpp Prompt.h Prompt.cpp Parameters.cpp Parameters.cpp Parameters.cpp Node.h Driver.h Solution.cpp Solution.h Cost.cpp Cost.h TimeSlot.cpp TimeSlot.h UpdateCost.cpp heur/Solver.cpp heur/Solver.h InsertOperator.h heur/CustInsertion.cpp heur/CustInsertion.h InsRmvMethod.h ListMove.h Move.h heur/InsRmvMethodFast.cpp heur/InsRmvMethodFast.h heur/InsRmvBuilder.h TempsPriorite.cpp TimeSlotPriorite.cpp SortRelated.cpp heur/InsRmvBuilder1.h heur/ListMoveVrp.cpp heur/CustInsertionOperator.h heur/InsRmvBuilder2.h model/gurobi/gurobiModel.cpp model/gurobi/gurobiModel.h model/SolverExact.cpp model/SolverExact.h model/cplex/cplexModel.cpp model/cplex/cplexModel.h model/Graph.cpp model/Graph.h heur/InsRmvBuilder3.h)
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(CPLEX_STUDIO_DIR "/Applications/CPLEX_Studio_Community2211/")
+    set(SYSTEM  arm64_osx)
+    set(GUROBI_DIR "/Library/gurobi952/macos_universal2")
+    set(LEMON_DIR  /Users/aliwa/lemon-1.3.1/)
+
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+    set(CPLEX_STUDIO_DIR /opt/ibm/ILOG/CPLEX_Studio1210/)
+    set(SYSTEM  x86-64_linux)
+    set(GUROBI_DIR "/home/alious/gurobi952/")
+    set(LEMON_DIR  /home/alious/lemon-1.3.1/)
+
+endif()
+
+set(CONCERT_INCLUDE_DIRS ${CPLEX_STUDIO_DIR}/concert/include)
+set(CONCERT_LIB_DIRS ${CPLEX_STUDIO_DIR}/concert/lib/${SYSTEM}/static_pic)
+set(CONCERT_LIBRARIES concert)
+set(CPLEX_INCLUDE_DIRS ${CPLEX_STUDIO_DIR}/cplex/include)
+set(CPLEX_LIB_DIRS ${CPLEX_STUDIO_DIR}/cplex/lib/${SYSTEM}/static_pic)
+set(CPLEX_LIBRARIES cplex)
+
+
+set(GUROBI_INCLUDE_DIRS ${GUROBI_DIR}/include)
+set(GUROBI_LIB_DIRS ${GUROBI_DIR}/lib)
+
+set(LEMON_INCLUDE_DIRS ${LEMON_DIR}/include)
+set(LEMON_LIB_DIRS ${LEMON_DIR}/lib)
+
+include_directories(${CONCERT_INCLUDE_DIRS} ${CPLEX_INCLUDE_DIRS}
+        ${GUROBI_INCLUDE_DIRS} ${LEMON_INCLUDE_DIRS} )
+link_directories(${CONCERT_LIB_DIRS} ${CPLEX_LIB_DIRS}
+        ${GUROBI_LIB_DIRS} ${LEMON_LIB_DIRS})
+#
+target_link_libraries(code
+        ${CPLEX_LIB_DIRS}/libilocplex.a ${CPLEX_LIB_DIRS}/libcplex.a
+        ${CONCERT_LIB_DIRS}/libconcert.a
+        ${GUROBI_LIB_DIRS}/libgurobi_c++.a
+        ${GUROBI_LIB_DIRS}/libgurobi95.dylib
+        ${LEMON_LIB_DIRS}/libemon.a
+        )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -DIL_STD")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGRB_USE_STD_VECTOR -DGRB_USE_UNORDERED_MAP")
+
+add_compile_options(-Wdeprecated-declaration)

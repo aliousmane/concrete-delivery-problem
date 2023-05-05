@@ -1,0 +1,513 @@
+
+#include "Data.h"
+#include "Parameters.h"
+#include <fstream>
+#include <iostream>
+
+using namespace std;
+void Data::Load(){
+    if(Parameters::KINABLE){
+        Parameters::ADJUSTMENT_DURATION=0;
+        Parameters::CLEANING_DURATION = 0;
+        LoadKinableInstance();
+    }
+    else{
+    LoadInstance();
+        //Data::LoadMatrices(_distances,distance_mat_file,1);
+        Data::LoadMatrices(_times, time_mat_file,60);
+    }
+    AddDeliveryNodes();
+    AddDockNodes();
+}
+void Data::LoadInstance() {
+
+    std::ifstream inputFile(this->input);
+    if(inputFile.is_open()){
+        inputFile>> this->nbDepots;
+        inputFile>> this->nbCustomers;
+        inputFile>> this->nbOrders;
+        inputFile>> this->nbDrivers;
+        string dummy;
+
+        for(int i=0;i<this->nbDepots;i++){
+            Depot n;
+            inputFile >> n.depotID >> n.distID >> n.depotLoc >>  n.capacity;
+            n.id = GetNodeCount();
+            n.no = n.id+1;
+            n.depotID = i;
+            n.SetTW(0,Parameters::MAX_LATE_TW);
+            n.type = Parameters::DEPOT;
+            Node d1;
+            d1.id = n.id + 1;
+            d1.no = d1.id + 1;
+            d1.distID = n.distID;
+            d1.type = Parameters::START_LINK;
+            Node d2 = d1;
+            d2.id = d1.id + 1;
+            d2.no = d2.id + 1;
+            d2.type = Parameters::END_LINK;
+            d2.nodeID = d2.id;
+            n.StartNodeID = d1.id;
+            n.EndNodeID = d2.id;
+            AddDepot(n);
+
+            AddNode(d1);
+            AddNode(d2);
+        }
+
+        minEarlyTW = 1440;
+        maxEarlyTW = 0;
+        minLateTW = 1440;
+        maxLateTW = 0;
+        MinDemand = INFINI;
+        MaxDemand = 0;
+        SumDemand=0;
+        for (int i = 0; i < this->nbCustomers; ++i) {
+            Customer n;
+            inputFile >> n.custID >> n.orderID >> dummy >> n.distID >> n.depotID >> n.early_tw >> n.demand >> n.nbOrder;
+            n.id = GetNodeCount();
+            n.no=n.id+1;
+            n.late_tw = n.early_tw +Parameters::TW_WIDTH;
+            n.type = Parameters::CUSTOMER;
+            Node d1;
+            d1.id = n.id + 1;
+            d1.no = d1.id + 1;
+            d1.distID = n.distID;
+            d1.type = Parameters::START_LINK;
+            Node d2 = d1;
+            d2.id = d1.id + 1;
+            d2.no = d2.id + 1;
+            d2.type = Parameters::END_LINK;
+            d2.nodeID = d2.id;
+            n.StartNodeID = d1.id;
+            n.EndNodeID = d2.id;
+
+            AddCustomer(n);
+            AddNode(d1);
+            AddNode(d2);
+
+            SumDemand += n.demand;
+            MinDemand = std::min(MinDemand,(int)n.demand);
+            MaxDemand = std::max(MaxDemand,(int)n.demand);
+
+            minEarlyTW = std::min(minEarlyTW,n.early_tw);
+            maxEarlyTW = std::max(maxEarlyTW,n.early_tw);
+            minLateTW = std::min(minLateTW,n.early_tw);
+            maxLateTW = std::max(maxLateTW,n.early_tw);
+        }
+
+        for (int i = 0; i < this->nbOrders; ++i) {
+            Order o;
+            int travel_minute;
+            inputFile >> o.orderID >> o.custID >> o.demand >> travel_minute  >> o.service_duration >> dummy ;
+            o.orderID = GetOrderCount();
+            AddOrder(o);
+        }
+        this->driverCapacities.clear();
+        for (int i = 0; i < this->nbDrivers; i++){
+            Driver d;
+            inputFile >> d.id >> d.no >> d.rank >> dummy >> d.depotID >>
+                      d.capacity >> d.start_shift_time >> d.end_shift_time;
+            d.id = i;
+            if(d.rank ==-1) d.rank = MAX_RANK;
+
+            Depot *dep = GetDepot(d.depotID);
+            d.distID = dep->distID;
+
+            Node d1;
+            d1.id = GetNodeCount();
+            d1.no = d1.id + 1;
+            d1.distID = dep->distID;
+            d1.type = Parameters::START_LINK;
+            Node d2 = d1;
+            d2.id = d1.id + 1;
+            d2.no = d2.id + 1;
+            d2.type = Parameters::END_LINK;
+            d.StartNodeID = d1.id;
+            d.EndNodeID = d2.id;
+            AddNode(d1);
+            AddNode(d2);
+            AddDriver(d);
+            this->driverCapacities.insert(d.capacity);
+        }
+        this->minDriverCap = *this->driverCapacities.begin();
+        this->maxDriverCap = *this->driverCapacities.rbegin();
+    }
+    else{
+        cout <<"Erreur ouverture "<<endl;
+        exit(1);
+    }
+}
+void Data::LoadKinableInstance(){
+    std::ifstream inputFile(this->input);
+    if(inputFile.is_open()){
+        string dummy;
+        inputFile >> dummy >> Parameters::TIME_BTW_DELIVERY;
+        inputFile >> dummy>> this->nbDrivers;
+        this->driverCapacities.clear();
+        for (int i = 0; i < this->nbDrivers; i++){
+            Driver d;
+            inputFile >> dummy >> d.capacity >> d.serviceDuration;
+            d.id = i;
+            d.no =d.id+1;
+            d.rank = 1;
+            AddDriver(d);
+            this->driverCapacities.insert(d.capacity);
+        }
+        this->minDriverCap = *this->driverCapacities.begin();
+        this->maxDriverCap = *this->driverCapacities.rbegin();
+
+        inputFile>> dummy >> this->nbCustomers;
+        minEarlyTW = 1440;
+        maxEarlyTW = 0;
+        minLateTW = 1440;
+        maxLateTW = 0;
+        MinDemand = INFINI;
+        MaxDemand = 0;
+        SumDemand=0;
+        for (int i = 0; i < this->nbCustomers; ++i) {
+            Customer n;
+            inputFile >>  dummy >> n.demand  >> n.early_tw >> n.late_tw;
+            n.custID=GetCustomerCount();
+            n.id = GetNodeCount();
+            n.no=n.id+1;
+            n.distID = n.id;
+            n.type = Parameters::CUSTOMER;
+            n.orderID = GetOrderCount();
+            n.nbOrder =1;
+            AddCustomer(n);
+            SumDemand += n.demand;
+            MinDemand = std::min(MinDemand,(int)n.demand);
+            MaxDemand = std::max(MaxDemand,(int)n.demand);
+
+            minEarlyTW = std::min(minEarlyTW,n.early_tw);
+            maxEarlyTW = std::max(maxEarlyTW,n.early_tw);
+            minLateTW = std::min(minLateTW,n.early_tw);
+            maxLateTW = std::max(maxLateTW,n.early_tw);
+
+            Order o;
+            o.orderID = GetOrderCount();
+            o.custID = n.custID;
+            o.demand = n.demand;
+            AddOrder(o);
+        }
+        this->nbOrders = this->nbCustomers;
+
+        inputFile>> dummy >> this->nbDepots;
+        for(int i=0;i<this->nbDepots;i++){
+            inputFile >> dummy;
+        }
+        inputFile >> dummy >> dummy;
+
+        Node startDepot;
+        inputFile >> dummy >> startDepot.x >> startDepot.y;
+        Node endDepot;
+        inputFile >> dummy >> endDepot.x >> endDepot.y;
+
+        for(int i=0;i<this->nbDepots;i++){
+            Depot n;
+            inputFile >> dummy >> n.x >> n.y;
+            n.id = GetNodeCount();
+            n.no = n.id+1;
+            n.distID = n.id;
+            n.depotID = i;
+            n.type = Parameters::DEPOT;
+            Node d1;
+            d1.id = n.id + 1;
+            d1.no = d1.id + 1;
+            d1.distID = n.distID;
+            d1.type = Parameters::START_LINK;
+            d1.x = n.x;
+            d1.y = n.y;
+            Node d2 = d1;
+            d2.id = d1.id + 1;
+            d2.no = d2.id + 1;
+            d2.type = Parameters::END_LINK;
+            d2.nodeID = d2.id;
+            n.StartNodeID = d1.id;
+            n.EndNodeID = d2.id;
+            AddDepot(n);
+
+            AddNode(d1);
+            AddNode(d2);
+
+
+        }
+        for(int i=0;i<GetCustomerCount();i++){
+            Customer *c = GetCustomer(i);
+            inputFile >> dummy >> c->x >> c->y;
+            Node d1;
+            d1.id = GetNodeCount();
+            d1.no = d1.id + 1;
+            d1.distID = c->distID;
+            d1.type = Parameters::START_LINK;
+            d1.x = c->x;
+            d1.y = c->y;
+            Node d2 = d1;
+            d2.id = d1.id + 1;
+            d2.no = d2.id + 1;
+            d2.type = Parameters::END_LINK;
+            d2.nodeID = d2.id;
+            c->StartNodeID = d1.id;
+            c->EndNodeID = d2.id;
+
+            AddNode(d1);
+            AddNode(d2);
+        }
+        const int driver_distID = GetNodeCount();
+        for(int i=0;i<GetDriverCount();i++){
+            Driver *d = GetDriver(i);
+            d->distID = driver_distID;
+            Node d1;
+            d1.id = GetNodeCount();
+            d1.no = d1.id + 1;
+            d1.distID = d->distID;
+            d1.type = Parameters::START_LINK;
+            d1.x = startDepot.x;
+            d1.y = startDepot.y;
+            Node d2 = d1;
+            d2.id = d1.id + 1;
+            d2.no = d2.id + 1;
+            d2.type = Parameters::END_LINK;
+            d->StartNodeID = d1.id;
+            d->EndNodeID = d2.id;
+            AddNode(d1);
+            AddNode(d2);
+        }
+
+
+        const int dim = driver_distID+1;
+        std::vector<double> minDistance(GetNodeCount(), 100000);
+        std::vector<int> flags(dim,-1);
+        _times.resize(dim);
+        _distances.resize(dim);
+        for (int i = 0; i < dim; ++i) {
+            _times[i].resize(dim,0);
+            _distances[i].resize(dim,0);
+        }
+
+        for (int i = 0; i < GetNodeCount(); i++) {
+            Node * ni = GetNode(i);
+//            if(ni->type==Parameters::NODE) continue;
+            if(flags[ni->distID]!=-1) {
+                continue;
+            }
+            flags[ni->distID]=ni->distID;
+//            cout<<*ni <<" ni "<< ni->distID<< endl;
+            for (int j = 0; j < GetNodeCount(); j++) {
+                auto *nj = GetNode(j);
+                if(ni->distID == nj->distID) continue;
+
+                _times[ni->distID][nj->distID] =
+                        std::ceil(sqrt(pow((ni->x - nj->x), 2) + pow((ni->y - nj->y), 2)));
+                _distances[ni->distID][nj->distID]= _times[ni->distID][nj->distID];
+                _times[nj->distID][ni->distID]= _times[ni->distID][nj->distID];
+                _distances[nj->distID][ni->distID]= _distances[ni->distID][nj->distID];
+//                if(ni->id==11) cout<<*nj <<" nj "<< nj->distID<< endl;
+
+                // Assign nearest depot to customer
+                if (ni->type==Parameters::DEPOT && nj->type==Parameters::CUSTOMER) {
+                    if (_times[ni->distID][nj->distID] < minDistance[nj->id]) {
+                        nj->depotID = ni->depotID;
+                        minDistance[nj->id] = _times[ni->distID][nj->distID];
+//                        cout<<ni->distID<<" "<<nj->distID << " "<< minDistance[nj->id]<<endl;
+
+//                        cout<<nj->x<<" "<<nj->y<<endl;
+                    }
+                }
+            }
+        }
+//        cout<<Travel(15,12)<<endl;
+//        exit(1);
+    }
+    else{
+        cout <<"Erreur ouverture "<<endl;
+        exit(1);
+    }
+}
+
+
+void Data::AddNode(const Node &n) {
+    _nodes.push_back(std::make_shared<Node>(n));
+}
+void Data::AddDepot(const Depot &n) {
+    _depots.push_back(GetNodeCount());
+    _nodes.push_back(std::make_shared<Depot>(n));
+}
+void Data::AddDelivery( const Delivery &del){
+    _deliveries.push_back(GetNodeCount());
+    _orders_deliveries[del.orderID].push_back(GetNodeCount());
+    _nodes.push_back(std::make_shared<Delivery>(del));
+}
+
+void Data::AddCustomer(const Customer &n) {
+    _customers.push_back(GetNodeCount());
+    _index_orders.emplace_back();
+    _nodes.push_back(std::make_shared<Customer>(n));
+}
+
+void Data::AddDock(const Dock &n){
+    _docks.push_back(GetNodeCount());
+    _nodes.push_back(std::make_shared<Dock>(n));
+}
+
+
+Depot *Data::GetDepot(int i) {
+    return dynamic_pointer_cast<Depot>( _nodes[_depots[i]]).get();
+}
+
+Customer * Data::GetCustomer(int i) const {
+    return dynamic_pointer_cast<Customer>( _nodes[_customers[i]]).get();
+}
+void Data::AddOrder(Order &o) {
+    _index_orders[o.custID].emplace_back(GetOrderCount());
+    _orders.emplace_back(o);
+    _orders_deliveries.emplace_back();
+}
+
+Order *Data::GetOrder(Customer *c, int index) {
+    return &_orders[ _index_orders[c->custID][index]];
+}
+Order * Data::GetOrder(int index){
+    return &_orders[index];
+}
+
+std::vector<Order*> Data::GetOrders(Customer *c) {
+    std::vector<Order*> temp;
+    for(auto i:_index_orders[c->custID])
+        temp.emplace_back(&_orders[i]);
+    return temp;
+}
+Delivery *Data::GetDelivery(Order *o,int index){
+    return  dynamic_pointer_cast<Delivery>( _nodes[_orders_deliveries[o->orderID][index]]).get();
+}
+Delivery *Data::GetDelivery(int index){
+    return  dynamic_pointer_cast<Delivery> (_nodes[_deliveries[index]]).get();
+}
+Dock *Data::GetDock(int dockID){
+    return  dynamic_pointer_cast<Dock> (_nodes[_docks[dockID]]).get();
+}
+
+void Data::AddDriver(Driver &d) {
+    _drivers.emplace_back(d);
+}
+
+Driver * Data::GetDriver(int id){
+    return &_drivers[id];
+}
+
+void Data::AddDeliveryNodes(){
+    for(int i=0;i<_customers.size();i++){
+        Customer *c = GetCustomer(i);
+        AddDeliveryNodes(c);
+    }
+}
+
+void Data::AddDeliveryNodes(Customer *c){
+    for(int i=0;i<_index_orders[c->custID].size();i++){
+        Order *o1= GetOrder(c,i);
+        const short nb= ceil(double(o1->demand)/minDriverCap);
+        AddDeliveryNodes(o1,nb);
+        o1->nbDelMax = nb;
+        o1->nbDelMin = ceil(double(o1->demand)/maxDriverCap);
+    }
+}
+void Data::AddDeliveryNodes(Order *o,int nb){
+    Customer *c = GetCustomer(o->custID);
+    assert(c->depotID!=-1);
+    for (int j = 0; j < nb; ++j) {
+        Delivery del;
+        del.id = GetNodeCount();
+        del.delID = GetDeliveryCount();
+        del.no = del.id+1;
+        del.rank= j;
+        del.orderID = o->orderID;
+        del.custID = o->custID;
+        del.type = Parameters::DELIVERY;
+        del.StartNodeID = c->StartNodeID;
+        del.EndNodeID = c->EndNodeID;
+        del.distID = c->distID;
+        AddDelivery(del);
+    }
+}
+
+void Data::AddDockNodes(){
+
+    for (int i = 0; i < GetDeliveryCount(); ++i) {
+        Delivery *del = GetDelivery(i);
+        Customer *c = GetCustomer(del->custID);
+        Depot *dep = GetDepot(c->depotID);
+        del->depotID = c->depotID;
+        Dock d1;
+        d1.id = GetNodeCount();
+        d1.dockID = GetDockCount();
+        d1.custID = c->custID;
+        d1.no = d1.id+1;
+        d1.type = Parameters::DOCK;
+        d1.delID = del->delID;
+        d1.rank = del->rank;
+        del->dockID = d1.dockID;
+        d1.depotID = del->depotID;
+        d1.distID = dep->distID;
+        AddDock(d1);
+    }
+}
+
+
+void Data::LoadMatrices(std::vector<std::vector<double>> &array, const string &matrix_filename,int rate)
+{
+    string line;
+    ifstream f(matrix_filename.c_str()); // open file
+    if (!f.is_open())
+    {
+        perror(("error while opening file " + matrix_filename).c_str());
+        exit(1);
+    }
+
+    while (getline(f, line))
+    {                       // read each line
+        string val;           // string to hold value
+        vector<double> row;   // vector for row of values
+        stringstream s(line); // stringstream to parse csv
+
+        while (getline(s, val, ',')) // for each value
+        {
+            row.push_back(stold(val) / rate);
+        }
+        array.push_back(row);
+    }
+    f.close();
+}
+
+
+void Data::ShowData() {
+    cout<<"Depots"<<endl;
+    for(int i=0;i<_depots.size();i++){
+        cout<<*GetDepot(i)<<endl;
+    }
+    cout<<"Customers"<<endl;
+    for(int i=0;i<_customers.size();i++){
+        Customer *c = GetCustomer(i);
+        cout<<*c<<endl;
+        cout<<"Orders"<<endl;
+        for(int j=0;j<_index_orders[c->custID].size();j++){
+            Order *o = GetOrder(c,j);
+            cout<<*o<<endl;
+            cout<<"Deliveries"<<endl;
+            for(int k=0;k<_orders_deliveries[o->orderID].size();k++){
+                Delivery *del = GetDelivery(o,k);
+                cout<<*del<<endl;
+                Dock *dock = GetDock(del->dockID);
+                cout<<*dock<<endl;
+            }
+        }
+    }
+
+    cout<<"Drivers"<<endl;
+    for(auto &d:_drivers){
+        cout<<d<<endl;
+    }
+}
+
+
+

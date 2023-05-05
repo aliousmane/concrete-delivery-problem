@@ -1,0 +1,37 @@
+MaxTimeLag:	5
+Vehicles:	4
+k0	15	15
+k1	15	15
+k2	20	20
+k3	20	20
+Customers:	5
+c0	10	370	390
+c1	20	290	330
+c2	30	400	450
+c3	45	70	170
+c4	60	260	360
+Stations:	3
+s0
+s1
+s2
+Locations:	10
+v0	50	50
+v1	50	50
+s0	33	39
+s1	40	47
+s2	63	56
+c0	15	28
+c1	51	34
+c2	50	62
+c3	27	20
+c4	50	42
+-----------------------
+minVehicleCap: 10
+maxVehicleCap: 25
+vehicleClasses: 3
+minCustDemand: 10
+maxCustDemand: 75
+timeWindowScaleFactor: 1.1
+maxDistanceToNearestStation: 30
+maxDistanceStationToDepot: 26
+timeHorizon: 500
