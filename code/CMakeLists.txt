@@ -1,5 +1,15 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.23)
 project(code)
+
+ADD_CUSTOM_TARGET(debug
+        COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Debug ${CMAKE_SOURCE_DIR}
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target all
+        COMMENT "Creating the executable in the debug mode.")
+
+ADD_CUSTOM_TARGET(release
+        COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Release ${CMAKE_SOURCE_DIR}
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target all
+        COMMENT "Creating the executable in the release mode.")
 
 set(CMAKE_CXX_STANDARD 23)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
@@ -10,12 +20,14 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(SYSTEM  arm64_osx)
     set(GUROBI_DIR "/Library/gurobi952/macos_universal2")
     set(LEMON_DIR  /Users/aliwa/lemon-1.3.1/)
+    set(GUROBI_LIB2  libgurobi95.dylib)
 
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
-    set(CPLEX_STUDIO_DIR /opt/ibm/ILOG/CPLEX_Studio1210/)
+    set(CPLEX_STUDIO_DIR /home/alious/CPLEX_Studio1210/)
     set(SYSTEM  x86-64_linux)
-    set(GUROBI_DIR "/home/alious/gurobi952/")
+    set(GUROBI_DIR "/home/alious/gurobi952/linux64")
+    set(GUROBI_LIB2  libgurobi95.so)
     set(LEMON_DIR  /home/alious/lemon-1.3.1/)
 
 endif()
@@ -43,7 +55,7 @@ target_link_libraries(code
         ${CPLEX_LIB_DIRS}/libilocplex.a ${CPLEX_LIB_DIRS}/libcplex.a
         ${CONCERT_LIB_DIRS}/libconcert.a
         ${GUROBI_LIB_DIRS}/libgurobi_c++.a
-        ${GUROBI_LIB_DIRS}/libgurobi95.dylib
+        ${GUROBI_LIB_DIRS}/${GUROBI_LIB2}
         ${LEMON_LIB_DIRS}/libemon.a
         )
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -DIL_STD")

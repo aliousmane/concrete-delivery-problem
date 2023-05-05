@@ -4,6 +4,7 @@
 #define CODE_TIMESLOT_H
 
 #include <ostream>
+#include <cassert>
 #include "Node.h"
 #include "Data.h"
 class TimeSlot {

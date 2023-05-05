@@ -2,6 +2,7 @@
 #include "Data.h"
 #include "Parameters.h"
 #include <fstream>
+#include <cassert>
 #include <iostream>
 
 using namespace std;
