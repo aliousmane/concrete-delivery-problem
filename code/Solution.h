@@ -12,7 +12,7 @@
 #include <set>
 class Sol {
 public:
-    Sol()=default;
+//    Sol()=default;
     explicit Sol(Data *data);
     bool isFeasible{false};
     int iter{-1};
@@ -80,6 +80,7 @@ public:
     Dock * GetDock(int dockID){return _data->GetDock(dockID);}
     Order * GetOrder(int orderId){return _data->GetOrder(orderId);}
     std::vector<Order*> GetOrders(Customer *c){ return _data->GetOrders(c);}
+    std::vector<Order*> GetOrders(int custId ){ return _data->GetOrders(GetCustomer(custId));}
     void UnassignCustomer(Customer *c);
     void UnassignOrder(Order *o);
     void AddToUnassigneds(Customer *n);

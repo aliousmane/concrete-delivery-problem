@@ -15,8 +15,8 @@ void Solver::run() {
     for(int i=0;i<_data->GetCustomerCount();i++){
 //        cout<<*_data->GetCustomer(i)<<endl;
         std::vector<int> temp{i};
-        Data dat = _data->copyCustomersData(temp);
-        Sol s;
+        Data  dat = _data->copyCustomersData(temp);
+        Sol s(&dat);
         SolveInstance(s,dat );
         if(s.isFeasible)
         {
@@ -28,17 +28,26 @@ void Solver::run() {
         }
     }
     cout<<endl;
-    Data dat = _data->copyCustomersData(feasibleClients);
-    Sol s;
-    SolveInstance(s,dat );
-    s.ShowCustomer();
+    if(feasibleClients.size()==_data->GetCustomerCount()){
+        Sol s(_data);
+        SolveInstance(s,*_data );
+        s.ShowCustomer();
+    }
+    else{
+        cout<<"Solve min data"<<endl;
+        Data dat = _data->copyCustomersData(feasibleClients);
+//      dat.ShowData();
+        Sol s(&dat);
+        SolveInstance(s,dat );
+        s.ShowCustomer();
+    }
+
 }
 
 void Solver::SolveInstance(Sol &sol,Data &dat){
     Sol::FailureCause.resize(dat.GetNodeCount(),Parameters::FAILURECAUSE::NONE);
     Sol::minDelay.resize(dat.GetNodeCount(),0);
-    Sol s(&dat);
-    s.PutAllCustomersToUnassigned();
+
 
     InsRmvMethodFast insrmv(dat);
     InsRmvBuilder1 builder1(dat);
@@ -64,10 +73,14 @@ void Solver::SolveInstance(Sol &sol,Data &dat){
 //        custInsertionOp.emplace_back(&custIns2,val.first,"Builder 2 "+ val.second);
         custInsertionOp.emplace_back(&custIns3,val.first,"Builder 3 "+ val.second);
     }
-
+    Sol s(&dat);
+    s.PutAllCustomersToUnassigned();
+    int iter=0;
     for(int i=0;i<10;i++){
         for(auto heur: custInsertionOp){
             Sol cur(&dat);
+//            cout<<"Iter "<<iter++<<endl;
+//            dat.ShowData();
             cur.PutAllCustomersToUnassigned();
             heur.Insert(cur);
             if(cur<s){

@@ -69,7 +69,7 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const Dock &dock) {
         os << static_cast<const Node &>(dock) << " dockID: " << dock.dockID << " depotID: " << dock.depotID
            << " arrival_time: " << dock.arrival_time << " start_service: " << dock.start_service << " end_service: "
-           << dock.end_service << " departure_time: " << dock.departure_time <<"departure_time";
+           << dock.end_service << " departure_time: " << dock.departure_time;
         return os;
     }
 };
