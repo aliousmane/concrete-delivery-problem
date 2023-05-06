@@ -214,7 +214,7 @@ void Sol::RemoveFromDepot(Dock *n){
     DepotAssignTo[n->id] = nullptr;
 }
 void Sol::AddToUnassigneds(Customer *n){
-    UnassignedIndex[n->id] = UnassignedCount;
+    UnassignedIndex[n->custID] = UnassignedCount;
     Unassigned[UnassignedCount] = n;
     UnassignedCount++;
 }
