@@ -40,6 +40,7 @@ RoutesLength(data->GetDriverCount(), 0),
     AssignStationToCustomers();
     AssignStationToDepots();
     AssignStationToDriver();
+
 }
 
 void Sol::InitCustomers(){
@@ -58,6 +59,9 @@ void Sol::InitOrders(){
 void Sol::AssignStationToDriver(){
     for (int i = 0; i < _data->GetDriverCount(); i++) {
         RoutesLength[i] = 0;
+
+        DriverVisitCount[i] = std::vector<int>(_data->GetCustomerCount(), 0);
+
         Driver *d = _data->GetDriver(i);
         Node *n1 = _data->GetNode(d->StartNodeID);
         Node *n2 = _data->GetNode(d->EndNodeID);
