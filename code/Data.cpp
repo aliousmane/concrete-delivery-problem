@@ -170,6 +170,7 @@ void Data::LoadKinableInstance(){
             Customer n;
             inputFile >>  dummy >> n.demand  >> n.early_tw >> n.late_tw;
             n.custID=GetCustomerCount();
+            n.constID = n.custID;
             n.id = GetNodeCount();
             n.no=n.id+1;
             n.distID = n.id;

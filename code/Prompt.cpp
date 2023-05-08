@@ -1,8 +1,7 @@
 
 #include "Prompt.h"
 
-#include <string>
-#include <iostream>
+
 
 using namespace std;
   void Prompt::ShowMissingArgument(int argc){

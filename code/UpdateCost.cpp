@@ -14,7 +14,7 @@ void Sol::Update() {
         d->Init();
         shiftDuration[d->id] = 0;
         driverWorkingIntervals[d->id].clear();
-        //TODO std::fill(DriverVisitCount[i].begin(), DriverVisitCount[i].end(), 0);
+        std::fill(DriverVisitCount[i].begin(), DriverVisitCount[i].end(), 0);
     }
     for (int i = 0; i < GetCustomerCount(); i++)
     {
@@ -62,7 +62,7 @@ void Sol::Update() {
         Customer *c = GetCustomer(i);
         if (isClientSatisfied(c))
         {
-            satisfiedCustomers.insert(c->custID);
+            satisfiedCustomers.insert(c->constID);
         }
         else
         {
@@ -137,9 +137,9 @@ void Sol::Update(Depot *dep, Dock *dock,Delivery *del)
     updateCost.satisfiedCost += DeliveryLoad[del->id];
     UpdateDemand(c,o,DeliveryLoad[del->id]);
     if(isClientSatisfied(c)){
-        satisfiedCustomers.insert(c->custID);
+        satisfiedCustomers.insert(c->constID);
     }
-    //  TODO DriverVisitCount[d->id][c->custID]++;
+    DriverVisitCount[d->id][c->custID]++;
     del->demand = DeliveryLoad[del->id];
     //TODO del->driverId = d->id;
     const int LOAD_DURATION = Data::LoadingTime(dep, del->demand);
@@ -297,9 +297,6 @@ void Sol::GetCost(Depot *dep, Dock *dock,Delivery *del,Cost &cur_cost){
 
     Driver *d = GetDriverAssignedTo(del);
 
-    //  TODO DriverVisitCount[d->id][c->custID]++;
-
-    //TODO del->driverId = d->id;
     const int UNLOADING_DURATION = Data::UnloadingTime(del, del->demand, d);
 
     Node *prec_del = CustomerPrev[del->id];

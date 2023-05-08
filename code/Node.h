@@ -28,22 +28,25 @@ public:
     void SetTW(int a,int b){
         early_tw=a;late_tw=b;
     }
+    void Show(){
+        std::cout<<*this<<std::endl;
+    }
 };
 
 class Customer :public Node{
 public:
-    int custID,nbOrder;
+    int custID,nbOrder,constID;
     long orderID;
-    Customer():custID(-1),orderID(-1),nbOrder(0){}
+    Customer():custID(-1),orderID(-1),nbOrder(0),constID(-1){}
 
     friend std::ostream &operator<<(std::ostream &os, const Customer &customer) {
         os<<"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n";
-        os << "Customer "<< customer.custID << " demand: " << customer.demand  <<" "<<static_cast<const Node &>(customer) <<"|\n";
+        os << "Customer "<< customer.constID << " demand: " << customer.demand  <<" "<<static_cast<const Node &>(customer) <<"|\n";
         os<<"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^";
         return os;
     }
-
-    ~Customer() override {
+    void Show(){
+        std::cout<<*this<<std::endl;
     }
 };
 

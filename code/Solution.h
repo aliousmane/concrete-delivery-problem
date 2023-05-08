@@ -12,11 +12,11 @@
 #include <set>
 class Sol {
 public:
-//    Sol()=default;
+    Sol()=default;
     explicit Sol(Data *data);
     bool isFeasible{false};
     int iter{-1};
-
+    double duration_time{0};
     Cost updateCost;
     std::vector<Driver *> DriverAssignTo;
     std::vector<Depot *> DepotAssignTo;
@@ -44,6 +44,7 @@ public:
     std::vector<int>  UnassignedIndex;
     std::vector<bool> VisitFlags;
     std::vector<bool> VisitFlagCost;
+    std::vector<std::vector<int>> DriverVisitCount;
     std::vector<std::set<TimeSlot>> depotLoadingIntervals;
     std::vector<std::set<TimeSlot>> driverWorkingIntervals;
     std::vector<TimeSlot> nodeServiceIntervals;
@@ -58,12 +59,12 @@ public:
 
     void  PutAllCustomersToUnassigned();
 
-    int GetCustomerCount(){return _data->GetCustomerCount();}
-    int GetOrderCount(){return _data->GetOrderCount();}
-    int GetNodeCount(){return _data->GetNodeCount();}
-    int GetDriverCount(){return _data->GetDriverCount();}
-    int GetDepotCount(){return _data->GetDepotCount();}
-    int GetDeliveryCount(Order *o){return _data->GetDeliveryCount(o);}
+    int GetCustomerCount()const {return _data->GetCustomerCount();}
+    int GetOrderCount()const {return _data->GetOrderCount();}
+    int GetNodeCount()const {return _data->GetNodeCount();}
+    int GetDriverCount()const {return _data->GetDriverCount();}
+    int GetDepotCount()const {return _data->GetDepotCount();}
+    int GetDeliveryCount(Order *o)const{return _data->GetDeliveryCount(o);}
     Customer *GetCustomer(int i){return _data->GetCustomer(i);}
     Driver *GetDriver(int i){return _data->GetDriver(i);}
     Driver *GetDriverAssignedTo(Node *n)  {
@@ -95,6 +96,7 @@ public:
     void UpdateForward(Depot *dep);
     void Update(Depot *dep, Dock *dock,Delivery *del);
     Cost GetCost();
+    Cost GetLastCost(){ return _last_cost;}
     void GetCost(Depot *dep, Cost &cur_cost);
     void GetCost(Depot *dep, Dock *dock,Delivery *del,Cost &cur_cost);
     Cost GetCost(Driver *d);
@@ -107,10 +109,10 @@ public:
     void ShowCustomer();
     int EarlyTW(Delivery *n) const { return _data->EarlyTW(n); }
     int LateTW(Delivery *n) const { return _data->LateTW(n); }
-    bool isOrderSatisfied(Order *o){return (orderCapRestante[o->orderID]<=0); }
-    bool isOrderSatisfied(int ordId){return (orderCapRestante[ordId]<=0); }
-    bool isClientSatisfied(Customer *c){return (clientCapRestante[c->custID]<=0); }
-    bool isClientSatisfied(int custId){return (clientCapRestante[custId]<=0); }
+    bool isOrderSatisfied(Order *o)const{return (orderCapRestante[o->orderID]<=0); }
+    bool isOrderSatisfied(int ordId)const{return (orderCapRestante[ordId]<=0); }
+    bool isClientSatisfied(Customer *c)const{return (clientCapRestante[c->custID]<=0); }
+    bool isClientSatisfied(int custId)const{return (clientCapRestante[custId]<=0); }
     void InsertAfter(Node *n, Node *prev);
     void InsertAfter(Node *n, Node *prev,Driver *d);
     void AssignDeliveryToCustomer(Delivery *n);
@@ -194,9 +196,14 @@ public:
 
     static std::vector<int> FailureCause;
     static std::vector<int> minDelay;
-
-    virtual ~Sol();
-
+    std::string CustomerString() ;
+    ~Sol()=default;
+    template<typename T>
+    bool hasScheduled(  const T &  container){
+        return (std::includes(satisfiedCustomers.begin(), satisfiedCustomers.end(),
+                                  container.begin(), container.end()));
+    }
+    std::string toString() const;
 private:
     Data *_data{};
     Cost _last_cost;

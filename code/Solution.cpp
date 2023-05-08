@@ -10,6 +10,7 @@ RoutesLength(data->GetDriverCount(), 0),
                       orderCapRestante(data->GetOrderCount(),0),
                       shiftDuration(data->GetDriverCount(), 0),
                       shiftDurationCost(data->GetDriverCount(), 0),
+                      DriverVisitCount(data->GetDriverCount()),
                       DepotSize(data->GetDepotCount(), 0),
                       EndServiceTime(data->GetNodeCount(),0),
                       ExpectedServiceTime(data->GetNodeCount(),0),
@@ -140,10 +141,6 @@ void Sol::Remove(Node *n){
         if (it != driverWorkingIntervals[d->id].end()) {
             driverWorkingIntervals[d->id].erase(it);
         }
-        // TODO
-//        if (n->isDelivery) {
-//            DriverVisitCount[d->id][n->custID]--;
-//        }
     }
     if (DriverNext[n->id] != nullptr)
         DriverPrev[DriverNext[n->id]->id] = DriverPrev[n->id];
@@ -173,6 +170,8 @@ void Sol::RemoveDelivery(Delivery *del) {
     orderCapRestante[del->orderID] += DeliveryLoad[del->id];
     clientCapRestante[del->custID] += DeliveryLoad[del->id];
     DeliveryLoad[del->id] = 0;
+    Driver *d = DriverAssignTo[del->id];
+    DriverVisitCount[d->id][del->custID]--;
     Remove(del);
     RemoveFromCustomer(del);
 
@@ -320,7 +319,7 @@ void Sol::ShowCustomer()  {
         Customer *n = GetCustomer(i);
         if (!isClientSatisfied(n))
             continue;
-        std::cout << "Customer " << n->custID << " (" << n->demand << ")-";
+        std::cout << "Customer " << n->constID << " (" << n->demand << ")-";
         sum_ += n->demand;
     }
     std::cout << ": cost:*" << sum_
@@ -361,6 +360,54 @@ bool Sol::operator<(const Sol &rhs) const {
     return const_cast<Sol*>(this)->GetCost() < const_cast<Sol&>(rhs).GetCost();
 }
 
-Sol::~Sol() {
+std::string Sol::CustomerString()
+{
+    std::stringstream ss;
+    double sum_=0;
+    for (int i = 0; i < GetCustomerCount(); i++) {
+        Customer *n = GetCustomer(i);
+        if (clientCapRestante[n->custID] > 0)
+            continue;
+        ss << n->constID  << ":"<<n->demand<<"-";
+        sum_ += n->demand;
+    }
+    ss<<" | "<<sum_;
+    return ss.str();
+}
 
+std::string Sol::toString() const {
+    std::stringstream ss;
+    ss << _last_cost.satisfiedCost << ":";
+    for (int i = 0; i < GetOrderCount(); i++) {
+        Order *o1 = const_cast<Sol*>(this)->GetOrder(i);
+        if (isOrderSatisfied(o1))
+            continue;
+        std::vector<int> countDriver(GetDriverCount(), 0);
+        ss << "<" << o1->orderID << ":";
+        for (int j = 0; j < GetDeliveryCount(o1); j++) {
+            Delivery *del = const_cast<Sol*>(this)->GetDelivery(o1, j);
+            Driver *d = const_cast<Sol*>(this)->GetDriverAssignedTo(del);
+            if (d != nullptr) {
+
+                ss << del->id << "-(" << int(DriverVisitCount[d->id][del->custID]>1) << ")-[" << d->capacity << "-" << DeliveryLoad[del->id] ;
+                if(del->rank==0){
+                    if(StartServiceTime[del->id]<= EarlyTW(del)){
+                        ss<<"<]-";
+                    }
+                    else
+                    {
+                        ss<<">]-";
+                    }
+                }
+                else{
+                    ss<<"]-";
+                }
+                countDriver[d->id]++;
+            } else {
+                ss << del->id << "[0-0]";
+            }
+        }
+        ss << ">";
+    }
+    return ss.str();
 }
