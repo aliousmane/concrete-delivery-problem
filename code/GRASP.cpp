@@ -1,6 +1,5 @@
 #include "GRASP.h"
 #include "Driver.h"
-#include "heur/RechercheLocale.h"
 #include "Node.h"
 #include <cassert>
 
@@ -8,7 +7,7 @@ using namespace std;
 template <class NodeT, class DriverT>
 void GRASP<NodeT, DriverT>::Optimize(Sol &s,bool first_improvement)
 {
-	Optimize(s, nullptr,nullptr,false);
+	Optimize(s, nullptr,nullptr,nullptr, false);
 }
 template <class NodeT, class DriverT>
 void GRASP<NodeT, DriverT>::Optimize(
@@ -20,7 +19,8 @@ void GRASP<NodeT, DriverT>::Optimize(
 
 template <class NodeT, class DriverT>
 void GRASP<NodeT, DriverT>::Optimize(
-	Sol &s, ISolutionList<NodeT, DriverT> *best_sol_list, unordered_map<string, Sol, MyHashFunction> *Mymap,bool first_improvement)
+	Sol &s, ISolutionList<NodeT, DriverT> *best_sol_list, unordered_map<string, Sol, MyHashFunction> *Mymap,
+    RechercheLocale * loc_search,bool first_improvement)
 {
 	Sol best;
 	std::vector<Node *> list_cust;
@@ -43,7 +43,6 @@ void GRASP<NodeT, DriverT>::Optimize(
 	int iter_k = 0;
 	_chrono.start();
 	_chrono.setDuration(300);
-	bool first = true;
 	if (verbose)
 	{
 		printf("GRASP heuristic: %d iterations: %d Heuristics\n", _iterator_count, (int)grasp_insert_operators.size());
@@ -52,25 +51,18 @@ void GRASP<NodeT, DriverT>::Optimize(
 	{
 		for (int i = 0; i < (int)grasp_insert_operators.size(); i++)
 		{
-			// Sol cur(s.GetData());
-			// cur.PutAllDeliveriesToUnassigned();
-			Sol cur = s;
-			// cur.keyCustomers = s.keyCustomers;
+            Sol cur(s.GetData());
+            cur.keyCustomers = s.keyCustomers;
 			auto f = grasp_insert_operators[i];
 			f.opt->Insert(cur);
-//TODO			repairSchedule(cur);
-			// if (!cur.IsFeasible() and cur.updateCost.satisfiedCost > realBestCout.satisfiedCost)
-			// {
-			// 	printf("LS Iter %d \n", iter_k);
-			// 	LS.optimize(cur);
-			// }
+            if(loc_search!= nullptr){
+                loc_search->Run(cur);
+            }
 			if (not cur.isFeasible)
 			{
 				iter_k++;
 				continue;
 			}
-			//TODO cur.isImproved = true;
-			int _count = 0;
 			if (Mymap != nullptr)
 			{
 				if (Mymap->find(cur.toString()) == Mymap->end())
@@ -78,7 +70,6 @@ void GRASP<NodeT, DriverT>::Optimize(
 					(*Mymap)[cur.toString()] = cur;
 				}
 			}
-
 			Cost curCout = cur.GetCost();
 
 // TODO			for (Node *c : list_cust)
@@ -111,12 +102,12 @@ void GRASP<NodeT, DriverT>::Optimize(
 				bestCout = curCout;
 				best = cur;
 				if (verbose)
-					{
-						printf("Iter(%d-%d) %d %.2lf %2.1lf %2.lf %2.0lf real %2.0lf*\n",
-							   iter, i + 1, iter_k, curCout.travelCost, curCout.getTotal(),
-							   curCout.lateDeliveryCost, curCout.satisfiedCost,
-							   bestCout.satisfiedCost);
-					}
+                {
+                    printf("Iter(%d-%d) %d %.2lf %2.1lf %2.lf %2.0lf real %2.0lf*\n",
+                           iter, i + 1, iter_k, curCout.travelCost, curCout.getTotal(),
+                           curCout.lateDeliveryCost, curCout.satisfiedCost,
+                           bestCout.satisfiedCost);
+                }
 
                 if(first_improvement){
 					if (std::includes(best.satisfiedCustomers.begin(), best.satisfiedCustomers.end(), 
@@ -153,11 +144,4 @@ void GRASP<NodeT, DriverT>::Optimize(
 	_chrono.stop();
 }
 
-
-
-
-
-
-
-
-template class GRASP<Delivery, Driver>;
+template class GRASP<Customer, Driver>;

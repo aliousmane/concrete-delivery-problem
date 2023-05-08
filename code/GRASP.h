@@ -18,6 +18,7 @@
 #include <unordered_map>
 
 #include "heur/ListMoveVrp.h"
+#include "heur/RechercheLocale.h"
 
 
 class MyHashFunction {
@@ -55,7 +56,7 @@ template <class NodeT, class DriverT> struct grasp_insert_operator {
 template <class NodeT, class DriverT>
 class GRASP : public IAlgorithm<NodeT, DriverT> {
 public:
-  GRASP() : _insrmv(nullptr),_data(nullptr) {
+  GRASP() : _data(nullptr) {
     _iterator_count = 25000;
     _temperature = 0.9896;
     _pourcentage_max = 0.4;
@@ -72,8 +73,7 @@ public:
     _chrono_check_iter = 100;
   }
 
-  GRASP(InsRmvMethod<Node, Driver, MoveVrp> *insrmv, Data *pr)
-      : _insrmv(insrmv), _data(pr) {
+  explicit GRASP(Data *pr) :  _data(pr) {
     _iterator_count = 25000;
     _temperature = 0.9896;
     _pourcentage_max = 0.4;
@@ -89,29 +89,12 @@ public:
     _max_time = 99999999;
     _chrono_check_iter = 100;
   }
-  explicit GRASP(Data *pr) : _insrmv(nullptr), _data(pr) {
-    _iterator_count = 25000;
-    _temperature = 0.9896;
-    _pourcentage_max = 0.4;
-    _pourcentage_min = 0.1;
-    _max_nb_items = 60;
-    _min_nb_items = 30;
-    _sigma1 = 4.5;
-    _sigma2 = 2.5;
-    _sigma3 = 0.5;
-    _p = 0.6;
-    _temperature_iter_init = 0;
-    _acceptation_gap = 0.7;
-    _max_time = 99999999;
-    _chrono_check_iter = 100;
-  }
-  InsRmvMethod<Node, Driver, MoveVrp> *_insrmv;
   bool verbose{false};
-  void Optimize(Sol &s,bool first_improvement=false);
-
+  void Optimize(Sol &s, bool first_improvement);
+  void Optimize(Sol &s){}
   void Optimize(Sol &s, ISolutionList<NodeT, DriverT> *best_sol_list);
   void Optimize(Sol &s, ISolutionList<NodeT, DriverT> *best_sol_list, std::unordered_map<std::string, Sol,
-   MyHashFunction> * umap, bool first_improvement=false);
+   MyHashFunction> * umap, RechercheLocale * loc_search, bool first_improvement=false);
 
   void SetItemMinRemoved(int minp)
   {
@@ -126,11 +109,6 @@ public:
   void SetMaxTime(int maxtime) { _max_time = maxtime; }
   void SetChronoCheckIter(int iter) { _chrono_check_iter = iter; }
   void SetAcceptationGap(double a) { _acceptation_gap = a; }
-  void AddInsertOperatorLp(InsertOperator<NodeT, DriverT> *opt) {
-    grasp_insert_operator<NodeT, DriverT> o;
-    o.opt = opt;
-    grasp_insert_operators.push_back(o);
-  }
   void AddInsertOperatorVrp(InsertOperator<NodeT, DriverT> *opt) {
     grasp_insert_operator<NodeT, DriverT> o;
     o.opt = opt;

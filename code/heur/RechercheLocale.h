@@ -1,8 +1,8 @@
-#ifndef INCLUDE_RECHERCHELOCAL_H
-#define INCLUDE_RECHERCHELOCAL_H
+#ifndef INCLUDE_RECHERCHELOCALE_H
+#define INCLUDE_RECHERCHELOCALE_H
 
 #include "../Solution.h"
-#include "Solver.h"
+#include "CDPSolver.h"
 #include <vector>
 #include <iostream>
 #include<set>
@@ -14,6 +14,7 @@ public:
     RechercheLocale(std::set<int> const& feasibleClients);
     ~RechercheLocale(){}
     void Run(Sol &s, std::vector<std::set<int>> const &LinkedClients);
+    void Run(Sol &s);
     void Run(Sol &s, std::vector<std::set<int>> &LinkedClientSlot,std::vector<std::set<int>> &LinkedClientDemand);
     bool Swap(Sol &s, Customer *c1,Customer *c2);
     bool Relocate(Sol &s, Customer *c1,std::set<int> &  _set);
@@ -21,6 +22,7 @@ public:
     bool found{true};
     std::vector<int> customerIdList;
     Cost bestCost;
+    std::vector<std::set<int>> LinkedClientSlot;
 };
 
-#endif // !INCLUDE_RECHERCHELOCAL_H
+#endif // !INCLUDE_RECHERCHELOCALE_H

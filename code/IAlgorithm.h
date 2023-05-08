@@ -24,6 +24,7 @@ public:
   virtual ~IAlgorithm() {}
 
   virtual void Optimize(Sol& sol) = 0;
+  virtual void Optimize(Sol& sol,bool first_improvement) {};
 
   virtual void Optimize(Sol& sol, ISolutionList<NodeT, DriverT>* list) {};
 

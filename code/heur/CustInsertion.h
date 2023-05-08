@@ -10,7 +10,7 @@
 #include "../SortRelated.h"
 #include "InsRmvBuilder.h"
 
-class CustInsertion : public InsertOperator<Node, Driver> {
+class CustInsertion : public InsertOperator<Customer, Driver> {
 
 public:
     CustInsertion(Data &prob, InsRmvBuilder &insrmv)
@@ -51,7 +51,7 @@ private:
     int _k;
     Data &_data;
 
-    std::vector<Node *> depotList;
+    std::vector<Depot *> depotList;
     std::vector<Driver *> driversList;
     std::vector<int> customersListId;
     std::vector<int> removedListId;

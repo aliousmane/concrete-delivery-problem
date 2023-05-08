@@ -13,6 +13,59 @@ RechercheLocale::RechercheLocale(std::set<int> const& feasibleClients)
     customerIdList = std::vector<int>(feasibleClients.begin(), feasibleClients.end());
 }
 
+void RechercheLocale::Run(Sol &s)
+{
+    Sol cur = s;
+    found = true;
+    shuffle(customerIdList.begin(), customerIdList.end(), Parameters::RANDOM_GEN);
+    std::vector<int> seen(s.GetCustomerCount(), -1);
+    while (found)
+    {
+        // cout<<"Iteration ******************\n";
+        found = false;
+        for (auto id : customerIdList)
+        {
+            Customer *c1 = s.GetCustomer(id);
+            if (LinkedClientSlot[c1->custID].empty())
+                continue;
+            // if(seen[c1->custID]!=-1)                continue;
+            if (s.isClientSatisfied(c1))
+                continue;
+            TimeSlot Intc1 = TimeSlot(c1->early_tw, c1->late_tw, c1->custID);
+            bool isInserted = false;
+            std::set<int> _set;
+            for (auto custId : LinkedClientSlot[c1->custID])
+            {
+                Customer *c2 = s.GetCustomer(custId);
+                if (!s.isClientSatisfied(c2))
+                    continue;
+                TimeSlot Intc2 = TimeSlot(c2->early_tw, c2->late_tw, c2->custID);
+                if (Intc1 == Intc2)
+                {
+                    _set.insert(c2->custID);
+                }
+                if (Relocate(s, c1, c2))
+                {
+                    isInserted = true;
+                    if (!s.isClientSatisfied(c2))
+                        seen[c2->custID] = c2->custID;
+                    break;
+                }
+                if (Swap(s, c1, c2))
+                {
+                    isInserted = true;
+                    if (!s.isClientSatisfied(c2))
+                        seen[c2->custID] = c2->custID;
+                    break;
+                }
+            }
+            // if(!s.isClientSatisfied(c1) && !_set.empty()){
+            //     Relocate(s,c1,_set);
+            // }
+        }
+    }
+}
+
 void RechercheLocale::Run(Sol &s, std::vector<std::set<int>> const &LinkedClients)
 {
     Sol cur = s;
@@ -156,7 +209,7 @@ bool RechercheLocale::Swap(Sol &s, Customer *c1, Customer *c2)
     std::set<int> v_intersection;
     // TODO
     std::set_intersection(clients.begin(), clients.end(),
-                          Solver::disjointClients[c1->custID].begin(), Solver::disjointClients[c1->custID].end(),
+                          CDPSolver::disjointClients[c1->custID].begin(), CDPSolver::disjointClients[c1->custID].end(),
                           std::inserter(v_intersection, v_intersection.end()));
     if (!v_intersection.empty())
         return false;
@@ -174,7 +227,7 @@ bool RechercheLocale::Swap(Sol &s, Customer *c1, Customer *c2)
 //        return false;
     // Printer::print(clients);
     // cur.ShowCustomer();
-    Solver::SolveInstance(cur, *s.GetData(),2);
+    CDPSolver::SolveInstance(cur, *s.GetData(),2);
 
 //    SolverReduce::SolvedSequence[cur.satisfiedCustomers] =
 //        SequenceInfo(true, cur.GetLastCost().satisfiedCost);
@@ -236,7 +289,7 @@ bool RechercheLocale::Relocate(Sol &s, Customer *c1, Customer *c2)
 {
     std::set<int> v_intersection;
     std::set_intersection(s.satisfiedCustomers.begin(), s.satisfiedCustomers.end(),
-                          Solver::disjointClients[c1->custID].begin(), Solver::disjointClients[c1->custID].end(),
+                          CDPSolver::disjointClients[c1->custID].begin(), CDPSolver::disjointClients[c1->custID].end(),
                           std::inserter(v_intersection, v_intersection.end()));
     if (!v_intersection.empty())
         return false;
@@ -252,7 +305,7 @@ bool RechercheLocale::Relocate(Sol &s, Customer *c1, Customer *c2)
     Sol cur = s;
     cur.keyCustomers = clients;
     //    Data dat = s.GetData()->copyCustomersData(clients);
-    Solver::SolveInstance(cur,*s.GetData(),2);
+    CDPSolver::SolveInstance(cur,*s.GetData(),2);
 //    SolverReduce::SolveCustomer(cur, {c1->custID}, 5, nullptr, false, true);
 //    // cout<<" sol relocate 1:  "<<cur.CustomerString()<<endl;
 //    SolverReduce::SolvedSequence[cur.satisfiedCustomers] =

@@ -15,20 +15,20 @@
  * k=5, sort by decreasing demand
  * k=5, shuffle customer
  */
-class CustInsertionOperator: public InsertOperator<Node, Driver>
+class CustInsertionOperator: public InsertOperator<Customer, Driver>
 {
 	public:	
     CustInsertionOperator(CustInsertion * insert_opt, int k)
             : _insert_opt(insert_opt),_k(k),
-            InsertOperator<Node, Driver>("CustInsertionOperator"){
+            InsertOperator<Customer, Driver>("CustInsertionOperator"){
         _insert_opt->SetK(_k);
             }
-    CustInsertionOperator(CustInsertion * insert_opt, int k,std::string name)
-            : _insert_opt(insert_opt),_k(k),InsertOperator<Node, Driver>(name){
+    CustInsertionOperator(CustInsertion * insert_opt, int k,std::string const & name)
+            : _insert_opt(insert_opt),_k(k),InsertOperator<Customer, Driver>(name){
         _insert_opt->SetK(_k);
         _insert_opt->name=name;
     }
-		void Insert(Sol & s)
+		void Insert(Sol & s) override
 		{
 			_insert_opt->SetK(_k);
 			_insert_opt->Insert(s);

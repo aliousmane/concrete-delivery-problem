@@ -24,6 +24,5 @@ int main(int argc, const char **argv) {
     cout << "\nTemps " << elapsed_time / 1000.0 << " s "<<(elapsed_time / 1000.0)/60<<" min"<< std::endl;
 //    data.ShowData();
 
-    Solver::deleteOperator();
     return 0;
 }
