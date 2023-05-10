@@ -15,12 +15,13 @@
 class Solver {
 public:
     explicit Solver(Data *data):_data(data){
-        TimeSlot::myData = *data;
+
     }
     void run();
-    void SolveGrasp(Sol &s,Data &dat,std::vector<std::set<int>> const & linkedClientSlot);
+    static void SolveGrasp(Sol &s,Data &dat,std::vector<std::set<int>> const & linkedClientSlot);
 
 private:
+    void run2(Sol &s,std::set<int> feasible);
     Data *_data;
 
 };
