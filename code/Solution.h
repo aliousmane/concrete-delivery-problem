@@ -10,6 +10,9 @@
 #include "Node.h"
 #include <vector>
 #include <set>
+#include <cassert>
+#include <iostream>
+
 class Sol {
 public:
     Sol()=default;
@@ -49,6 +52,9 @@ public:
     std::vector<std::set<TimeSlot>> driverWorkingIntervals;
     std::vector<TimeSlot> nodeServiceIntervals;
     std::set<int> keyCustomers;
+    std::set<int> availableDrivers;
+    std::set<int> driverUsed;
+    std::vector<std::set<int>> clientDriverUsed;
     std::set<int> satisfiedCustomers;
 
     void InitCustomers();
@@ -65,6 +71,7 @@ public:
     int GetDriverCount()const {return _data->GetDriverCount();}
     int GetDepotCount()const {return _data->GetDepotCount();}
     int GetDeliveryCount(Order *o)const{return _data->GetDeliveryCount(o);}
+    int GetDeliveryCount()const{return _data->GetDeliveryCount();}
     Customer *GetCustomer(int i){return _data->GetCustomer(i);}
     Driver *GetDriver(int i){return _data->GetDriver(i);}
     Driver *GetDriverAssignedTo(Node *n)  {
@@ -82,6 +89,20 @@ public:
     Order * GetOrder(int orderId){return _data->GetOrder(orderId);}
     std::vector<Order*> GetOrders(Customer *c){ return _data->GetOrders(c);}
     std::vector<Order*> GetOrders(int custId ){ return _data->GetOrders(GetCustomer(custId));}
+    Order * GetRandomOrder(Customer *c){
+        std::vector<Order*> temp(GetOrders(c));
+        std::shuffle(temp.begin(), temp.end(), Parameters::RANDOM_GEN);
+        Order *cur_order = nullptr;
+        for (auto o1 : temp)
+        {
+            if (isOrderSatisfied(o1))
+                continue;
+            cur_order = o1;
+            break;
+        }
+        assert(cur_order != nullptr);
+        return cur_order;
+    }
     void UnassignCustomer(Customer *c);
     void UnassignOrder(Order *o);
     void AddToUnassigneds(Customer *n);
@@ -110,6 +131,7 @@ public:
     int EarlyTW(Delivery *n) const { return _data->EarlyTW(n); }
     int LateTW(Delivery *n) const { return _data->LateTW(n); }
     bool isOrderSatisfied(Order *o)const{return (orderCapRestante[o->orderID]<=0); }
+    bool isOrderSatisfied(Delivery *del)const{return (orderCapRestante[del->orderID] <=0); }
     bool isOrderSatisfied(int ordId)const{return (orderCapRestante[ordId]<=0); }
     bool isClientSatisfied(Customer *c)const{return (clientCapRestante[c->custID]<=0); }
     bool isClientSatisfied(int custId)const{return (clientCapRestante[custId]<=0); }
@@ -117,6 +139,9 @@ public:
     void InsertAfter(Node *n, Node *prev,Driver *d);
     void AssignDeliveryToCustomer(Delivery *n);
     int Travel(Node *from, Node *to) {
+        return  _data->Travel(from,to);
+    }
+    int Travel(Customer *from, Customer *to) {
         return  _data->Travel(from,to);
     }
     int Travel(int from, int to) {
@@ -195,7 +220,11 @@ public:
     bool operator<(const Sol &rhs) const;
 
     static std::vector<int> FailureCause;
+    static std::vector<int> FailureCount;
     static std::vector<int> minDelay;
+    static std::vector<int> pullVisit;
+    static std::vector<int> pushVisit;
+    static std::vector<int> StartBefore;
     std::string CustomerString() ;
     ~Sol()=default;
     template<typename T>
@@ -204,6 +233,25 @@ public:
                                   container.begin(), container.end()));
     }
     std::string toString() const;
+    Order * findIdleOrder(Customer *c){
+        std::vector<Order*> orders(GetOrders(c));
+        std::shuffle(orders.begin(), orders.end(), Parameters::RANDOM_GEN);
+        for (Order *cur_o: orders) {
+            if (isOrderSatisfied(cur_o))
+                continue;
+            return cur_o;
+        }
+        return nullptr;
+    }
+    Delivery * GetNextIdleDelivery(Order *o) {
+
+        for (int i = 0; i < GetDeliveryCount(o); i++) {
+            Delivery *del = GetDelivery(o, i);
+            if (DeliveryLoad[del->id] == 0)
+                return del;
+        }
+        return nullptr;
+    }
 private:
     Data *_data{};
     Cost _last_cost;
