@@ -15,9 +15,9 @@ public:
     int distID;
     int early_tw,late_tw;
     int StartNodeID, EndNodeID;
-
+    char c;
     Node() : id(-1), no(-1),nodeID(-1), x(0), y(0), early_tw(0), late_tw(0),StartNodeID(-1),EndNodeID(-1),
-    distID(0),depotID(-1),demand(0),type(Parameters::NODE)
+    distID(0),depotID(-1),demand(0),type(Parameters::NODE),c('N')
     {}
     virtual ~Node()= default;
     friend std::ostream &operator<<(std::ostream &os, const Node &node) {
@@ -102,13 +102,16 @@ public:
     int nbDelMin, nbDelMax;
     int orderID;
     int demand;
-    Order():orderID(-1),demand(0),custID(-1),nbDelMin(0),nbDelMax(0),service_duration(0){}
+    int early_tw,late_tw;
+
+    Order():orderID(-1),demand(0),custID(-1),nbDelMin(0),nbDelMax(0),service_duration(0),
+    early_tw(0),late_tw(0){}
 
 public:
     friend std::ostream &operator<<(std::ostream &os, const Order &order) {
         os<<"ooooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n";
         os << "Order: demand: " << order.demand << " custID: " << order.custID << " nbDelMin: " << order.nbDelMin
-           << " nbDelMax: " << order.nbDelMax << " orderID: " << order.orderID <<"  |\n";
+           << " nbDelMax: " << order.nbDelMax << " orderID: " << order.orderID << " ["<<order.early_tw<<"-"<<order.late_tw<< "]  |\n";
         os<<"ooooooooooooooooooooooooooooooooooooooooooooooooooooooooo";
         return os;
     }
