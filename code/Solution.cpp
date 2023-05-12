@@ -1,10 +1,13 @@
 
 #include "Solution.h"
-#include <iostream>
 using namespace std;
 
 std::vector<int> Sol::FailureCause = std::vector<int>();
+std::vector<int> Sol::FailureCount = std::vector<int>();
 std::vector<int> Sol::minDelay = std::vector<int>();
+std::vector<int> Sol::StartBefore = std::vector<int>();
+std::vector<int> Sol::pullVisit = std::vector<int>();
+std::vector<int> Sol::pushVisit = std::vector<int>();
 Sol::Sol(Data *data): _data(data), _last_cost(false), DriverAssignTo(data->GetNodeCount(),nullptr),
 RoutesLength(data->GetDriverCount(), 0),
                       orderCapRestante(data->GetOrderCount(),0),
@@ -33,6 +36,7 @@ RoutesLength(data->GetDriverCount(), 0),
                       DepotPrev(data->GetNodeCount(),nullptr),
                       CustomerPrev(data->GetNodeCount(),nullptr),
                       UnassignedIndex(data->GetCustomerCount(),0),
+                      clientDriverUsed(data->GetCustomerCount()),
                       updateCost(), UnassignedCount(0)
                       {
     InitCustomers();
@@ -170,7 +174,7 @@ void Sol::RemoveDelivery(Delivery *del) {
         updateCost.satisfiedCost -= DeliveryLoad[del->id];
     }
     updateCost.travelCost -= del->travel_time;
-
+    Sol::FailureCount[del->id]=0;
     orderCapRestante[del->orderID] += DeliveryLoad[del->id];
     clientCapRestante[del->custID] += DeliveryLoad[del->id];
     DeliveryLoad[del->id] = 0;
@@ -274,45 +278,60 @@ void Sol::AssignDeliveryToCustomer(Delivery *n) {
     assert(CustomerPrev[n->id] != n);
 }
 
-void Sol::ShowSchedule(Delivery *del)  {
+void Sol::ShowSchedule(Delivery *del) {
     Driver *d = GetDriverAssignedTo(del);
-    if (d == nullptr)
-        return;
-    // printf("Node  | Cl  |Driver   |Load| From | -> |Dock | Depart  | Arrival   |
+    // printf("Node  | Cl  |Driver   |Load| From | -> |Dock | Depart|->  | Arrival   |
     // Wait  | Start | End   | To \n");
     Dock *dock = GetDock(del->dockID);
-    printf("%04d |%02d(%02d)|%02d(%02d)| %02d |%04d|%02d|%04d|%04d-%04d| %04d"
+    if (d != nullptr) {
+    printf("%04d |%02d(%02d)|%02d(%02d)| %02d |%04d|%02d|%04d|%04d-%04d|%02d|%04d "
            "  |%03d "
            "|%04d "
            "| %04d |%04d|\n",
            del->id, del->orderID, del->custID, d->id, d->capacity,
-           DeliveryLoad[del->id], DriverPrev[dock->id]->id, Travel(DriverPrev[dock->id],dock), dock->id,
-           StartServiceTime[dock->id], EndServiceTime[dock->id],
+           DeliveryLoad[del->id], DriverPrev[dock->id]->id, Travel(DriverPrev[dock->id], dock), dock->id,
+           StartServiceTime[dock->id], EndServiceTime[dock->id], Travel(dock, del),
            ArrivalTime[del->id], WaitingTime[del->id],
            StartServiceTime[del->id], EndServiceTime[del->id],
            DriverNext[del->id]->id);
+    }
+    else {
+        printf("%04d |%02d(%02d)|%02d(%02d)| %02d |%04d|%02d|%04d|%04d-%04d|%02d|%04d "
+               "  |%03d "
+               "|%04d "
+               "| %04d |%04d|\n",
+               del->id, del->orderID, del->custID, -1, -1,
+               DeliveryLoad[del->id], -1, -1, dock->id,
+               StartServiceTime[dock->id], EndServiceTime[dock->id], Travel(dock, del),
+               ArrivalTime[del->id], WaitingTime[del->id],
+               StartServiceTime[del->id], EndServiceTime[del->id],
+               -1);
+    }
 }
 
 void Sol::ShowSchedule() {
 
     for (int i = 0; i < GetOrderCount(); i++) {
         Order *o = GetOrder(i);
-        if(!isOrderSatisfied(o)) continue;
+        if(!isOrderSatisfied(o)) {
+            cout<<"Incomplete schedule"<<endl;
+//            continue;
+        }
         ShowSchedule(o);
     }
     Cost coutSol = GetCost();
-    printf(" travel cost %2.1lf\n", coutSol.travelCost);
-    printf(" Waiting cost %2.1lf\n", coutSol.waitingCost);
+    printf(" travel cost %2.1lf|", coutSol.travelCost);
+    printf(" Waiting cost %2.1lf| ", coutSol.waitingCost);
     printf(" total cost %2.1lf\n", coutSol.getTotal());
 }
 
 void Sol::ShowSchedule(Order *o){
     cout<<*o<<endl;
-    printf("Node| Cl    |Driver|Load|From|->|Dock| Depart  |Arrival|"
+    printf("Node| Cl    |Driver|Load|From|->|Dock| Depart  |->|Arrival|"
            "Wait|Start| End  | To |\n");
     for (int j = 0; j < GetDeliveryCount(o); j++) {
         Delivery *del = GetDelivery(o, j);
-        if (DriverAssignTo[del->id] != nullptr)
+//        if (DriverAssignTo[del->id] != nullptr)
             ShowSchedule(del);
     }
 }
@@ -323,7 +342,7 @@ void Sol::ShowCustomer()  {
         Customer *n = GetCustomer(i);
         if (!isClientSatisfied(n))
             continue;
-        std::cout << "Customer " << n->constID << " (" << n->demand << ")-";
+        std::cout << "C" << n->constID << " (" << n->demand << ")-";
         sum_ += n->demand;
     }
     std::cout << ": cost:*" << sum_
