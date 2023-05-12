@@ -70,6 +70,10 @@ public:
     int Travel(Node *from, Node *to) {
         return  ceil(_times[from->distID][to->distID]);
     }
+    int Travel(Customer *from, Customer *to) {
+        Depot * dep_to = GetDepot(to->depotID);
+        return  Travel(from,dep_to) + Travel(dep_to,to) ;
+    }
     int Travel(int from, int to) {
         return ceil(_times[from][to]);
     }
