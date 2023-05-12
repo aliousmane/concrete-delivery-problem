@@ -65,6 +65,7 @@ void Data::LoadInstance() {
         SumDemand=0;
         for (int i = 0; i < this->nbCustomers; ++i) {
             Customer n;
+            n.c='C';
             inputFile >> n.custID >> n.orderID >> dummy >> n.distID >> n.depotID >> n.early_tw >> n.demand >> n.nbOrder;
             n.id = GetNodeCount();
             n.no=n.id+1;
@@ -75,11 +76,13 @@ void Data::LoadInstance() {
             d1.no = d1.id + 1;
             d1.distID = n.distID;
             d1.type = Parameters::START_LINK;
+            d1.c='S';
             Node d2 = d1;
             d2.id = d1.id + 1;
             d2.no = d2.id + 1;
             d2.type = Parameters::END_LINK;
             d2.nodeID = d2.id;
+            d2.c='E';
             n.StartNodeID = d1.id;
             n.EndNodeID = d2.id;
 
@@ -120,12 +123,14 @@ void Data::LoadInstance() {
             d1.no = d1.id + 1;
             d1.distID = dep->distID;
             d1.type = Parameters::START_LINK;
+            d1.c='S';
             Node d2 = d1;
             d2.id = d1.id + 1;
             d2.no = d2.id + 1;
             d2.type = Parameters::END_LINK;
             d.StartNodeID = d1.id;
             d.EndNodeID = d2.id;
+            d2.c='E';
             AddNode(d1);
             AddNode(d2);
             AddDriver(d);
@@ -168,6 +173,7 @@ void Data::LoadKinableInstance(){
         SumDemand=0;
         for (int i = 0; i < this->nbCustomers; ++i) {
             Customer n;
+            n.c='C';
             inputFile >>  dummy >> n.demand  >> n.early_tw >> n.late_tw;
             n.custID=GetCustomerCount();
             n.constID = n.custID;
@@ -191,6 +197,8 @@ void Data::LoadKinableInstance(){
             o.orderID = GetOrderCount();
             o.custID = n.custID;
             o.demand = n.demand;
+            o.early_tw=n.early_tw;
+            o.late_tw = n.late_tw;
             AddOrder(o);
         }
         this->nbOrders = this->nbCustomers;
@@ -245,11 +253,13 @@ void Data::LoadKinableInstance(){
             d1.type = Parameters::START_LINK;
             d1.x = c->x;
             d1.y = c->y;
+            d1.c= 'S';
             Node d2 = d1;
             d2.id = d1.id + 1;
             d2.no = d2.id + 1;
             d2.type = Parameters::END_LINK;
             d2.nodeID = d2.id;
+            d2.c='E';
             c->StartNodeID = d1.id;
             c->EndNodeID = d2.id;
 
@@ -267,12 +277,14 @@ void Data::LoadKinableInstance(){
             d1.type = Parameters::START_LINK;
             d1.x = startDepot.x;
             d1.y = startDepot.y;
+            d1.c='S';
             Node d2 = d1;
             d2.id = d1.id + 1;
             d2.no = d2.id + 1;
             d2.type = Parameters::END_LINK;
             d->StartNodeID = d1.id;
             d->EndNodeID = d2.id;
+            d2.c='E';
             AddNode(d1);
             AddNode(d2);
         }
@@ -408,6 +420,8 @@ void Data::AddDeliveryNodes(){
 void Data::AddDeliveryNodes(Customer *c){
     for(int i=0;i<_index_orders[c->custID].size();i++){
         Order *o1= GetOrder(c,i);
+        o1->early_tw=c->early_tw;
+        o1->late_tw = c->late_tw;
         const short nb= ceil(double(o1->demand)/minDriverCap);
         AddDeliveryNodes(o1,nb);
         o1->nbDelMax = nb;
@@ -429,6 +443,7 @@ void Data::AddDeliveryNodes(Order *o,int nb){
         del.StartNodeID = c->StartNodeID;
         del.EndNodeID = c->EndNodeID;
         del.distID = c->distID;
+        del.c='D';
         AddDelivery(del);
     }
 }
@@ -451,6 +466,7 @@ void Data::AddDockNodes(){
         del->dockID = d1.dockID;
         d1.depotID = del->depotID;
         d1.distID = dep->distID;
+        d1.c='L';
         AddDock(d1);
     }
 }
