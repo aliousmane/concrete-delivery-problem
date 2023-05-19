@@ -13,6 +13,9 @@
 #include <cassert>
 #include <iostream>
 
+
+
+
 class Sol {
 public:
     Sol()=default;
@@ -45,6 +48,8 @@ public:
     std::vector<int>  DeliveryLoad;
     std::vector<int>  WaitingTime;
     std::vector<int>  UnassignedIndex;
+    std::vector<int>  OrderVisitCount;
+    std::vector<int>  sumServiceTime;
     std::vector<bool> VisitFlags;
     std::vector<bool> VisitFlagCost;
     std::vector<std::vector<int>> DriverVisitCount;
@@ -56,6 +61,17 @@ public:
     std::set<int> driverUsed;
     std::vector<std::set<int>> clientDriverUsed;
     std::set<int> satisfiedCustomers;
+    std::set<int> unscheduledCustomers;
+
+
+    static std::vector<int> FailureCause;
+    static std::vector<std::set<int>> TabuFleet;
+    static std::vector<int> FailureCount;
+    static std::vector<int> minDelay;
+    static std::vector<int> pullVisit;
+    static std::vector<int> pushVisit;
+    static std::vector<int> StartBefore;
+    static std::map<std::tuple<int, int>, int> nodeMaxStartService;
 
     void InitCustomers();
     void InitOrders();
@@ -83,6 +99,21 @@ public:
     Data * GetData(){return _data;}
     Node *GetNode(int i){return _data->GetNode(i);}
     Delivery *GetDelivery(Order *o,int index){return _data->GetDelivery(o,index);}
+    std::vector<Delivery *>GetDelivery(Customer *c){
+        std::vector<Delivery *> temp;
+        for(auto o: GetOrders(c)){
+            std::vector<Delivery *> temp2=GetDelivery(o);
+            temp.insert(temp.end(), temp2.begin(), temp2.end());
+        }
+        return temp;
+    }
+    std::vector<Delivery *>GetDelivery(Order *o){
+        std::vector<Delivery *> temp(GetDeliveryCount(o));
+        for(int i=0;i< GetDeliveryCount(o);i++){
+            temp[i]=GetDelivery(o,i);
+        }
+        return temp;
+    }
     Delivery *GetDelivery(int index){return _data->GetDelivery(index);}
     Depot *GetDepot(int index){return _data->GetDepot(index);}
     Dock * GetDock(int dockID){return _data->GetDock(dockID);}
@@ -104,6 +135,10 @@ public:
         return cur_order;
     }
     void UnassignCustomer(Customer *c);
+    void UnassignCustomer(int custID){
+        assert(custID<GetCustomerCount());
+        UnassignCustomer(GetCustomer(custID));
+    }
     void UnassignOrder(Order *o);
     void AddToUnassigneds(Customer *n);
     void UnassignDelivery(std::vector<Delivery*> const & delList);
@@ -127,13 +162,16 @@ public:
     void ShowSchedule(Delivery *del);
     void ShowSchedule();
     void ShowSchedule(Order *o);
+    void ShowSchedule(Customer *c);
     void ShowCustomer();
     int EarlyTW(Delivery *n) const { return _data->EarlyTW(n); }
     int LateTW(Delivery *n) const { return _data->LateTW(n); }
     bool isOrderSatisfied(Order *o)const{return (orderCapRestante[o->orderID]<=0); }
+    bool isSatisfied(Order *o)const{return (orderCapRestante[o->orderID]<=0); }
     bool isOrderSatisfied(Delivery *del)const{return (orderCapRestante[del->orderID] <=0); }
     bool isOrderSatisfied(int ordId)const{return (orderCapRestante[ordId]<=0); }
     bool isClientSatisfied(Customer *c)const{return (clientCapRestante[c->custID]<=0); }
+    bool isSatisfied(Customer *c)const{return (clientCapRestante[c->custID]<=0); }
     bool isClientSatisfied(int custId)const{return (clientCapRestante[custId]<=0); }
     void InsertAfter(Node *n, Node *prev);
     void InsertAfter(Node *n, Node *prev,Driver *d);
@@ -166,18 +204,18 @@ public:
                                    double expected_arrival) {
         return int(arrival > expected_arrival);
     }
-    static double GetTruckWaitingCost(Delivery *del, double arrival,
+    static int GetTruckWaitingCost(Delivery *del, double arrival,
                                     double expected_arrival) {
-        return std::max(0., expected_arrival - arrival);
+        return int(std::max(0., expected_arrival - arrival));
     }
     static int GetClientWaitingCost(Delivery *del, double arrival,
                                      double expected_arrival) {
-        return std::max(0., arrival - expected_arrival);
+        return int(std::max(0., arrival - expected_arrival));
     }
-    static double GetLateDeliveryCost(Delivery *del, double arrival,
+    static int GetLateDeliveryCost(Delivery *del, double arrival,
                                     double expected_arrival) {
-        return Parameters::LATE_ARRIVAL_PENALTY *
-               std::max(0., arrival - expected_arrival);
+        return int(Parameters::LATE_ARRIVAL_PENALTY *
+               std::max(0., arrival - expected_arrival));
     }
     static int GetLateDeliveryCount(Delivery *del, double arrival,
                                   double expected_arrival) {
@@ -219,12 +257,7 @@ public:
 
     bool operator<(const Sol &rhs) const;
 
-    static std::vector<int> FailureCause;
-    static std::vector<int> FailureCount;
-    static std::vector<int> minDelay;
-    static std::vector<int> pullVisit;
-    static std::vector<int> pushVisit;
-    static std::vector<int> StartBefore;
+
     std::string CustomerString() ;
     ~Sol()=default;
     template<typename T>
@@ -247,16 +280,41 @@ public:
 
         for (int i = 0; i < GetDeliveryCount(o); i++) {
             Delivery *del = GetDelivery(o, i);
-            if (DeliveryLoad[del->id] == 0)
+            if (GetDriverAssignedTo(del) == nullptr)
                 return del;
         }
         return nullptr;
     }
-private:
+    void ShowSlot(Depot *myDep) {
+        std::cout << "Slots for " << myDep->depotLoc << std::endl;
+        for (const auto& x : depotLoadingIntervals[myDep->depotID]) {
+            std::cout << x << "--";
+        }
+        std::cout << std::endl;
+    }
+    void ShowSlot(Driver *d) {
+        std::cout << "Slots for driver " << d->id << std::endl;
+        for (const auto  &x : driverWorkingIntervals[d->id]) {
+            std::cout << x << "--";
+        }
+        std::cout << std::endl;
+    }
+    void ShowAllSchedule();
+    void exportCSVFormat(const std::string &fileName) ;
+
+        private:
     Data *_data{};
     Cost _last_cost;
     int UnassignedCount{};
 };
 
-
+class MyHashFunction {
+public:
+    size_t operator()(const Sol &s) const {
+        return std::hash<std::string>()(s.toString());
+    }
+    size_t operator()(const std::string &s) const {
+        return std::hash<std::string>()(s) << 1;
+    };
+};
 #endif //CODE_SOLUTION_H
