@@ -38,6 +38,10 @@ public:
                                 const std::vector<DriverT *> &driversList,
                                 Move<NodeT, DriverT, MoveT> &best) = 0;
 
+  virtual void GetBestInsertion(Sol &s, const std::vector<int> &listId,
+                                  const std::vector<DriverT *> &driversList,
+                                  ListMove<NodeT, DriverT, MoveT> *list_moves) = 0;
+
   void SetNoise(double noise) { _noise = noise; }
   double GetNoise() { return _noise; }
 
