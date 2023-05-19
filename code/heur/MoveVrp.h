@@ -23,7 +23,7 @@ public:
 	Driver* from;
 	double DeltaCost;
 	double DeltaDistance;
-	double arrival_time;
+	int arrival_time;
 	bool IsFeasible;
 };
 

@@ -17,14 +17,14 @@ public:
   double demand;
   Cost DeltaCost;
   double DeltaDistance;
-  double waste;
-  double arrival_dock, arrival_del;
+  int waste;
+  int arrival_dock, arrival_del;
   bool IsFeasible;
   int nbDriver{0};
   MoveT move;
 
   Move()
-      : n(NULL), to(NULL), IsFeasible(false), demand(0),
+      : n(nullptr), to(nullptr), IsFeasible(false), demand(0),
          DeltaDistance(INFINITY),
         DeltaCost(false), arrival_dock(0), arrival_del(0),
         waste(0) {}
