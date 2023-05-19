@@ -19,6 +19,7 @@ public:
   virtual int Count() = 0;
   virtual void Insert(int i, Move<NodeT, DriverT, MoveT> &m) = 0;
   virtual Move<NodeT, DriverT, MoveT> &Get(int i) = 0;
+  virtual Move<NodeT, DriverT, MoveT> Extract() = 0;
   virtual void Sort() = 0;
   virtual Move<NodeT, DriverT, MoveT> &GetRandom() = 0;
   virtual void Resize(int n) = 0;
