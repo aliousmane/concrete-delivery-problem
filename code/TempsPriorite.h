@@ -11,16 +11,17 @@
 #include "IFilePriorite.h"
 #include "Data.h"
 
-class TempsPriorite : public IFilePriorite<double> {
+class TempsPriorite : public IFilePriorite<int> {
 public:
     TempsPriorite():_data(nullptr),valeurs(0), tabuList(0), tableauCount(0), tabuCount(0),count(0) {}
-    TempsPriorite(Data *pdata): _data(pdata), valeurs(0), tabuList(0), tableauCount(0), tabuCount(0),
+    explicit TempsPriorite(Data *pr)
+        : _data(pr), valeurs(0), tabuList(0), tableauCount(0), tabuCount(0),
           count(0) {}
-    TempsPriorite(Data *data,int n);
+    TempsPriorite(Data *pr,int n);
     TempsPriorite(int n);
 
     //Ajouter un noeud ayant une certaine valeur
-    void Ajouter(int noeud, double valeur) override;
+    void Ajouter(int noeud, int valeur) override;
 
     //retourne le noeud de plus petite valeur
     int SupprimerMin()override;
@@ -28,7 +29,7 @@ public:
 
 
     //Reduit la valeur associe au noeud
-    void Decroitre(int noeud, double valeur)override;
+    void Decroitre(int noeud, int valeur)override;
 
     bool EstVide() override;
 
@@ -44,7 +45,7 @@ public:
     void Supprimer(int cle)override;
 
   private:
-    std::vector<double> valeurs;
+    std::vector<int> valeurs;
     std::vector<int> tabuList;
     int tableauCount;
     int tabuCount;
