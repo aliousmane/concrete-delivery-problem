@@ -259,7 +259,7 @@ private:
     std::vector<std::vector<int>> _index_orders;
     std::vector<std::shared_ptr<Node>> _nodes;
     std::string time_mat_file, distance_mat_file;
-    static void LoadMatrices(std::vector<std::vector<double>> &array, const std::string &matrix_filename,int rate);
+    static void LoadMatrices(std::vector<std::vector<double>> &array, const std::string &matrix_filename,const int rate);
 
     std::vector<std::vector<double>> _distances;
     std::vector<std::vector<double>> _times;

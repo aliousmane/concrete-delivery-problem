@@ -4,9 +4,13 @@
 #include <fstream>
 #include <cassert>
 #include <iostream>
+#include <filesystem>
 
 using namespace std;
 void Data::Load(){
+    instance_name = filesystem::path(input).stem();
+    problem_name = filesystem::path(input).parent_path().filename();
+    sol_output = path + "/solution/" + problem_name + "/" + instance_name + ".csv";
     if(Parameters::KINABLE){
         Parameters::ADJUSTMENT_DURATION=0;
         Parameters::CLEANING_DURATION = 0;
@@ -66,7 +70,7 @@ void Data::LoadInstance() {
         for (int i = 0; i < this->nbCustomers; ++i) {
             Customer n;
             n.c='C';
-            inputFile >> n.custID >> n.orderID >> dummy >> n.distID >> n.depotID >> n.early_tw >> n.demand >> n.nbOrder;
+            inputFile >> n.custID >> n.orderNbr >> dummy >> n.distID >> n.depotID >> n.early_tw >> n.demand >> n.nbOrder;
             n.id = GetNodeCount();
             n.no=n.id+1;
             n.late_tw = n.early_tw +Parameters::TW_WIDTH;
@@ -181,7 +185,7 @@ void Data::LoadKinableInstance(){
             n.no=n.id+1;
             n.distID = n.id;
             n.type = Parameters::CUSTOMER;
-            n.orderID = GetOrderCount();
+            n.orderNbr = GetOrderCount();
             n.nbOrder =1;
             AddCustomer(n);
             SumDemand += n.demand;
@@ -472,7 +476,7 @@ void Data::AddDockNodes(){
 }
 
 
-void Data::LoadMatrices(std::vector<std::vector<double>> &array, const string &matrix_filename,int rate)
+void Data::LoadMatrices(std::vector<std::vector<double>> &array, const string &matrix_filename,const int rate)
 {
     string line;
     ifstream f(matrix_filename.c_str()); // open file
@@ -490,7 +494,7 @@ void Data::LoadMatrices(std::vector<std::vector<double>> &array, const string &m
 
         while (getline(s, val, ',')) // for each value
         {
-            row.push_back(stold(val) / rate);
+            row.push_back(stod(val) / rate);
         }
         array.push_back(row);
     }
