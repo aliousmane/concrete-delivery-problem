@@ -14,16 +14,16 @@ class InsRmvMethodFast: public InsRmvMethod<Delivery, Driver, MoveVrp> {
 public:
     explicit InsRmvMethodFast(Data &data);
     InsRmvMethodFast()=default;
-    void InsertCost(Sol &s, Delivery *n, Driver *d, Move<Delivery, Driver, MoveVrp> &m) override;
+    void InsertCost(Sol &s, Delivery *n, Driver *d, Move<Delivery, Driver, MoveVrp> &m) override{}
 
-    void RemoveCost(Sol &s, Delivery *n, Move<Delivery, Driver, MoveVrp> &m) override;
-    void FillInsertionList(Sol &s, std::vector<Delivery *> &list) override;
-    void CancelMove(Sol &s, Move<Delivery, Driver, MoveVrp> &m) override;
+    void RemoveCost(Sol &s, Delivery *n, Move<Delivery, Driver, MoveVrp> &m) override{}
+    void FillInsertionList(Sol &s, std::vector<Delivery *> &list) override{}
+    void CancelMove(Sol &s, Move<Delivery, Driver, MoveVrp> &m) override{}
 
 
     void GetBestInsertion(Sol &s, const std::vector<int> &listId,
                           const std::vector<Driver *> &driversList,
-                          Move<Delivery, Driver, MoveVrp> &best)override;
+                          Move<Delivery, Driver, MoveVrp> &best)override{}
 
     void GetBestInsertion(Sol &s, const std::vector<int> &listId,
                                   const std::vector<Driver *> &driversList,
@@ -31,9 +31,9 @@ public:
 
     void SetServiceParams(Sol &s,  Delivery *n, Driver *d, int demand) override;
 
-    void repairSolution(Sol &s) override;
+    void repairSolution(Sol &s) override{}
 
-    void InsertCost(Sol &s, Delivery *n, Driver *d,  ListMove<Delivery, Driver, MoveVrp> *temp_moves);
+    void InsertCost(Sol &s, Delivery *n, Driver *d,  ListMove<Delivery, Driver, MoveVrp> *temp_moves){}
     Move<Delivery, Driver, MoveVrp> GetCost(
             Sol &s,  Delivery *n, Driver *d, Cost &solcost, int demand,
             ListMove<Delivery, Driver, MoveVrp> *temp_moves) override;
