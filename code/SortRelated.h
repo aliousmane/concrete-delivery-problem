@@ -25,6 +25,7 @@ template <class NodeT, class DriverT> class SortNode {
 public:
   static void radixSortGreatDemand(std::vector<NodeT *> &nodes, double max_demand);
   static void radixSortEarlyTW(std::vector<NodeT *> &nodes, double max_early_tw);
+  static void radixSortMinWidthTW(std::vector<NodeT *> &nodes, double max_early_tw);
   static void radixSortIncreasingTW(std::vector<NodeT *> &nodes, double max_early_tw);
   static void radixSortKinable(std::vector<NodeT *> &nodes, double max_late_tw);
   static void radixSortLateTW(std::vector<NodeT *> &nodes, double max_late_tw);

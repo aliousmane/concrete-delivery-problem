@@ -13,6 +13,8 @@ int main(int argc, const char **argv) {
     }
     Data data;
     data.input = argv[1];
+
+
     cout<<data.input<<endl;
     auto start_time = std::chrono::high_resolution_clock::now();
 

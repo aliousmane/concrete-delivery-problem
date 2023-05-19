@@ -213,7 +213,7 @@ bool RechercheLocale::Swap(Sol &s, Customer *c1, Customer *c2)
                           std::inserter(v_intersection, v_intersection.end()));
     if (!v_intersection.empty())
         return false;
-    cout << " try to swap " << c1->custID << " with " << c2->custID << " " << s.CustomerString() << endl;
+//    cout << " try to swap " << c1->custID << " with " << c2->custID << " " << s.CustomerString() << endl;
 
     Sol cur(s.GetData());
     cur.keyCustomers = clients;
@@ -231,12 +231,13 @@ bool RechercheLocale::Swap(Sol &s, Customer *c1, Customer *c2)
 
 //    SolverReduce::SolvedSequence[cur.satisfiedCustomers] =
 //        SequenceInfo(true, cur.GetLastCost().satisfiedCost);
+    cur.keyCustomers = s.keyCustomers;
     if (cur < s)
     {
         s = cur;
         found = true;
         sortie = true;
-        cout << "new sol swap " << cur.CustomerString() << endl;
+//        cout << "new sol swap " << cur.CustomerString() << endl;
         if (cur.GetLastCost()< bestCost)
         {
             bestCost = s.GetLastCost();
@@ -256,7 +257,7 @@ bool RechercheLocale::Relocate(Sol &s, Customer *c1, std::set<int> &_set)
     }
     _set.insert(c1->custID);
     // cur.ShowCustomer();
-    cout << " try to relocate with all  " << endl;
+//    cout << " try to relocate with all  " << endl;
 //    SolverReduce::SolveCustomer(cur, _set, 1, nullptr, false);
 //    if (cur.GetLastCost() < s.GetLastCost())
 //    {
@@ -301,7 +302,7 @@ bool RechercheLocale::Relocate(Sol &s, Customer *c1, Customer *c2)
 //        return false;
 //    if (SolverReduce::ComputeCost(s, clients) < bestCost.satisfiedCost)
 //        return false;
-    cout << " try to relocate " << c1->custID << " near " << c2->custID << " " << s.CustomerString() << endl;
+//    cout << " try to relocate " << c1->custID << " near " << c2->custID << " " << s.CustomerString() << endl;
     Sol cur = s;
     cur.keyCustomers = clients;
     //    Data dat = s.GetData()->copyCustomersData(clients);
@@ -310,12 +311,13 @@ bool RechercheLocale::Relocate(Sol &s, Customer *c1, Customer *c2)
 //    // cout<<" sol relocate 1:  "<<cur.CustomerString()<<endl;
 //    SolverReduce::SolvedSequence[cur.satisfiedCustomers] =
 //        SequenceInfo(true, cur.GetLastCost().satisfiedCost);
+    cur.keyCustomers = s.keyCustomers;
     if (cur < s)
     {
         s = cur;
         found = true;
         sortie = true;
-        cout << "best sol relocate 1) " << cur.CustomerString() << endl;
+//        cout << "best sol relocate 1) " << cur.CustomerString() << endl;
         if (cur.GetLastCost() < bestCost)
         {
             bestCost = s.GetLastCost();

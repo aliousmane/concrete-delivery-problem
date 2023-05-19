@@ -6,6 +6,8 @@ void Sol::Update() {
 
     updateCost = Cost();
     satisfiedCustomers.clear();
+    unscheduledCustomers.clear();
+    driverUsed.clear();
     BuildFromDepotSetIntervall();
     isFeasible = true;
     for (int i = 0; i < GetDriverCount(); i++)
@@ -20,7 +22,9 @@ void Sol::Update() {
     {
         Customer *c = GetCustomer(i);
         clientCapRestante[c->custID] = c->demand;
-        //TODO OrderVisitCount[c->custID] = 0;
+        clientDriverUsed[c->custID].clear();
+        OrderVisitCount[c->custID] = 0;
+        sumServiceTime[c->custID]=0;
     }
     for (int i = 0; i < GetOrderCount(); i++)
     {
@@ -57,15 +61,18 @@ void Sol::Update() {
                 int(d->shiftDuration > Parameters::NORMAL_WORKING_TIME);
     }
     int count = 0;
+    updateCost.waste=0;
     for (int i = 0; i < GetCustomerCount(); i++)
     {
         Customer *c = GetCustomer(i);
         if (isClientSatisfied(c))
         {
+            updateCost.waste += std::abs(clientCapRestante[c->custID]);
             satisfiedCustomers.insert(c->constID);
         }
         else
         {
+            unscheduledCustomers.insert(c->constID);
             count++;
         }
     }
@@ -128,23 +135,34 @@ void Sol::Update(Depot *dep, Dock *dock,Delivery *del)
 {
     VisitFlags[dock->id] = true;
     VisitFlags[del->id] = true;
-
+    Sol::FailureCount[del->id]=0;
+    Sol::FailureCause[del->id]=Parameters::NONE;
     Driver *d = GetDriverAssignedTo(del);
+
     Order *o = GetOrder(del->orderID);
     Customer *c = GetCustomer(del->custID);
 
+    OrderVisitCount[c->custID]++;
+    clientDriverUsed[c->custID].insert(d->id);
+    driverUsed.insert(d->id);
+
     DeliveryLoad[del->id] = GetLoad(d,o);
     updateCost.satisfiedCost += DeliveryLoad[del->id];
+    updateCost.waste += d->capacity;
     UpdateDemand(c,o,DeliveryLoad[del->id]);
     if(isClientSatisfied(c)){
         satisfiedCustomers.insert(c->constID);
+        updateCost.waste -= d->capacity;
+        updateCost.waste += std::abs(clientCapRestante[c->custID]);
     }
     DriverVisitCount[d->id][c->custID]++;
     del->demand = DeliveryLoad[del->id];
-    //TODO del->driverId = d->id;
     const int LOAD_DURATION = Data::LoadingTime(dep, del->demand);
     const int ADJUSTMENT_DURATION = Parameters::ADJUSTMENT_DURATION;
     const int UNLOADING_DURATION = Data::UnloadingTime(del, del->demand, d);
+
+
+    sumServiceTime[c->custID] += UNLOADING_DURATION;
 
     Node *prec_del = CustomerPrev[del->id];
 
@@ -159,7 +177,7 @@ void Sol::Update(Depot *dep, Dock *dock,Delivery *del)
             dep, dock,
             TimeSlot(ArrivalTime[dock->id], ArrivalTime[dock->id]+ LOAD_DURATION, 'L', *dock));
 
-    StartServiceTime[dock->id] = ArrivalTime[dock->id]; //TODO s'assurer que ArrivalTime est initialisé
+    StartServiceTime[dock->id] = ArrivalTime[dock->id];
     Dock *prev_dock = dynamic_cast<Dock*>( DepotPrev[dock->id]);
     if(prev_dock!= nullptr){
         StartServiceTime[dock->id] = std::max(ArrivalTime[dock->id],EndServiceTime[prev_dock->id]);
@@ -228,22 +246,25 @@ Cost Sol::GetCost() {
     }
     _last_cost.satisfiedCost = 0;
     _last_cost.undeliveredCost = 0;
-
+    _last_cost.waste=0;
     for (int i = 0; i < GetCustomerCount(); i++)
     {
         Customer *c = GetCustomer(i);
         _last_cost.undeliveredCost += !(isClientSatisfied(c))* Parameters::UNDELIVERY_PENALTY;
         _last_cost.satisfiedCost += (isClientSatisfied(c)) * c->demand;
+        if(isClientSatisfied(c)){
+            _last_cost.waste+= std::abs(clientCapRestante[c->custID]);
+        }
     }
     _last_cost.driverUsed=0;
 
     for (int i = 0; i < GetDriverCount(); i++)
     {
         Driver *d = GetDriver(i);
-        _last_cost.driverUsed += int(RoutesLength[d->id] > 0);
 
         if (RoutesLength[d->id] < EPS)
             continue;
+        _last_cost.driverUsed ++;
         Node *lastOfDriver = DriverPrev[d->EndNodeID];
         shiftDurationCost[d->id] += Travel(lastOfDriver->distID, d->distID) ;
         d->shiftDurationCost = shiftDurationCost[d->id] - d->start_shift_time;
@@ -300,11 +321,10 @@ void Sol::GetCost(Depot *dep, Dock *dock,Delivery *del,Cost &cur_cost){
     const int UNLOADING_DURATION = Data::UnloadingTime(del, del->demand, d);
 
     Node *prec_del = CustomerPrev[del->id];
-
+    cur_cost.waste+=d->capacity;
     int real_del_time = EndServiceTime[prec_del->id];
     Node *lastOfDriver = DriverPrev[dock->id];
     cur_cost.travelCost += Travel(lastOfDriver, dock) + Travel(dock, del) ;
-
 
     int arr_node = ArrivalTime[del->id];
 
@@ -335,27 +355,34 @@ void Sol::Show() {
 
 }
 void Sol::ShowDrivers()  {
-    for (int i = 0; i < GetDriverCount(); i++)
-        cout<<*GetDriver(i)<<endl;
+    for (int i = 0; i < GetDriverCount(); i++){
+
+        Show(GetDriver(i));
+    }
 }
 void Sol::Show(Driver *d) {
     if (RoutesLength[d->id] < 1) 		return;
     double dmd = 0;
-    printf(" len:%d:\n", (int)RoutesLength[d->id]);
+    printf("%d cap %d len %d:\n",d->id,d->capacity, (int)RoutesLength[d->id]);
     Node *cur = GetNode(d->StartNodeID);
     while (cur->type !=Parameters::END_LINK) {
         dmd += cur->demand;
-        if(cur->type!=Parameters::START_LINK)
-            printf("D%d(%d->%d)-", cur->id, StartServiceTime[cur->id],
-               EndServiceTime[cur->id]);
+        if(cur->type!=Parameters::START_LINK) {
+            printf("%c%d(%d->%d)-", cur->c, cur->id, StartServiceTime[cur->id],
+                   EndServiceTime[cur->id]);
+            if (cur->type == Parameters::DELIVERY) {
+                auto *del = dynamic_cast<Delivery *>(cur);
+                printf("C%d-", del->custID);
+            }
+        }
         else {
-            printf("%d", cur->id);
+            printf("%d-", cur->id);
         }
         cur = DriverNext[cur->id];
     }
     Cost value = GetCost(d);
 
-    printf("Driver %d: load:%2.lf cap:%d cost:%2.0lf ", d->id, dmd, d->capacity,
+    printf("Driver %d: load:%2.lf cap:%d cost:%2.0lf \n", d->id, dmd, d->capacity,
            value.getTotal());
 }
 

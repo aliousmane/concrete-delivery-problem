@@ -21,15 +21,7 @@
 #include "heur/RechercheLocale.h"
 
 
-class MyHashFunction {
-public:
-  size_t operator()(const Sol &s) const {
-    return std::hash<std::string>()(s.toString());
-  }
-  size_t operator()(const std::string &s) const {
-    return std::hash<std::string>()(s) << 1;
-  };
-};
+
 
 template <class NodeT, class DriverT> struct grasp_remove_operator {
   int no;

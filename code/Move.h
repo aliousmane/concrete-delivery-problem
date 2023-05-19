@@ -20,6 +20,7 @@ public:
   double waste;
   double arrival_dock, arrival_del;
   bool IsFeasible;
+  int nbDriver{0};
   MoveT move;
 
   Move()
@@ -29,10 +30,10 @@ public:
         waste(0) {}
 
   bool operator<(const Move<NodeT, DriverT, MoveT> &m) const {
-      if(this->n == m.n){
-          return (this->arrival_dock <= m.arrival_dock);
-      }
-    return (DeltaCost < m.DeltaCost);
+        if(this->n == m.n){
+            return (this->arrival_del <= m.arrival_del);
+        }
+        return (DeltaCost < m.DeltaCost);
   }
 
   bool operator<=(const Move<NodeT, DriverT, MoveT> &m)const {
@@ -46,8 +47,8 @@ public:
     return (DeltaCost <= m->DeltaCost);
   }
   void Show() {
-    printf("driver %d(%d) insert (%d-%d) after %d \n", to->no, to->id, move.dock->id,
-           n->id, move.prev->id);
+    printf("driver %ld(%d) insert (%d-%d) after %d at %2.0lf with waste %2.0lf \n", to->no, to->id, move.dock->id,
+           n->id, move.prev->id,arrival_del,waste);
     // printf("Plant %d insert %d after %d \n", depot->depotLoc, dock->id,
     // move.prevOfDepot->id);
   }

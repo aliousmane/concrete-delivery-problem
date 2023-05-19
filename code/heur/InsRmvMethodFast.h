@@ -2,6 +2,7 @@
 
 #ifndef CODE_INSRMVMETHODFAST_H
 #define CODE_INSRMVMETHODFAST_H
+#define WITH_OUTPUT 0
 
 #include "../InsRmvMethod.h"
 #include "../Driver.h"
@@ -23,6 +24,10 @@ public:
     void GetBestInsertion(Sol &s, const std::vector<int> &listId,
                           const std::vector<Driver *> &driversList,
                           Move<Delivery, Driver, MoveVrp> &best)override;
+
+    void GetBestInsertion(Sol &s, const std::vector<int> &listId,
+                                  const std::vector<Driver *> &driversList,
+                          ListMove<Delivery, Driver, MoveVrp> *list_moves) override;
 
     void SetServiceParams(Sol &s,  Delivery *n, Driver *d, int demand) override;
 

@@ -38,8 +38,6 @@ void GRASP<NodeT, DriverT>::Optimize(
 	//TODO SortNode<Node, Driver>::radixSortGreatDemand(list_cust, s.GetData()->GetMaxDemand());
 
 	Cost bestCout(false);
-
-
 	int iter_k = 0;
 	_chrono.start();
 	_chrono.setDuration(300);
