@@ -10,18 +10,25 @@
 #include <map>
 #include <memory>
 #include <sstream>
+#include <filesystem>
 class Data {
 public:
     Data() : input(), output(), nbDepots(0), nbCustomers(0), nbOrders(0), nbDrivers(0), _depots(0), _customers(0), driverCapacities(),
               maxDriverCap(0), minDriverCap(0), _deliveries(0), _drivers(0), _orders_deliveries(0), _distances(0), _times(0), _docks(0),
-              _index_orders(0)
+              _index_orders(0),path(std::filesystem::current_path().parent_path()),instance_name(),
+              problem_name(),sol_output()
     {
         time_mat_file= "../../matrices/Matrice_de_temps_all.csv";
         distance_mat_file= "../../matrices/Matrice_de_distance_all.csv";
 
+
     }
     std::string input;
     std::string output;
+    std::string sol_output;
+    std::string instance_name;
+    std::string problem_name;
+    std::string path;
     int nbDepots,nbCustomers, nbOrders, nbDrivers, maxDriverCap, minDriverCap;
     std::set<int> driverCapacities;
     int minEarlyTW {0};
@@ -209,6 +216,37 @@ public:
         temp._times = this->_times;
         return temp;
     }
+    std::vector<Customer*> GetCustomers() const{
+        std::vector<Customer*> list_cust(GetCustomerCount());
+        for(int i=0;i<GetCustomerCount();i++){
+            list_cust[i]= GetCustomer(i);
+        }
+        return list_cust;
+    }
+    std::vector<Driver*> GetDrivers(int cap){
+        std::vector<Driver*> curDrivers;
+            for(int i=0;i<GetDriverCount();i++){
+                Driver *d = GetDriver(i);
+                if(d->capacity == cap)
+                    curDrivers.push_back(d);
+            }
+        return curDrivers;
+    }
+    std::vector<Driver*> GetDrivers(){
+        std::vector<Driver*> curDrivers(GetDriverCount());
+        for(int i=0;i<GetDriverCount();i++){
+            curDrivers[i]=GetDriver(i);
+        }
+        return curDrivers;
+    }
+    std::set<int> GetDriversId() const{
+        std::set<int> curDrivers;
+        for(int i=0;i<GetDriverCount();i++){
+            curDrivers.insert(i);
+        }
+        return curDrivers;
+    }
+
 
 private:
     std::vector<int> _depots;
