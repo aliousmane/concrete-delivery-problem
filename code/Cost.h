@@ -12,7 +12,7 @@ public:
               truckWaitingCost(0), clientWaitingCost(0), driverUsed(0),
               firstDeliveryCost(0), lateDeliveryCost(0), overTimeCost(0),
               firstDeliveryCount(0), lateDeliveryCount(0), satisfiedCost(0),
-              isFeasible(true) {}
+              isFeasible(true),waste(0) {}
     explicit Cost(bool value);
 
     bool operator==(const Cost &rhs) const {
@@ -29,6 +29,7 @@ public:
                lateDeliveryCount == rhs.lateDeliveryCount &&
                overTimeCost == rhs.overTimeCost &&
                driverUsed == rhs.driverUsed &&
+               waste == rhs.waste &&
                isFeasible == rhs.isFeasible;
     }
 
@@ -58,6 +59,7 @@ public:
         this->satisfiedCost += c.satisfiedCost;
         this->totalCost += c.totalCost;
         this->isFeasible = c.isFeasible;
+        this->waste = c.waste;
         return *this;
     }
     double getTotal() const {
@@ -74,7 +76,7 @@ public:
         travelCost=0; waitingCost=0; undeliveredCost=0; totalCost=0;
                 truckWaitingCost=0; clientWaitingCost=0; driverUsed=0;
                 firstDeliveryCost=0; lateDeliveryCost=0; overTimeCost=0;
-                firstDeliveryCount=0; lateDeliveryCount=0; satisfiedCost=0;
+                firstDeliveryCount=0; lateDeliveryCount=0; satisfiedCost=0;waste=0;
     }
     double travelCost;
     double satisfiedCost;
@@ -90,6 +92,10 @@ public:
     double overTimeCost;
     int driverUsed;
     bool isFeasible;
+    int waste;
+private:
+    bool ObtainMinCDP(const Cost &rhs)const;
+    bool ObtainMinCQ(const Cost &rhs)const;
 };
 
 
