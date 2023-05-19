@@ -19,9 +19,11 @@ int Parameters::UNLOADING_RATE=10;
 std::mt19937 Parameters::RANDOM_GEN =
         std::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
 
- int Parameters::LOADING_DURATION=5;
+int Parameters::LOADING_DURATION=5;
 int Parameters::TIME_BTW_DELIVERY=5;
 bool Parameters::PENALTY_COST = false;
 bool Parameters::KINABLE= true;
+bool Parameters::SHOW = false;
+int Parameters::SORT_TYPE= Parameters::SORT::TWO;
 
 

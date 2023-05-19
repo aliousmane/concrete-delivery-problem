@@ -29,7 +29,8 @@ public:
     static int CLEANING_DURATION ;
     static bool PENALTY_COST;
     static bool KINABLE;
-
+    static bool SHOW;
+    static int SORT_TYPE;
     enum TypeNode
     {
         NODE,
@@ -47,6 +48,13 @@ public:
         DRIVERBUSY,
         DEPOTBUSY
     };
+    enum SORT{
+        ONE,
+        TWO,
+        THREE,
+        FOUR
+    };
+
 };
 
 
