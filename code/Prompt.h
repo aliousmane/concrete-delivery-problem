@@ -3,6 +3,7 @@
 #define CODE_PROMPT_H
 
 #include <string>
+#include "Node.h"
 #include <iostream>
 class Prompt {
 public:
@@ -12,7 +13,14 @@ public:
     static void print(const T  container){
         std::cout << "{ ";
         for (auto& element : container) {
-            std::cout << element << " "<<std::flush;
+            std::cout << element << ","<<std::flush;
+        }
+        std::cout << "}"<<std::endl;
+    }
+    static void print(const std::vector<Customer*> & container){
+        std::cout << "{ ";
+        for (auto& element : container) {
+            std::cout << element->custID << ","<<std::flush;
         }
         std::cout << "}"<<std::endl;
     }

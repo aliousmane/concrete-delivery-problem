@@ -2,7 +2,6 @@
 #include "Prompt.h"
 
 
-
 using namespace std;
   void Prompt::ShowMissingArgument(int argc){
       std::cout << "Please provide some arguments " << std::endl;
