@@ -49,7 +49,6 @@ bool TimeSlot::operator<(const TimeSlot &rhs) const {
         }
     }
     return (this->upper < rhs.lower);
-
 }
 
 bool TimeSlot::operator>(const TimeSlot &rhs) const {
@@ -81,7 +80,6 @@ bool TimeSlot::operator!=(const TimeSlot &rhs) const {
 }
 
 std::ostream &operator<<(std::ostream &os, const TimeSlot &slot) {
-    os << "[" << slot.lower << " : " << slot.upper << "] nodeID: " << slot.nodeID << " typeNoeud: "
-       << slot.typeNoeud << " n: " << slot.n;
+    os <<  slot.typeNoeud << ":[" << slot.lower << ":" << slot.upper << "] "<< ":"<< slot.nodeID;
     return os;
 }

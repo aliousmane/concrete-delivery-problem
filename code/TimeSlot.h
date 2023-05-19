@@ -15,6 +15,13 @@ public:
         assert(a >= 0);
         assert(b >= 0);
     }
+    explicit TimeSlot(int a)
+            : lower(a), upper(a), nodeID(-1), typeNoeud('N'), n(){
+        assert(a >= 0);
+    }
+    explicit TimeSlot(Node const&n)
+            : lower(n.early_tw), upper(n.late_tw), nodeID(n.id), typeNoeud('N'), n(n){
+    }
     TimeSlot(int a, int b,Node & _n)
             : lower(a), upper(b), nodeID(_n.id), typeNoeud('N'), n(_n){
         assert(a >= 0);
