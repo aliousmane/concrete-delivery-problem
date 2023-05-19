@@ -28,7 +28,7 @@ public:
     void SetTW(int a,int b){
         early_tw=a;late_tw=b;
     }
-    void Show(){
+    virtual void Show() const{
         std::cout<<*this<<std::endl;
     }
 };
@@ -36,8 +36,8 @@ public:
 class Customer :public Node{
 public:
     int custID,nbOrder,constID;
-    long orderID;
-    Customer():custID(-1),orderID(-1),nbOrder(0),constID(-1){}
+    long orderNbr;
+    Customer():custID(-1),orderNbr(-1),nbOrder(0),constID(-1){}
 
     friend std::ostream &operator<<(std::ostream &os, const Customer &customer) {
         os<<"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n";
@@ -45,7 +45,7 @@ public:
         os<<"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^";
         return os;
     }
-    void Show(){
+    void Show() const override{
         std::cout<<*this<<std::endl;
     }
 };
