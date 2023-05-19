@@ -32,6 +32,11 @@ public:
     {
         insrmv.GetBestInsertion(s, listId, driversList, best);
     }
+    virtual void GetBestInsertion(Sol &s, const std::vector<int> &listId,
+                          const std::vector<Driver *> &driversList,
+                          ListMove<Delivery, Driver, MoveVrp> *list_moves) {
+        insrmv.GetBestInsertion(s, listId, driversList, list_moves);
+    }
     virtual void SetServiceParams(Sol &s,  Delivery *n, Driver *d, int demand)
     {
         insrmv.SetServiceParams(s,  n, d, demand);
