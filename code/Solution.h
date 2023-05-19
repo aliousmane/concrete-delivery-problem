@@ -250,7 +250,7 @@ public:
                     del, arrival, expected_arrival + Parameters::TIME_BTW_DELIVERY);
         }
     }
-    void ShowLoadingSlot(Depot *myDep);
+
     void BuildFromDepotSetIntervall();
     void BuildFromDepotSetIntervall(Depot *depot);
     void InsertAfterDepot(Node *n, Node *prev, Node *dep);

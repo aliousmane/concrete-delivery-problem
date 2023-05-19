@@ -1,5 +1,6 @@
 
 #include "Solution.h"
+#include <fstream>
 using namespace std;
 
 std::vector<int> Sol::FailureCause = std::vector<int>();
@@ -8,6 +9,11 @@ std::vector<int> Sol::minDelay = std::vector<int>();
 std::vector<int> Sol::StartBefore = std::vector<int>();
 std::vector<int> Sol::pullVisit = std::vector<int>();
 std::vector<int> Sol::pushVisit = std::vector<int>();
+std::vector<std::set<int>> Sol::TabuFleet = std::vector<std::set<int>>();
+std::map<std::tuple<int, int>, int> Sol::nodeMaxStartService =
+        std::map<std::tuple<int, int>, int>();
+
+
 Sol::Sol(Data *data): _data(data), _last_cost(false), DriverAssignTo(data->GetNodeCount(),nullptr),
 RoutesLength(data->GetDriverCount(), 0),
                       orderCapRestante(data->GetOrderCount(),0),
@@ -37,6 +43,8 @@ RoutesLength(data->GetDriverCount(), 0),
                       CustomerPrev(data->GetNodeCount(),nullptr),
                       UnassignedIndex(data->GetCustomerCount(),0),
                       clientDriverUsed(data->GetCustomerCount()),
+                      OrderVisitCount(data->GetCustomerCount(),0),
+                      sumServiceTime(data->GetCustomerCount(),0),
                       updateCost(), UnassignedCount(0)
                       {
     InitCustomers();
@@ -116,22 +124,20 @@ void Sol::UnassignCustomer(Customer *c){
 void Sol::UnassignOrder(Order *o) {
     for (int i = 0; i < GetDeliveryCount(o); i++) {
         Delivery *del = GetDelivery(o, i);
-        Dock *dock = GetDock(del->dockID);
         Driver *d = DriverAssignTo[del->id];
         if (d != nullptr) {
             RemoveDelivery(del);
-            RemoveDock(dock);
+//            RemoveDock(dock);
         }
     }
 }
 
 void Sol::UnassignDelivery(std::vector<Delivery*> const & delList) {
     for (auto del :delList) {
-        Dock *dock = GetDock(del->dockID);
         Driver *d = DriverAssignTo[del->id];
         if (d != nullptr) {
             RemoveDelivery(del);
-            RemoveDock(dock);
+//            RemoveDock(dock);
         }
     }
 }
@@ -181,6 +187,8 @@ void Sol::RemoveDelivery(Delivery *del) {
     Driver *d = DriverAssignTo[del->id];
     DriverVisitCount[d->id][del->custID]--;
     Remove(del);
+    Dock *dock = GetDock(del->dockID);
+    RemoveDock(dock);
     RemoveFromCustomer(del);
 
 }
@@ -232,6 +240,7 @@ void Sol::RemoveFromCustomer(Delivery *del){
         CustomerNext[CustomerPrev[del->id]->id] = CustomerNext[del->id];
     CustomerNext[del->id] = nullptr;
     CustomerPrev[del->id] = nullptr;
+    OrderVisitCount[del->custID]--;
 }
 
 void Sol::InsertAfter(Node *n, Node *prev) {
@@ -267,8 +276,7 @@ void Sol::InsertAfterDepot(Node *n, Node *prev, Node *dep) {
 }
 void Sol::AssignDeliveryToCustomer(Delivery *n) {
 
-//   TODO OrderVisitCount[n->custID]++;
-
+//    OrderVisitCount[n->custID]++;
     Node *end = GetNode(n->EndNodeID);
     Node *prev = CustomerPrev[n->EndNodeID];
     CustomerNext[prev->id] = n;
@@ -314,6 +322,21 @@ void Sol::ShowSchedule() {
     for (int i = 0; i < GetOrderCount(); i++) {
         Order *o = GetOrder(i);
         if(!isOrderSatisfied(o)) {
+            continue;
+        }
+        ShowSchedule(o);
+    }
+    Cost coutSol = GetCost();
+    printf(" travel cost %2.1lf|", coutSol.travelCost);
+    printf(" Waiting cost %2.1lf| ", coutSol.waitingCost);
+    printf(" total cost %2.1lf\n", coutSol.getTotal());
+}
+
+void Sol::ShowAllSchedule() {
+
+    for (int i = 0; i < GetOrderCount(); i++) {
+        Order *o = GetOrder(i);
+        if(!isOrderSatisfied(o)) {
             cout<<"Incomplete schedule"<<endl;
 //            continue;
         }
@@ -331,8 +354,14 @@ void Sol::ShowSchedule(Order *o){
            "Wait|Start| End  | To |\n");
     for (int j = 0; j < GetDeliveryCount(o); j++) {
         Delivery *del = GetDelivery(o, j);
-//        if (DriverAssignTo[del->id] != nullptr)
+        if (DriverAssignTo[del->id] != nullptr)
             ShowSchedule(del);
+    }
+}
+void Sol::ShowSchedule(Customer *c){
+
+    for(auto o: GetOrders(c)){
+        ShowSchedule(o);
     }
 }
 
@@ -364,7 +393,7 @@ void Sol::BuildFromDepotSetIntervall(Depot *depot) {
     DepotSize[depot->depotID] = 0;
     DepotNext[prev->id] = end;
     DepotPrev[end->id] = prev;
-//    ShowLoadingSlot(depot);
+//    ShowSlot(depot);
     for (auto const & intv : depotLoadingIntervals[depot->depotID]) {
         Dock *dock_int = dynamic_cast<Dock*>(GetNode(intv.nodeID));
         InsertAfterDepot(dock_int, prev, depot);
@@ -372,13 +401,6 @@ void Sol::BuildFromDepotSetIntervall(Depot *depot) {
     }
 }
 
-void Sol::ShowLoadingSlot(Depot *myDep) {
-    cout << "Slots for " << myDep->depotID << endl;
-    for (auto const &x : depotLoadingIntervals[myDep->depotID]) {
-        cout << x << "--";
-    }
-    cout << endl;
-}
 bool Sol::operator<(const Sol &rhs) const {
     return const_cast<Sol*>(this)->GetCost() < const_cast<Sol&>(rhs).GetCost();
 }
@@ -400,10 +422,10 @@ std::string Sol::CustomerString()
 
 std::string Sol::toString() const {
     std::stringstream ss;
-    ss << _last_cost.satisfiedCost << ":";
+    ss << updateCost.satisfiedCost << ":";
     for (int i = 0; i < GetOrderCount(); i++) {
         Order *o1 = const_cast<Sol*>(this)->GetOrder(i);
-        if (isOrderSatisfied(o1))
+        if (!isOrderSatisfied(o1))
             continue;
         std::vector<int> countDriver(GetDriverCount(), 0);
         ss << "<" << o1->orderID << ":";
@@ -433,4 +455,32 @@ std::string Sol::toString() const {
         ss << ">";
     }
     return ss.str();
+}
+
+void Sol::exportCSVFormat(const std::string &fileName) {
+    std::ofstream myfile(fileName);
+    if (myfile.is_open()) {
+        myfile << "instance;Del;Order;Cust;Driver;Cap;rank;Load;Prev;TravelToDock;Dock;ArrDock;FinDock;TravelToDel;ArrDel;"
+                  "Waiting;StartDel;FinDel;Next;Depot;ELT;LTW"<<std::endl;
+        for (int i = 0; i < GetOrderCount(); i++) {
+            Order *o = GetOrder(i);
+            for (int j = 0; j < GetDeliveryCount(o); j++) {
+                Delivery *del = GetDelivery(o, j);
+                Dock *dock = GetDock(del->dockID);
+                Driver *d = GetDriverAssignedTo(del);
+                if (d != nullptr) {
+                    // std::cout << _prob->instance_name << std::endl;
+                    myfile << _data->instance_name << ";" << del->id << ";"
+                           << del->orderID << ";" << del->custID << ";" << d->id<<";"
+                           <<d->capacity<<";"<<d->rank <<";" <<  DeliveryLoad[del->id] <<";" << DriverPrev[dock->id]->id<<";" << Travel(DriverPrev[dock->id], dock)<<";" <<
+                           dock->id<<";" << StartServiceTime[dock->id]<<";" << EndServiceTime[dock->id]<<";" <<
+                           Travel(dock, del) <<";" << ArrivalTime[del->id] <<";" << WaitingTime[del->id]<<";" <<
+                            StartServiceTime[del->id]<<";" << EndServiceTime[del->id]<<";" <<
+                            DriverNext[del->id]->id<<";" <<del->depotID<<";" <<EarlyTW(del)<<";" <<LateTW(del) << endl;
+                }
+            }
+        }
+        std::cout << "./" << fileName << " ----- CREATED " << std::endl;
+    } else
+        std::cout << "----- IMPOSSIBLE TO OPEN: " << fileName << std::endl;
 }
