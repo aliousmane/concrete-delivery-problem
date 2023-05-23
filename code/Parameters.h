@@ -8,6 +8,7 @@
 
 #include <chrono>
 #include <random>
+#include <iostream>
 
 class Parameters {
 public:
@@ -31,6 +32,11 @@ public:
     static bool KINABLE;
     static bool SHOW;
     static int SORT_TYPE;
+    static std::chrono::steady_clock::time_point START_TIME;
+    static void ShowTime(){
+        auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - Parameters::START_TIME ).count();
+        std::cout << "\nTemps " << elapsed_time / 1000.0 << " s "<<(elapsed_time / 1000.0)/60<<" min"<< std::endl;
+    }
     enum TypeNode
     {
         NODE,
@@ -42,11 +48,12 @@ public:
         DOCK
     };
     enum FAILURECAUSE{
-        NONE,
+        NONE =-1,
         DELAY,
         LATETW,
         DRIVERBUSY,
-        DEPOTBUSY
+        DEPOTBUSY,
+        PUSH_PREC_CUSTOMER
     };
     enum SORT{
         ONE,
