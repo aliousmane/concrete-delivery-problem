@@ -25,6 +25,7 @@ public:
 	double DeltaDistance;
 	int arrival_time;
 	bool IsFeasible;
+    int prevMaxTime;
 };
 
 #endif
