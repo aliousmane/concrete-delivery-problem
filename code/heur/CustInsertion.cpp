@@ -7,171 +7,192 @@
 using namespace std;
 
 void CustInsertion::Insert(Sol &s) {
+    Sol::InitStructure(s.GetData());
+    removedList.clear();
     s.Update();
+    _insrmv.FillStructures(s,customersList,driversList);
 
-    if (not s.availableDrivers.empty()) {
-        driversList.clear();
-        for (int i: s.availableDrivers) {
-            driversList.push_back(s.GetDriver(i));
-        }
-    } else {
-        driversList.clear();
-        Init();
-    }
-    if (not s.keyCustomers.empty()) {
-        for (int i: s.keyCustomers) {
-            Customer *c = s.GetCustomer(i);
-            if (s.isClientSatisfied(c))
-                continue;
-            customersList.emplace_back(c);
-            customersListId.emplace_back(c->custID);
-        }
-    } else {
-        for (int i = 0; i < s.GetCustomerCount(); i++) {
-            Customer *c = s.GetCustomer(i);
-            customersList.emplace_back(c);
-            customersListId.emplace_back(c->custID);
-        }
-    }
-    Insert(s, customersList, customersListId);
+    InsertWithBactrack(s, customersList);
     bool sortie = false;
     while (!removedList.empty() && !sortie) {
         double demand = s.updateCost.satisfiedCost;
-        // cout << s.updateCost << endl;
         customersList = removedList;
-        customersListId = removedListId;
-        Insert(s, customersList, removedListId);
-        // cout << s.updateCost << endl;
+        InsertWithBactrack(s, customersList);
         sortie = (s.updateCost.satisfiedCost == demand);
     }
     s.Update();
 }
 
-
-void CustInsertion::Insert(Sol &s, std::vector<Customer *> &list,
-                           std::vector<int> &list_ID) {
-    if(list.size()>1){
-        Sort(s, list, list_ID, CustInsertion::_k);
+void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *>  &list) {
+    if (list.size() > 1) {
+        Sort(s, list, CustInsertion::_k);
     }
-//    Prompt::print(list);
     removedList.clear();
-    removedListId.clear();
     listMoves.clear();
     listMoves.resize(s.GetDeliveryCount());
-//TODO    std::shuffle(driversList.begin(), driversList.end(), Parameters::RANDOM_GEN);
-    for (auto c: list) {
-//        cout<<*c<<"--"<<std::endl;
-        if (s.isClientSatisfied(c))
+    std::vector<bool> flags(s.GetDeliveryCount(), false);
+//    std::shuffle(driversList.begin(), driversList.end(), Parameters::RANDOM_GEN);
+    Customer *c = list[0];
+    for (int i = 0; i < list.size();) {
+        if (s.isClientSatisfied(c)) {
+            if (i == list.size() - 1) break;
+            i++;
+            c = list[i];
             continue;
-        if(c->custID==19)Parameters::SHOW=true;
+        }
+        if (Parameters::SHOW) {
+            cout << *c << "--" << std::endl;
+        }
         Order *cur_order = s.GetRandomOrder(c);
         for (int j = 0; j < s.GetDeliveryCount(cur_order);) {
             Delivery *del = s.GetDelivery(cur_order, j);
-            //cout << this->name << " Try to insert del " << del->id << "("<<del->rank<<") for "<<cur_order->orderID<< endl;
-            Move<Delivery, Driver, MoveVrp> best;
+            if (Parameters::SHOW) {
+                Prompt::print(
+                        {this->name, " Try to insert del ", to_string(del->id), "(", to_string(del->rank), ") for",
+                         to_string(cur_order->orderID)});
+            }
             std::vector<int> listId{del->delID};
-            if (listMoves[del->delID].Count() == 0) {
+            if (listMoves[del->delID].Count() > 0) {
+                if (Sol::minDelay[del->id] > 0) {
+                    if (Parameters::SHOW) {
+                        Prompt::print({"Push", to_string(del->id), "by", to_string(Sol::minDelay[del->id])});
+                    }
+                    ListMoveVrp temp_moves;
+                    _insrmv.GetBestInsertion(s, listId, driversList, &temp_moves);
+                    if (temp_moves.Count() > 0) {
+                        listMoves[del->delID].Insert(temp_moves);
+                    }
+                    Sol::minDelay[del->id] = 0;
+                }
+            } else if (listMoves[del->delID].Count() == 0 and !flags[del->delID]) {
+                if (Parameters::SHOW) {
+                    Prompt::print({"Find insertions for", to_string(del->id), "with delay of ",
+                                   to_string(Sol::minDelay[del->id])});
+                }
                 _insrmv.GetBestInsertion(s, listId, driversList, &listMoves[del->delID]);
             }
+            if (Parameters::SHOW) {
+                Prompt::print({to_string(listMoves[del->delID].Count()), "moves for del", to_string(del->id)});
+                listMoves[del->delID].Show();
+            }
+            Move<Delivery, Driver, MoveVrp> best;
             if (listMoves[del->delID].Count() > 0) {
                 best = listMoves[del->delID].Extract();
             }
-//            cout<< listMoves[del->delID].Count()<<" moves remaining for "<<del->id<<endl;
             if (!best.IsFeasible) {
-                if (Sol::FailureCause[del->id] == Parameters::FAILURECAUSE::DRIVERBUSY) {
-//                    cout<<"driver is busy for "<<del->id<<"("<<c->custID<<")"<<" rank: "<<del->rank<<" "<<endl;
-//                    s.ShowSchedule();
-//                    s.ShowSchedule(cur_order);
-                }
                 if (del->rank > 0) {
                     Delivery *prec_del = s.GetDelivery(cur_order, del->rank - 1);
-
-                    if (Sol::FailureCount[del->id] < 3 &&
+                    bool backtrackOrder = false;
+                    if (Sol::FailureCount[del->id] < 4 &&
                         Sol::FailureCause[del->id] == Parameters::FAILURECAUSE::DELAY) {
-                        Sol::minDelay[prec_del->id] = Sol::pushVisit[del->id];
+                        int delay = Sol::pushVisit[del->id];
+                        int count = j;
+                        while (delay > 0) {
+                            if (s.WaitingTime[prec_del->id] < 0) {
+                                if (std::min(delay, Parameters::TIME_BTW_DELIVERY) - s.WaitingTime[prec_del->id] >
+                                    Parameters::TIME_BTW_DELIVERY) {
+                                    count--;
+                                    if (prec_del->rank > 0) {
+                                        prec_del = s.GetDelivery(cur_order, prec_del->rank - 1);
+                                        continue;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+                            Sol::minDelay[prec_del->id] = std::min(delay, Parameters::TIME_BTW_DELIVERY);
+                            Sol::FailureCause[prec_del->id] = Parameters::FAILURECAUSE::NONE;
+                            if (Parameters::SHOW) {
+                                Prompt::print({"Return to and delay", to_string(prec_del->id)});
+                            }
+                            backtrackOrder = true;
+                            count--;
+                            delay = delay - Parameters::TIME_BTW_DELIVERY;
+                            if (prec_del->rank > 0) {
+                                prec_del = s.GetDelivery(cur_order, prec_del->rank - 1);
+                            } else break;
+                        }
                         Sol::minDelay[del->id] = 0;
                         Sol::pushVisit[del->id] = 0;
                         Sol::FailureCause[del->id] = Parameters::FAILURECAUSE::NONE;
-                        Sol::FailureCause[prec_del->id] = Parameters::FAILURECAUSE::NONE;
-//                        cout<<" Push "<<prec_del->id << " by "<<Sol::minDelay[prec_del->id]<<endl;
-//                        s.ShowSchedule(cur_order);
-                        s.UnassignDelivery({prec_del});
-//                        cout<<"Uninstall "<<prec_del->id<< endl;
-
-                        prec_del->isdelayed = true;
                         listMoves[del->delID].Clear();
-                        j = j - 1;
-                        continue;
-                    }
-                    if (Sol::FailureCause[del->id] == Parameters::FAILURECAUSE::LATETW) {
-                        Sol::StartBefore[prec_del->id] = s.StartServiceTime[prec_del->id] - Sol::pullVisit[del->id];
-                        Sol::StartBefore[del->id] = 0;
-                        Sol::pullVisit[del->id] = 0;
-                        Sol::FailureCause[del->id] = Parameters::FAILURECAUSE::NONE;
-                        Sol::FailureCause[prec_del->id] = Parameters::FAILURECAUSE::NONE;
-//                    Sol::FailureCount[del->id]=0;
-//                        cout<<" Start  "<<prec_del->id << " before "<<Sol::StartBefore[prec_del->id]<<endl;
-//                        s.ShowSchedule(cur_order);
-//                    prec_del->isdelayed = true;
-                        listMoves[del->delID].Clear();
-                        int index = -1;
-                        for (int rank = j - 1; rank >= 0; rank--) {
-                            Delivery *temp = s.GetDelivery(cur_order, rank);
-                            s.UnassignDelivery({temp});
-                            if (listMoves[temp->delID].Count() == 0) {
-                                continue;
+                        if (backtrackOrder) {
+                            s.UnassignDelivery(s.GetDeliveries(cur_order, count, del->rank - 1));
+                            j = count;
+                            if (Parameters::SHOW) {
+                                s.ShowSchedule(c);
+                                Prompt::print({"return to del rank", to_string(j)});
                             }
-                            index = rank;
-                            break;
-                        }
-                        if (index != -1) {
-                            j = index;
                             continue;
                         }
                     }
-                    if (listMoves[prec_del->delID].Count() > 0) {
-                        j = j - 1;
+                    backtrackOrder = false;
+                    prec_del = s.GetDelivery(cur_order, del->rank - 1);
+                    while (prec_del != nullptr) {
                         s.UnassignDelivery({prec_del});
-                        continue;
+                        j = j - 1;
+                        if (listMoves[prec_del->delID].Count() > 0) {
+                            if (Parameters::SHOW) {
+                                Prompt::print({"return to", to_string(prec_del->id),
+                                               "with remaining moves", to_string(listMoves[prec_del->delID].Count())});
+
+                            }
+                            if (prec_del->rank > 0) {
+                                assert(s.GetDriverAssignedTo(s.GetDelivery(cur_order, prec_del->rank - 1))
+                                       != nullptr);
+                            }
+                            backtrackOrder = true;
+                            break;
+                        }
+                        if (prec_del->rank > 0) {
+                            prec_del = s.GetDelivery(cur_order, prec_del->rank - 1);
+                        } else break;
                     }
+                    if (backtrackOrder)
+                        continue;
                 }
-//                s.ShowSchedule(cur_order);
                 s.UnassignOrder(cur_order);
                 removedList.emplace_back(c);
-                removedListId.emplace_back(c->custID);
                 break;
             }
-
             if (best.IsFeasible) {
+                Sol::minDelay[best.n->id] = 0;
                 _insrmv.ApplyInsertMove(s, best);
                 s.Update(best.move.depot, best.move.dock, best.n);
-                assert(Sol::FailureCount[del->id] == 0);
-//                s.ShowSchedule(cur_order);
+                Delivery *next_del = s.GetNextIdleDelivery(cur_order);
+                if (next_del != nullptr) {
+                    Sol::minDelay[next_del->id] = 0;
+                    Sol::FailureCause[next_del->id] = Parameters::FAILURECAUSE::NONE;
+                    listMoves[next_del->delID].Clear();
+                }
+                if (Parameters::SHOW) {
+                    s.ShowSchedule(cur_order);
+                }
                 j++;
             }
             if (s.isOrderSatisfied(cur_order)) {
+                if (Parameters::SHOW) {
+                    cout << cur_order->orderID << " is scheduled\n";
+                }
                 break;
             }
         }
         if (s.isClientSatisfied(c)) {
-            s.ShowSchedule(cur_order);
-            cout<<"Insert "<<c->custID<<endl;
-
+            if (Parameters::SHOW) {
+                s.ShowSchedule(c);
+            }
         }
-//        s.ShowSchedule(cur_order);
-        Parameters::SHOW=false;
+        i = i + 1;
+        if (i == list.size()) break;
+        c = list[i];
     }
-//    s.ShowCustomer();
-//     cout<<s.GetCost()<<std::endl;
-//     exit(1);
 }
 
 void CustInsertion::Insert2(Sol &s, std::vector<Customer *> &list,
                             std::vector<int> &list_ID) {
-    Sort(s, list, list_ID, CustInsertion::_k);
+    Sort(s, list, CustInsertion::_k);
 //    Prompt::print(list);
     removedList.clear();
-    removedListId.clear();
     listMoves.clear();
     listMoves.resize(s.GetDeliveryCount());
     std::shuffle(driversList.begin(), driversList.end(), Parameters::RANDOM_GEN);
@@ -263,10 +284,9 @@ void CustInsertion::Insert2(Sol &s, std::vector<Customer *> &list,
                             continue;
                         }
                     }
-                    cout << " Cant install " << c->custID << endl;
+                    cout << " Can't install " << c->custID << endl;
                     s.UnassignOrder(cur_order);
                     removedList.emplace_back(c);
-                    removedListId.emplace_back(c->custID);
                     break;
                 }
 
@@ -300,13 +320,7 @@ void CustInsertion::Insert2(Sol &s, std::vector<Customer *> &list,
 
 
 void CustInsertion::Insert(Sol &s, std::vector<int> const &list) {
-    Sol::FailureCause.resize(s.GetNodeCount(), Parameters::FAILURECAUSE::NONE);
-    Sol::FailureCount.resize(s.GetNodeCount(), 0);
-    Sol::minDelay.resize(s.GetNodeCount(), 0);
-    Sol::StartBefore.resize(s.GetNodeCount(), 0);
-    Sol::pullVisit.resize(s.GetNodeCount(), 0);
-    Sol::pushVisit.resize(s.GetNodeCount(), 0);
-    TimeSlot::myData = *s.GetData();
+    Sol::InitStructure(s.GetData());
     s.Update();
     listMoves.clear();
     listMoves.resize(s.GetDeliveryCount());
@@ -318,10 +332,8 @@ void CustInsertion::Insert(Sol &s, std::vector<int> const &list) {
             continue;
         Order *cur_order = s.GetRandomOrder(c);
 
-        // std::shuffle(_ins_rmv_perators.begin(), _ins_rmv_perators.end(), Parameters::RANDOM_GEN);
         for (int j = 0; j < s.GetDeliveryCount(cur_order);) {
             Delivery *del = s.GetDelivery(cur_order, j);
-//             cout << this->name << " Try to insert del " << del->id << "("<<del->rank<<") for "<<cur_order->orderID<< endl;
             Move<Delivery, Driver, MoveVrp> best;
             std::vector<int> listId{del->delID};
             if (listMoves[del->delID].Count() == 0) {
@@ -404,22 +416,15 @@ void CustInsertion::Insert(Sol &s, std::vector<int> const &list) {
             }
         }
         if (s.isClientSatisfied(c)) {
-//            s.ShowSchedule(cur_order);
-//            cout<<"Insert "<<c->custID<<endl;
-
         }
-//        s.ShowSchedule(cur_order);
-
     }
-//    s.ShowCustomer();
     s.Update();
 }
 
-void CustInsertion::Sort(Sol &s, std::vector<Customer *> &list,
-                         std::vector<int> &list_ID, int k) {
+void CustInsertion::Sort(Sol &s, std::vector<Customer *> &list,int k) {
     switch (k) {
         case -1: {
-            std::vector<int> vec{18,19,12,16,17,1,0,4,3,2,5,6,9,10,7,8,11,14,15,13};
+            std::vector<int> vec{1, 0, 3, 4, 2, 5, 6, 9, 10, 7, 8, 11, 14, 17, 18, 12, 15, 16, 13, 19,};
             list.clear();
             for (auto id: vec) {
                 list.emplace_back(s.GetCustomer(id));
@@ -439,31 +444,25 @@ void CustInsertion::Sort(Sol &s, std::vector<Customer *> &list,
             SortNode<Customer, Driver>::radixSortMinWidthTW(list, s.GetData()->maxLateTW - s.GetData()->minEarlyTW);
             break;
         case 4:
-            std::stable_sort(list_ID.begin(), list_ID.end(), [&s](int a, int b) {
-                return -s.GetCustomer(a)->late_tw <
-                       -s.GetCustomer(b)->late_tw;
-            });
-            break;
-        case 5:
-            std::stable_sort(list_ID.begin(), list_ID.end(), [&s](int a, int b) {
-                return s.GetCustomer(a)->demand <
-                       s.GetCustomer(b)->demand;
-            });
-            break;
-        case 6:
             std::shuffle(list.begin(), list.end(), Parameters::RANDOM_GEN);
             break;
-
-        case 7:
-            SortNode<Customer, Driver>::radixSortKinable(list, this->_data.maxLateTW);
+        case 5:
+            SortNode<Customer, Driver>::radixSortKinable(list, s.GetData()->maxLateTW);
             break;
         default:
-            std::stable_sort(list_ID.begin(), list_ID.end(), [this](int a, int b) {
-                return this->_data.GetCustomer(a)->early_tw <
-                       this->_data.GetCustomer(b)->early_tw;
-            });
+            std::shuffle(list.begin(), list.end(), Parameters::RANDOM_GEN);
             break;
     }
 }
+
+void CustInsertion::Sort(Sol &s,std::vector<int> &list_ID, int k){
+    std::vector<Customer*> custList(list_ID.size());
+    int id=0;
+    for(auto val:list_ID){
+        custList[id++]=s.GetCustomer(val);
+    }
+    Sort(s,custList,k);
+}
+
 
 CustInsertion::~CustInsertion() = default;

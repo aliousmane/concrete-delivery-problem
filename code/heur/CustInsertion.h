@@ -31,8 +31,8 @@ public:
     std::string name;
     std::vector<ListMoveVrp>  listMoves;
     void Insert(Sol &s, std::vector<int> const &list);
-private:
     void InsertWithBactrack(Sol &s,std::vector<Customer *> &list);
+private:
     static void Sort(Sol &s,std::vector<Customer *> &list, int k);
     static void Sort(Sol &s,std::vector<int> &list_ID, int k);
     void Insert2(Sol &s, std::vector<Customer *> &list,std::vector<int> &list_ID);
