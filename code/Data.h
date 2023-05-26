@@ -58,6 +58,7 @@ public:
     void AddDriver(Driver &d);
     Driver * GetDriver(int id);
     Depot * GetDepot(int i);
+    Depot * GetDepot(Node *n);
     Node * GetNode(int i){ return _nodes[i].get();}
     Customer * GetCustomer(int i) const;
     Order * GetOrder(Customer *c, int index);
@@ -94,6 +95,12 @@ public:
             return d->serviceDuration;
 
         return std::ceil(double(60 * demand) / Parameters::UNLOADING_RATE);
+    }
+    static int UnloadingTime( int demand, int serviceDuration) {
+        if(Parameters::KINABLE)
+            return serviceDuration;
+
+        return std::ceil(double(demand) / Parameters::UNLOADING_RATE);
     }
     static int CleaningTime( Delivery *del,Driver *d) {
         return Parameters::CLEANING_DURATION;
@@ -259,7 +266,7 @@ private:
     std::vector<std::vector<int>> _index_orders;
     std::vector<std::shared_ptr<Node>> _nodes;
     std::string time_mat_file, distance_mat_file;
-    static void LoadMatrices(std::vector<std::vector<double>> &array, const std::string &matrix_filename,const int rate);
+    static void LoadMatrices(std::vector<std::vector<double>> &array, const std::string &matrix_filename,int rate);
 
     std::vector<std::vector<double>> _distances;
     std::vector<std::vector<double>> _times;

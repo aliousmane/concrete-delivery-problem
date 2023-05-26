@@ -373,6 +373,9 @@ void Data::AddDock(const Dock &n){
 Depot *Data::GetDepot(int i) {
     return dynamic_pointer_cast<Depot>( _nodes[_depots[i]]).get();
 }
+Depot *Data::GetDepot(Node *n ) {
+    return GetDepot(n->depotID);
+}
 
 Customer * Data::GetCustomer(int i) const {
     return dynamic_pointer_cast<Customer>( _nodes[_customers[i]]).get();
@@ -474,7 +477,6 @@ void Data::AddDockNodes(){
         AddDock(d1);
     }
 }
-
 
 void Data::LoadMatrices(std::vector<std::vector<double>> &array, const string &matrix_filename,const int rate)
 {
