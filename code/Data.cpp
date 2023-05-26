@@ -11,6 +11,8 @@ void Data::Load(){
     instance_name = filesystem::path(input).stem();
     problem_name = filesystem::path(input).parent_path().filename();
     sol_output = path + "/solution/" + problem_name + "/" + instance_name + ".csv";
+    result_file = path + "/result/" + problem_name + "/results.csv";
+
     if(Parameters::KINABLE){
         Parameters::ADJUSTMENT_DURATION=0;
         Parameters::CLEANING_DURATION = 0;

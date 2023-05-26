@@ -16,7 +16,7 @@ public:
     Data() : input(), output(), nbDepots(0), nbCustomers(0), nbOrders(0), nbDrivers(0), _depots(0), _customers(0), driverCapacities(),
               maxDriverCap(0), minDriverCap(0), _deliveries(0), _drivers(0), _orders_deliveries(0), _distances(0), _times(0), _docks(0),
               _index_orders(0),path(std::filesystem::current_path().parent_path()),instance_name(),
-              problem_name(),sol_output()
+              problem_name(),sol_output(),result_file()
     {
         time_mat_file= "../../matrices/Matrice_de_temps_all.csv";
         distance_mat_file= "../../matrices/Matrice_de_distance_all.csv";
@@ -27,6 +27,7 @@ public:
     std::string output;
     std::string sol_output;
     std::string instance_name;
+    std::string result_file;
     std::string problem_name;
     std::string path;
     int nbDepots,nbCustomers, nbOrders, nbDrivers, maxDriverCap, minDriverCap;
