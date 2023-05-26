@@ -80,6 +80,6 @@ bool TimeSlot::operator!=(const TimeSlot &rhs) const {
 }
 
 std::ostream &operator<<(std::ostream &os, const TimeSlot &slot) {
-    os <<  slot.typeNoeud << ":[" << slot.lower << ":" << slot.upper << "] "<< ":"<< slot.nodeID;
+    os <<  slot.typeNoeud <<slot.nodeID <<  ":[" << slot.lower << ":" << slot.upper << "]-";
     return os;
 }
