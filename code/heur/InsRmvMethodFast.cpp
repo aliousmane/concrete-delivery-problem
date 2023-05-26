@@ -1,5 +1,6 @@
 
 #include "InsRmvMethodFast.h"
+#include "../Prompt.h"
 
 using namespace std;
 
@@ -82,25 +83,23 @@ void InsRmvMethodFast::ApplyInsertMove(Sol &s, Move<Delivery, Driver, MoveVrp> &
     assert(m.arrival_dock <= m.arrival_del + s.Travel(m.move.dock, m.n));
 }
 
-Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(
-        Sol &s, Delivery *n, Driver *d, Cost &solcost, int demand,
-        ListMove<Delivery, Driver, MoveVrp> *temp_moves) {
-    Order *o = s.GetOrder(n->orderID);
+Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, Driver *d, Cost &solcost, int demand,
+                                                          ListMove<Delivery, Driver, MoveVrp> *temp_moves) {
     Customer *c = s.GetCustomer(n->custID);
     Dock *dock = s.GetDock(n->dockID);
-    int ELT = expected_del_time - s.Travel(dock, n) - ADJUSTMENT_DURATION -
-              LOAD_DURATION;
+    Depot *dep = s.GetDepot(dock->depotID);
+    int ELT = expected_del_time - s.Travel(dock, n) - ADJUSTMENT_DURATION - LOAD_DURATION;
     auto *prec_del_of_cust = dynamic_cast<Delivery *>( s.CustomerPrev[n->EndNodeID]);
     if (Parameters::SHOW) {
-        cout << "Try insertion with " << d->id << endl;
-        s.ShowSlot(d);
+//        Prompt::print({"Try insertion with", to_string(d->id)});
+//        s.ShowSlot(d);
+//        s.Show(d);
     }
     if (prec_del_of_cust != nullptr) {
         Dock *prec_dock = s.GetDock(prec_del_of_cust->dockID);
         ELT = std::max(ELT, s.EndServiceTime[prec_dock->id]);
     }
     TimeSlot loadSlot = TimeSlot(ELT, ELT + LOAD_DURATION);
-
     Node *prev = s.GetNode(d->StartNodeID);
     while (prev->type != Parameters::END_LINK) {
         assert(d == s.DriverAssignTo[prev->id]);
@@ -109,17 +108,17 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(
             prev = s.DriverNext[prev->id];
             continue;
         }
+        Delivery *prev_del = nullptr;
         if (prev->type == Parameters::DELIVERY) {
-            Delivery *cur_del = dynamic_cast<Delivery *> (prev);
-            if (s.LateTW(n) <= s.EarlyTW(cur_del)) {
+            prev_del = dynamic_cast<Delivery *> (prev);
+            if (s.LateTW(n) <= s.EarlyTW(prev_del)) {
                 break;
             }
         }
-
         if (Parameters::SHOW) {
-            cout << "Insert after " << prev->id << endl;
+//            Prompt::print({"Try Insert after", to_string(prev->id)});
         }
-        Move<Delivery, Driver, MoveVrp> m;
+
         Dock *next_dock = dynamic_cast<Dock *>(s.DriverNext[prev->id]);
         Delivery *next_del = nullptr;
         if (next_dock != nullptr) {
@@ -130,92 +129,126 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(
                 prev = next_del;
                 continue;
             }
-        }
-        Depot *dep = s.GetDepot(dock->depotID);
-        ELT = std::max(ELT, s.DepartureTime[prev->id] + s.Travel(prev, dock));
 
+        }
+        Move <Delivery, Driver, MoveVrp> m(n, d);
+        ELT = std::max(ELT, s.DepartureTime[prev->id] + s.Travel(prev, dock));
         loadSlot = TimeSlot(ELT, ELT + LOAD_DURATION);
         TimeSlot unloadSlot = TimeSlot();
+
         int node_arr = ELT;
         node_arr += LOAD_DURATION + ADJUSTMENT_DURATION;
         node_arr += s.Travel(dock, n);
         unloadSlot.lower = node_arr;
 
         if (Parameters::SHOW) {
-            cout << "ELT " << ELT << ":" << s.Travel(prev, dock) << " -> " << s.Travel(dock, n) << endl;
+//            Prompt::print({"ELT ", to_string(ELT), ":prev->L", to_string(s.Travel(prev, dock)), "L->D",
+//                           to_string(s.Travel(dock, n))});
         }
-
         if (node_arr > s.LateTW(n)) {
-            if (Parameters::SHOW) {
-                cout << "After " << prev->id << " , " << n->id << " exceeds time window of " << node_arr - s.LateTW(n)
-                     << " with driver " << d->id << endl;
-            }
-            Sol::FailureCause[n->id] = Parameters::FAILURECAUSE::LATETW;
-
             int delay = node_arr - s.LateTW(n);
+            if (Parameters::SHOW) {
+//                Prompt::print({"After ", to_string(prev->id), ",", to_string(n->id), "arrives",
+//                               to_string(delay), "after  LTW  with driver", to_string(d->id)});
+            }
 // TODO           Sol::pullVisit[n->id] = (Sol::pullVisit[n->id]==0)  ? delay: std::min(Sol::pullVisit[n->id],delay);
-
+            if (prev->type == Parameters::DELIVERY) {
+//                m.FailureCause = Parameters::FAILURECAUSE::LATETW;
+                m.move.prev = prev;
+                m.arrival_del = node_arr;
+                m.move.prevMaxTime = s.EndServiceTime[prev->id] - delay;
+                m.IsFeasible = true;
+//                temp_moves->Add(m);
+            }
+//            Sol::FailureCause[n->id] = Parameters::FAILURECAUSE::LATETW;
             prev = (next_del == nullptr) ? s.DriverNext[prev->id] : next_del;
             continue;
         }
         if (prec_del_of_cust != nullptr) {
             const int max_arrival = s.EndServiceTime[prec_del_of_cust->id] + Parameters::TIME_BTW_DELIVERY;
             if (node_arr > max_arrival) {
-                if (Parameters::PENALTY_COST) {
-                    newcost.lateDeliveryCost +=
-                            std::max(0, (node_arr - max_arrival)) *
-                            Parameters::LATE_ARRIVAL_PENALTY;
-                } else {
-                    if (Parameters::SHOW) {
-                        cout << "node_arr > "
-                                "s.nodeServiceIntervals[prec_del_of_cust->id].upper +  "
-                                "Parameters::TIME_BTW_DELIVERY "
-                             << endl;
-                    }
-                    int delay = node_arr - max_arrival;
-//                    cout<<n->id<<"("<<n->rank<<") violates delay for "<<delay<<" min. LTW= "<<s.LateTW(n)<< " arrival = "<<node_arr <<endl;
-//                    if(s.WaitingTime[prec_del_of_cust->id] <0)
-//                    {
-                    if (delay - s.WaitingTime[prec_del_of_cust->id] < Parameters::TIME_BTW_DELIVERY) {
-                        Sol::FailureCause[n->id] = Parameters::FAILURECAUSE::DELAY;
-                        Sol::pushVisit[n->id] = (Sol::pushVisit[n->id] == 0) ? delay : std::min(Sol::pushVisit[n->id],
-                                                                                                delay);
-                        Sol::FailureCount[n->id]++;
-                    }
-//                    }
-
+                int delay = node_arr - max_arrival;
+                if (delay > n->rank * Parameters::TIME_BTW_DELIVERY) {
                     prev = (next_del == nullptr) ? s.DriverNext[prev->id] : next_del;
                     continue;
                 }
+//                m.FailureCause = Parameters::FAILURECAUSE::DELAY;
+                m.move.prev = prec_del_of_cust;
+                m.move.prevMaxTime = delay;
+                m.IsFeasible = true;
+//              temp_moves->Add(m);
 
+                Sol::FailureCause[n->id] = Parameters::FAILURECAUSE::DELAY;
+                Sol::pushVisit[n->id] = (Sol::pushVisit[n->id] == 0) ? delay : std::min(Sol::pushVisit[n->id], delay);
+
+//                Sol::minDelay[prec_del_of_cust->id] = Sol::pushVisit[n->id];
+
+//                Sol::pushVisit[n->id]=0;
+                Sol::FailureCount[n->id]++;
+                if (Parameters::PENALTY_COST) {
+                    newcost.lateDeliveryCost +=
+                            std::max(0, delay) *
+                            Parameters::LATE_ARRIVAL_PENALTY;
+                } else {
+                    if (Parameters::SHOW) {
+                        Prompt::print(
+                                {"node_arr > s.nodeServiceIntervals[", to_string(prec_del_of_cust->id), "].upper + Parameters::TIME_BTW_DELIVERY"});
+                        Prompt::print(
+                                {to_string(n->id), "(", to_string(n->rank), ") violates delay for ",
+                                 to_string(Sol::FailureCount[n->id]), "times",
+                                 to_string(delay), " min. LTW=",
+                                 to_string(s.LateTW(n)), "arrival = ", to_string(node_arr),
+                                 to_string(Sol::FailureCause[n->id])});
+                    }
+//
+                    prev = (next_del == nullptr) ? s.DriverNext[prev->id] : next_del;
+                    continue;
+                }
             }
         }
-        Sol::SetTimingCost(n, node_arr, real_del_time,
-                           s.EarlyTW(n), newcost);
-
+        Sol::SetTimingCost(n, node_arr, real_del_time, s.EarlyTW(n), newcost);
         node_arr = std::max(node_arr, real_del_time);
 
-        if (prec_del_of_cust != nullptr) {
-            assert(node_arr >= s.EndServiceTime[prec_del_of_cust->id]);
-        }
-        if (node_arr > max_arrival_Time) {
-            //TODO
-            //newcost.lateDeliveryCost += std::max(0, (node_arr - max_arrival_Time));
-            if (Parameters::SHOW) {
-                cout << "node_arr > max_arrival_Time " << max_arrival_Time << endl;
+        if (false) {
+            if (node_arr > max_arrival_Time) {
+                if (Parameters::SHOW) {
+                    Prompt::print({"node_arr > max_arrival_Time ", to_string(max_arrival_Time)});
+                }
+//            m.FailureCause = Parameters::FAILURECAUSE::LATETW;
+                m.move.prev = prev;
+                m.move.prevMaxTime = s.EndServiceTime[prev->id] - (node_arr - max_arrival_Time);
+                m.IsFeasible = true;
+//            temp_moves->Add(m);
+                if (Parameters::PENALTY_COST) {
+                    newcost.lateDeliveryCost += std::max(0, (node_arr - max_arrival_Time));
+                } else {
+                    prev = s.DriverNext[prev->id];
+                    continue;
+                }
             }
-            prev = s.DriverNext[prev->id];
-            continue;
         }
         node_arr += UNLOADING_DURATION;
         if (node_arr > s.LateTW(n)) {
-            if (Parameters::PENALTY_COST) {
-                newcost.lateDeliveryCost += std::max(0, (s.LateTW(n) - node_arr)) *
-                                            Parameters::LATE_ARRIVAL_PENALTY;
-            } else {
-                if (Parameters::SHOW) {
-                    cout << "node_arr > s.LateTW(n) " << endl;
+            if (Parameters::SHOW) {
+                Prompt::print({"node_arr > s.LateTW(n) "});
+            }
+            if (prev->type == Parameters::DELIVERY) {
+//                    m.FailureCause = Parameters::FAILURECAUSE::LATETW;
+                if (prev_del->custID != n->custID) {
+                    m.move.prev = prev;
+                    m.move.prevMaxTime = s.EndServiceTime[prev->id] - (node_arr - s.LateTW(n));
+                    m.IsFeasible = true;
+                    //                temp_moves->Add(m);
+                    Sol::FailureCause[n->id] = Parameters::PUSH_PREC_CUSTOMER;
+                    Sol::CustomerConflict[n->custID].insert(dynamic_cast<Delivery *>(prev)->custID);
                 }
+            }
+//                if (Parameters::PENALTY_COST) {
+//                    newcost.lateDeliveryCost += std::max(0, (s.LateTW(n) - node_arr)) *
+//                                                Parameters::LATE_ARRIVAL_PENALTY;
+//                }
+//                else
+            {
                 prev = (next_del == nullptr) ? s.DriverNext[prev->id] : next_del;
                 continue;
             }
@@ -228,38 +261,35 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(
         if (it != s.driverWorkingIntervals[d->id].end()) {
             Depot *temp_dep = s.GetDepot(it->n.depotID);
 
-            if (intv.upper + s.Travel(n, temp_dep) + s.Travel(temp_dep->distID, it->n.distID) >
-                Sol::nodeMaxStartService[std::make_tuple(intv.n.id, d->capacity)]) {
-//TODO                prev = (next_del == nullptr) ? s.DriverNext[prev->id]  : next_del;
-//                continue;
+            Customer *it_cust =  s.GetCustomer( dynamic_cast<Delivery*>(s.GetNode(it->n.id))->custID);
+            if (Parameters::PENALTY_COST) {
+                newcost.lateDeliveryCost +=
+                        std::max(0,
+                                 (std::abs(it->lower - loadSlot.upper))) *
+                        Parameters::LATE_ARRIVAL_PENALTY;
             }
-
-            if (it->upper + s.Travel(it->n.distID, dock->distID) + s.Travel(dock->distID, n->distID) >
-                Sol::nodeMaxStartService[std::make_tuple(n->id, d->capacity)]) {
-//TODO                prev = (next_del == nullptr) ? s.DriverNext[prev->id]  : next_del;
-//                continue;
-            }
-            // newcost.lateDeliveryCost +=
-            //     std::max(0.,
-            //              (std::abs(it->lower-loadSlot.upper))) *
-            //     Parameters::LATE_ARRIVAL_PENALTY;
             if (Parameters::SHOW) {
-                cout << "it != s.driverWorkingIntervals[d->id].end())" << endl;
+                Prompt::print({"it != s.driverWorkingIntervals[", to_string(d->id), "].end())"});
+                Prompt::print({" driver ", to_string(d->id), " was busy with ", to_string(it->nodeID), " for node ",
+                               to_string(n->id),"cust", to_string( it_cust->custID)});
             }
-            //Sol::FailureCause[n->id]=Parameters::FAILURECAUSE::DRIVERBUSY;
-//            cout<<" driver "<<d->id <<" was busy with "<< it->nodeID <<" for node "<<n->id<<endl;
-//            cout<<*it<<endl;
+            Sol::FailureCause[n->id] = Parameters::FAILURECAUSE::DRIVERBUSY;
+            Sol::CustomerConflict[n->custID].insert(it_cust->custID);
+
             prev = (next_del == nullptr) ? s.DriverNext[prev->id] : next_del;
             continue;
         }
-//TODO
-// Calculer maxStartTime, annuler uniquement si arr >   max(maxStartTime,startServiceTime)
-// Pour calculer maxStartTime, utiliser le code de Eliminate Customer/LearnCustomers
-// Enlever cas où on annule quand le noeud est occupé
         if (next_dock != nullptr) {
             if (node_arr + s.Travel(n, next_dock) + s.Travel(next_dock, next_del) >
                 std::max(s.StartServiceTime[next_del->id],
                          Sol::nodeMaxStartService[make_tuple(next_del->id, d->capacity)])) {
+                if (Parameters::SHOW) {
+//                    printf("fin %d + s.Travel(%d, %d) + s.Travel(%d, %d) =%d > s.StartServiceTime[next_del->id] , ETW %d NC%d\n",
+//                           node_arr, n->id, next_dock->id, next_dock->id, next_del->id,
+//                           node_arr + s.Travel(n, next_dock) + s.Travel(next_dock,
+//                                                                        next_del), s.EarlyTW(next_del),next_del->custID);
+
+                }
                 if (Parameters::PENALTY_COST) {
                     newcost.lateDeliveryCost +=
                             std::max(0, (node_arr + s.Travel(n, next_dock) +
@@ -267,14 +297,6 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(
                                          s.StartServiceTime[next_del->id])) *
                             Parameters::LATE_ARRIVAL_PENALTY;
                 } else {
-                    if (Parameters::SHOW) {
-                        printf("fin %d + s.Travel(%d, %d) + s.Travel(%d, %d) =%d > s.StartServiceTime[next_del->id] , ETW %d NC%d\n",
-                               node_arr, n->id, next_dock->id, next_dock->id, next_del->id,
-                               node_arr + s.Travel(n, next_dock) + s.Travel(next_dock,
-                                                                            next_del), s.EarlyTW(next_del),
-                               next_del->custID);
-
-                    }
                     prev = next_del;
                     continue;
                 }
@@ -282,39 +304,45 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(
             if (node_arr + s.Travel(n, next_dock) + s.Travel(next_dock, next_del) +
                 Data::UnloadingTime(next_del, next_del->demand, d) >
                 s.LateTW(next_del)) {
-                if (Parameters::PENALTY_COST) {
-                    newcost.lateDeliveryCost +=
-                            std::max(0, (node_arr + s.Travel(n, next_dock) +
-                                         s.Travel(next_dock, next_del) +
-                                         Data::UnloadingTime(next_del, next_del->demand, d) - s.LateTW(next_del))) *
-                            Parameters::LATE_ARRIVAL_PENALTY;
-                } else {
-                    if (Parameters::SHOW) {
-                        cout << "node_arr + s.Travel(n, next) + s.Travel(next, next_del) "
-                                "+next_del->unload_duration > LateTW(next_del) "
-                             << endl;
-                    }
+                if (Parameters::SHOW) {
+                    Prompt::print(
+                            {"node_arr + s.Travel(n, next) + s.Travel(next, next_del) + next_del->unload_duration > "
+                             "LateTW(next_del) ","next client ", to_string(next_del->custID)});
+                }
+//                if (Parameters::PENALTY_COST) {
+//                    newcost.lateDeliveryCost +=
+//                            std::max(0, (node_arr + s.Travel(n, next_dock) +
+//                                         s.Travel(next_dock, next_del) +
+//                                         Data::UnloadingTime(next_del, next_del->demand, d) - s.LateTW(next_del))) *
+//                            Parameters::LATE_ARRIVAL_PENALTY;
+//                } else
+                {
+
                     prev = next_del;
                     continue;
                 }
             }
         }
-        if (Parameters::SHOW) {
-            cout << "Installation possible " << endl;
-        }
+
         newcost.travelCost = s.Travel(prev, dock) + s.Travel(dock, n) +
                              s.Travel(prev->distID, d->distID) - s.Travel(prev->distID, d->distID);
 
         newcost.waitingCost = newcost.clientWaitingCost + newcost.truckWaitingCost;
-        newcost.undeliveredCost = 0;
+        newcost.undeliveredCost=0;
         newcost.satisfiedCost = demand;
         newcost.isFeasible = true;
         newcost += s.updateCost;
         if (newcost.lateDeliveryCost > 100) {
-            prev = s.DriverNext[prev->id];
-            continue;
+            if (Parameters::SHOW) {
+                Prompt::print({"newcost.lateDeliveryCost", to_string(newcost.lateDeliveryCost),
+                               "> 100"});
+            }
+//            prev = s.DriverNext[prev->id];
+//            continue;
         }
-
+        if (Parameters::SHOW) {
+//            Prompt::print({"Installation possible of del", to_string(n->id), "with driver ", to_string(d->id)});
+        }
         m.n = n;
         m.to = d;
         m.move.dock = dock;
@@ -329,13 +357,14 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(
         m.IsFeasible = true;
         int rem = d->capacity - s.orderCapRestante[n->orderID];
         if (rem == 0) {
-            m.waste = 0;//s.updateCost.waste;
+            m.waste = 0;
+            m.DeltaCost.undeliveredCost -= s.GetOrder(n->orderID)->demand ;
         } else if (rem > 0) {
             m.waste = s.updateCost.waste + rem;
+            m.DeltaCost.undeliveredCost -= s.GetOrder(n->orderID)->demand ;
         } else {
             m.waste = s.updateCost.waste + std::abs(rem + s.GetData()->minDriverCap);
         }
-//TODO        m.waste = d->capacity - s.orderCapRestante[n->orderID];
 
         //m.waste = s.updateCost.waste + d->capacity - o->demand ;
         std::set<int> driverUsed(s.driverUsed);
@@ -343,21 +372,75 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(
 //
         driverUsed.insert(d->id);
         clientdriverUsed.insert(d->id);
-//        m.nbDriver = int(clientdriverUsed.size()) ;
-        m.nbDriver = int(driverUsed.size());
+
+        if(Parameters::DRIVER_USE==Parameters::MINIMIZEDRIVER::CLIENT ){
+            m.allDriver = int(clientdriverUsed.size()) ;
+        }
+        else if(Parameters::DRIVER_USE==Parameters::MINIMIZEDRIVER::SOLUTION ){
+            m.allDriver = int(driverUsed.size()) ;
+        }
+        else{
+            m.clientDriver = int(clientdriverUsed.size()) ;
+            m.allDriver = int(driverUsed.size());
+        }
 
         temp_moves->Add(m);
-
-        assert(m.arrival_dock <= m.arrival_del + s.Travel(dock, n));
-
         prev = s.DriverNext[prev->id];
     }
 
-    Move<Delivery, Driver, MoveVrp> best;
+    Move <Delivery, Driver, MoveVrp> best;
     if (temp_moves->Count() > 0) {
-        // best = temp_moves->Get(0);
         best = temp_moves->GetRandom();
     }
     solcost = best.DeltaCost;
     return best;
+}
+
+void InsRmvMethodFast::repairSolution(Sol &s, Order *o) {
+    for (int count = s.GetDeliveryCount(o) - 1; count >= 0; count--) {
+        Delivery *n = s.GetDelivery(o, count);
+        if (s.GetDriverAssignedTo(n) == nullptr) continue;
+        int delay = s.WaitingTime[n->id] + Parameters::TIME_BTW_DELIVERY;
+        if (delay < 0 and n->rank > 0) {
+            Delivery *n1 = s.GetDelivery(o, n->rank - 1);
+            s.ArrivalTime[n1->id] = s.ArrivalTime[n1->id] -
+                                    delay;//                        s.Update(s.GetDepot(n1->depotID),s.GetDock(n1->dockID),n1);
+        }
+    }
+    s.Update(o);
+}
+
+void InsRmvMethodFast::repairSolution(Sol &s, Customer *c) {
+}
+
+void InsRmvMethodFast::FillStructures( Sol &s, std::vector<Customer *> & customersList,
+                    std::vector<Driver *> & driversList){
+    driversList.clear();
+    if (not s.availableDrivers.empty())
+    {
+        for (int i : s.availableDrivers)
+        {
+            driversList.push_back(s.GetDriver(i));
+        }
+    }
+    else{
+        for (int i = 0; i < s.GetDriverCount(); i++)
+            driversList.push_back(s.GetDriver(i));
+    }
+    customersList.clear();
+    if (!s.keyCustomers.empty()) {
+        for (int i: s.keyCustomers) {
+            Customer *c = s.GetCustomer(i);
+            if (s.isClientSatisfied(c))
+                continue;
+            customersList.emplace_back(c);
+        }
+    } else {
+        for (int i = 0; i < s.GetCustomerCount(); i++) {
+            Customer *c = s.GetCustomer(i);
+            if (s.isClientSatisfied(c))
+                continue;
+            customersList.emplace_back(c);
+        }
+    }
 }

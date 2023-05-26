@@ -45,12 +45,24 @@ public:
     {
         insrmv.repairSolution(s);
     }
+    virtual void repairSolution(Sol &s,Order *o)
+    {
+        insrmv.repairSolution(s, o);
+    }
+    virtual void repairSolution(Sol &s,Customer *c)
+    {
+        insrmv.repairSolution(s,c);
+    }
 
     virtual Move<Delivery, Driver, MoveVrp>
     GetCost(Sol &s,  Delivery *n, Driver *d, Cost &solcost,
             double demand, ListMove<Delivery, Driver, MoveVrp> *temp_moves)
     {
         return insrmv.GetCost(s,  n, d, solcost, demand, temp_moves);
+    }
+    virtual void FillStructures( Sol &s, std::vector<Customer *> & customersList,
+                                           std::vector<Driver *> & driversList){
+        insrmv.FillStructures(  s, customersList,driversList);
     }
 
     InsRmvMethodFast insrmv;

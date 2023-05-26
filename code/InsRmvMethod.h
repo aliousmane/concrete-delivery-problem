@@ -47,6 +47,7 @@ public:
 
   virtual void repairSolution(Sol &s) = 0;
 
+
   virtual void SetServiceParams(Sol &s, NodeT *n, DriverT *d,
                                 int demand) = 0;
 
