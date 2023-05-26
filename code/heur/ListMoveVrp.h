@@ -23,20 +23,22 @@ class ListMoveVrp : public ListMove<Delivery, Driver, MoveVrp> {
 public:
   ListMoveVrp();
   void Clear();
-  void Add(Move<Delivery, Driver, MoveVrp> &m);
-  int Count();
-  void Insert(int i, Move<Delivery, Driver, MoveVrp> &m);
-  Move<Delivery, Driver, MoveVrp> &Get(int i);
-  Move<Delivery, Driver, MoveVrp>Extract();
+  void Add(Move<Delivery, Driver, MoveVrp> &m) override;
+  int Count() override;
+  void Insert(int i, Move<Delivery, Driver, MoveVrp> &m) override;
+  void Insert( ListMoveVrp &to_insert);
+  Move<Delivery, Driver, MoveVrp> &Get(int i) override;
+  Move<Delivery, Driver, MoveVrp>Extract() override;
 
-  void Sort();
-  Move<Delivery, Driver, MoveVrp> &GetRandom();
-  void Resize(int n);
-  void partial_Sort(int k);
-  void Show();
+  void Sort() override;
+  Move<Delivery, Driver, MoveVrp> &GetRandom() override;
+  void Resize(int n) override;
+  void partial_Sort(int k) override;
+  void Show() override;
   std::vector<Move<Delivery, Driver, MoveVrp>> _moves;
 
 private:
+    std::unordered_map<std::string, Move<Delivery, Driver, MoveVrp>  , MoveHashFunction<Delivery, Driver, MoveVrp> > moveMap;
   ListMoveVrpSorter move_sorter;
   static bool Sort1(Move<Delivery, Driver, MoveVrp> &m1,Move<Delivery, Driver, MoveVrp> &m2);
   static bool Sort2(Move<Delivery, Driver, MoveVrp> &m1,Move<Delivery, Driver, MoveVrp> &m2);

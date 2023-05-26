@@ -5,15 +5,18 @@
 using namespace std;
 
 bool ListMoveVrpSorter::operator()(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driver, MoveVrp> &m2) {
+    if(m1.FailureCause!=Parameters::FAILURECAUSE::NONE) return false;
     return m1 <= m2;
 }
 
-
 bool ListMoveVrp::Sort1(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driver, MoveVrp> &m2) {
+    if(m1.FailureCause!=Parameters::FAILURECAUSE::NONE) return false;
+    if(m1.DeltaCost.lateDeliveryCost<m2.DeltaCost.lateDeliveryCost)
+        return true;
     if (m1.n == m2.n) {
-        if (m1.nbDriver < m2.nbDriver)
+        if (m1.allDriver < m2.allDriver)
             return true;
-        else if (m1.nbDriver == m2.nbDriver) {
+        else if (m1.allDriver == m2.allDriver) {
 
             if (m1.waste == 0) return true;
             else if (m2.waste == 0) return false;
@@ -50,6 +53,10 @@ bool ListMoveVrp::Sort1(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driv
 }
 
 bool ListMoveVrp::Sort2(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driver, MoveVrp> &m2) {
+
+    if(m1.FailureCause!=-1) return false;
+    if(m1.DeltaCost.lateDeliveryCost<m2.DeltaCost.lateDeliveryCost)
+        return true;
     if (m1.n == m2.n) {
         if (m1.waste == 0) return true;
         else if (m2.waste == 0) return false;
@@ -58,7 +65,7 @@ bool ListMoveVrp::Sort2(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driv
             return true;
         } else if (m1.arrival_del == m2.arrival_del) {
 
-            if (m1.nbDriver < m2.nbDriver)
+            if (m1.allDriver < m2.allDriver)
                 return true;
 
 //            if(m1.DeltaCost.travelCost < m2.DeltaCost.travelCost) return true;
@@ -77,7 +84,7 @@ bool ListMoveVrp::Sort2(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driv
                 return false;
             }
         } else {
-            if (m1.nbDriver < m2.nbDriver)
+            if (m1.allDriver < m2.allDriver)
                 return true;
         }
 
@@ -90,6 +97,10 @@ bool ListMoveVrp::Sort2(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driv
 }
 
 bool ListMoveVrp::Sort3(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driver, MoveVrp> &m2) {
+    if(m1.FailureCause!=Parameters::FAILURECAUSE::NONE) return false;
+    if(m2.FailureCause!=Parameters::FAILURECAUSE::NONE) return true;
+    if(m1.DeltaCost.lateDeliveryCost<m2.DeltaCost.lateDeliveryCost)
+        return true;
     if (m1.n == m2.n) {
         if (m1.waste == 0) return true;
         else if (m2.waste == 0) return false;
@@ -100,7 +111,7 @@ bool ListMoveVrp::Sort3(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driv
             return true;
         } else if (m1.arrival_del == m2.arrival_del) {
 
-            if (m1.nbDriver < m2.nbDriver)
+            if (m1.allDriver < m2.allDriver)
                 return true;
 
 //            if(m1.DeltaCost.travelCost < m2.DeltaCost.travelCost) return true;
@@ -119,7 +130,7 @@ bool ListMoveVrp::Sort3(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driv
                 return false;
             }
         } else {
-            if (m1.nbDriver < m2.nbDriver)
+            if (m1.allDriver < m2.allDriver)
                 return true;
         }
 
@@ -133,6 +144,22 @@ bool ListMoveVrp::Sort3(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driv
 
 
 bool ListMoveVrp::Sort4(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driver, MoveVrp> &m2){
+    if(m1.FailureCause!=Parameters::FAILURECAUSE::NONE) return false;
+//    if(m1.DeltaCost.lateDeliveryCost<m2.DeltaCost.lateDeliveryCost)
+//        return true;
+
+    if(m1.DeltaCost.undeliveredCost<m2.DeltaCost.undeliveredCost) return true;
+    if(m1.DeltaCost.undeliveredCost>m2.DeltaCost.undeliveredCost) return false;
+    if(m1.allDriver<m2.allDriver) return true;
+    else{
+        if(m1.clientDriver < m2.clientDriver)
+            return true;
+//        else if(m1.clientDriver==m2.clientDriver){
+//            return(m1.waste<m2.waste);
+//        }
+    }
+//    if (m1.waste == 0) return true;
+//    else if (m2.waste == 0) return false;
     return (m1 < m2);
 }
 
@@ -143,10 +170,23 @@ ListMoveVrp::ListMoveVrp() : _moves(0) {
 void ListMoveVrp::Clear() { _moves.clear(); }
 
 void ListMoveVrp::Add(Move<Delivery, Driver, MoveVrp> &m) {
+
+    if(moveMap.contains(m.toString()))
+        return;
+    moveMap[m.toString()]=m;
     /*for(size_t i=0;i<_moves.size();i++)
             if(_moves[i].DeltaCost < m.DeltaCost && _moves[i].move.AddedTime <
        m.move.AddedTime) return;*/
     _moves.push_back(m);
+}
+void ListMoveVrp::Insert( ListMoveVrp &to_insert){
+
+    for(int i=to_insert.Count()-1;i>=0;i--){
+        auto mv = to_insert.Get(i);
+        if(moveMap.contains(mv.toString()))
+            continue;
+        _moves.insert( _moves.begin(), mv);
+    }
 }
 
 Move<Delivery, Driver, MoveVrp> &ListMoveVrp::Get(int i) { return _moves[i]; }
@@ -195,7 +235,8 @@ void ListMoveVrp::Show() {
     for (auto m: _moves) {
         cout << m.move.prev->id << "->" << m.to->id << "--" << m.n->id << "(" << m.n->orderID << ")--" << "("
              << m.n->rank << ")|"
-             << m.waste << " --" << m.arrival_del << "--" << m.nbDriver << "--";
+             << m.waste << " --" << m.arrival_del << "--(" << m.clientDriver << "-"<<m.allDriver<< ")-- F:"
+             << m.FailureCause <<"->" ;
         cout << m.DeltaCost << endl;
     }
 }
@@ -204,7 +245,8 @@ Move<Delivery, Driver, MoveVrp> &ListMoveVrp::GetRandom() {
     uniform_int_distribution<int> dis2(0, 10);
     uniform_int_distribution<int> dis(0, std::min(Count() - 1, 3));
     const int k = dis(Parameters::RANDOM_GEN);
-    partial_Sort(Count() - 1);
+    Sort();
+//    partial_Sort(Count() - 1);
     const int choice = dis2(Parameters::RANDOM_GEN);
     if (choice < 11) {
         return _moves[0];
