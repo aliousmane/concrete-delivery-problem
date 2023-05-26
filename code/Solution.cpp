@@ -5,7 +5,7 @@
 using namespace std;
 
 std::vector<int> Sol::FailureCause = std::vector<int>();
-std::vector<int> Sol::CustomerConflict = std::vector<int>();
+std::vector<std::set<int>> Sol::CustomerConflict = std::vector<std::set<int>>();
 std::vector<int> Sol::FailureCount = std::vector<int>();
 std::vector<int> Sol::minDelay = std::vector<int>();
 std::vector<int> Sol::StartBefore = std::vector<int>();
@@ -62,9 +62,17 @@ Sol::Sol(Data *data) : _data(data), _last_cost(false), DriverAssignTo(data->GetN
 }
 
 void Sol::InitCustomers() {
-    for (int i = 0; i < _data->GetCustomerCount(); i++) {
-        InitCustomer(_data->GetCustomer(i));
+    updateCost.undeliveredCost = 0;
+    if (keyCustomers.empty()) {
+        for (int i = 0; i < _data->GetCustomerCount(); i++) {
+            InitCustomer(_data->GetCustomer(i));
+        }
+    } else {
+        for (auto id: keyCustomers) {
+            InitCustomer(_data->GetCustomer(id));
+        }
     }
+
 }
 
 void Sol::InitCustomer(Customer *c) {
@@ -73,12 +81,26 @@ void Sol::InitCustomer(Customer *c) {
     OrderVisitCount[c->custID] = 0;
     sumServiceTime[c->custID] = 0;
     WaitingTime[c->id] = 0;
-}
-void Sol::InitDrivers() {
-    for (int i = 0; i < GetDriverCount(); i++) {
-        InitDriver(GetDriver(i));
+    updateCost.undeliveredCost += c->demand;
+    for(auto o: GetOrders(c))
+    {
+        InitOrder(o);
     }
 }
+
+void Sol::InitDrivers() {
+    if (availableDrivers.empty()) {
+        for (int i = 0; i < GetDriverCount(); i++) {
+            InitDriver(GetDriver(i));
+        }
+    }
+    else{
+        for(auto id:availableDrivers){
+            InitDriver(GetDriver(id));
+        }
+    }
+}
+
 void Sol::InitDriver(Driver *d) {
     d->Init();
     shiftDuration[d->id] = 0;
@@ -88,9 +110,10 @@ void Sol::InitDriver(Driver *d) {
 
 void Sol::InitDepots() {
     for (int i = 0; i < GetDepotCount(); i++) {
-        InitDepot( GetDepot(i));
+        InitDepot(GetDepot(i));
     }
 }
+
 void Sol::InitDepot(Depot *dep) {
     depotLoadingIntervals[dep->depotID].clear();
 }
@@ -104,12 +127,12 @@ void Sol::InitOrders() {
 void Sol::InitOrder(Order *o) {
     orderCapRestante[o->orderID] = o->demand;
     OrderLateDelivery[o->orderID] = 0;
-    clientCapRestante[o->custID]+=o->demand;
+    clientCapRestante[o->custID] += o->demand;
 }
 
 void Sol::AssignStationToDriver() {
     for (int i = 0; i < _data->GetDriverCount(); i++) {
-        RoutesLength[i]=0;
+        RoutesLength[i] = 0;
         Driver *d = _data->GetDriver(i);
         Node *n1 = _data->GetNode(d->StartNodeID);
         Node *n2 = _data->GetNode(d->EndNodeID);
@@ -162,8 +185,8 @@ void Sol::UnassignOrder(Order *o) {
     for (int i = 0; i < GetDeliveryCount(o); i++) {
         Delivery *del = GetDelivery(o, i);
         Driver *d = DriverAssignTo[del->id];
-        if(d == nullptr) break;
-            RemoveDelivery(del);
+        if (d == nullptr) break;
+        RemoveDelivery(del);
 //            RemoveDock(dock);
     }
 }
@@ -206,7 +229,7 @@ void Sol::Remove(Node *n) {
     if (it != driverWorkingIntervals[d->id].end()) {
         driverWorkingIntervals[d->id].erase(it);
     }
-    if(RoutesLength[d->id]==0){
+    if (RoutesLength[d->id] == 0) {
         driverUsed.erase(d->id);
     }
 }
@@ -221,34 +244,33 @@ void Sol::RemoveDelivery(Delivery *del) {
     updateCost.travelCost -= del->travel_time;
 
     updateCost.clientWaitingCost -= ClientWaitingTime[del->id];
-    updateCost.truckWaitingCost-=TruckWaitingTime[del->id];
+    updateCost.truckWaitingCost -= TruckWaitingTime[del->id];
     updateCost.waitingCost = updateCost.clientWaitingCost +
-            updateCost.truckWaitingCost;
+                             updateCost.truckWaitingCost;
     Sol::FailureCount[del->id] = 0;
     orderCapRestante[del->orderID] += DeliveryLoad[del->id];
     clientCapRestante[del->custID] += DeliveryLoad[del->id];
     OrderLateDelivery[del->orderID] -= NodeLateDelivery[del->id];
-    NodeLateDelivery[del->id]=0;
+    NodeLateDelivery[del->id] = 0;
     DeliveryLoad[del->id] = 0;
     Driver *d = DriverAssignTo[del->id];
-    updateCost.waste-=d->capacity;
+    updateCost.waste -= d->capacity;
     DriverVisitCount[d->id][del->custID]--;
     Remove(del);
     Dock *dock = GetDock(del->dockID);
     RemoveDock(dock);
     RemoveFromCustomer(del);
-    bool find=false;
-    for(int r=0; r<del->rank;r++){
-        Delivery *del1= GetDelivery(del->orderID,r);
+    bool find = false;
+    for (int r = 0; r < del->rank; r++) {
+        Delivery *del1 = GetDelivery(del->orderID, r);
         Driver *d1 = GetDriverAssignedTo(del1);
-        if(d1== nullptr) break;
-        if(d1==d)
-        {
+        if (d1 == nullptr) break;
+        if (d1 == d) {
             find = true;
             break;
         }
     }
-    if(!find){
+    if (!find) {
         clientDriverUsed[del->custID].erase(d->id);
     }
 
@@ -352,8 +374,8 @@ void Sol::AssignDeliveryToCustomer(Delivery *n) {
     CustomerNext[n->id] = end;
     CustomerPrev[end->id] = n;
     assert(CustomerPrev[n->id] != n);
-    if(prev->c=='D'){
-        assert(GetDriverAssignedTo(prev)!= nullptr);
+    if (prev->c == 'D') {
+        assert(GetDriverAssignedTo(prev) != nullptr);
     }
 }
 
@@ -423,9 +445,9 @@ void Sol::ShowSchedule(Order *o) {
            "Wait|Start| End  | To |\n");
     for (int j = 0; j < GetDeliveryCount(o); j++) {
         Delivery *del = GetDelivery(o, j);
-        if (DriverAssignTo[del->id] != nullptr){
-            if(j>0){
-                assert(DriverAssignTo[GetDelivery(o, j-1)->id] != nullptr);
+        if (DriverAssignTo[del->id] != nullptr) {
+            if (j > 0) {
+                assert(DriverAssignTo[GetDelivery(o, j - 1)->id] != nullptr);
             }
             ShowSchedule(del);
 

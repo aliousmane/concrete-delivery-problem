@@ -70,7 +70,7 @@ public:
 
 
     static std::vector<int> FailureCause;
-    static std::vector<int> CustomerConflict;
+    static std::vector<std::set<int>> CustomerConflict;
     static std::vector<std::set<int>> TabuFleet;
     static std::vector<int> FailureCount;
     static std::vector<int> minDelay;
@@ -434,7 +434,7 @@ public:
 
     static void InitStructure(Data *dat){
         Sol::CustomerConflict.clear();
-        Sol::CustomerConflict.resize(dat->GetCustomerCount(),-1);
+        Sol::CustomerConflict.resize(dat->GetCustomerCount());
         Sol::FailureCause.clear();
         Sol::FailureCause.resize(dat->GetNodeCount(), Parameters::FAILURECAUSE::NONE);
         Sol::FailureCount.clear();
