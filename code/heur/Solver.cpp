@@ -4,7 +4,6 @@
 #include <istream>
 #include "CustInsertion.h"
 #include "CustInsertionOperator.h"
-#include "../Combinatorial.h"
 #include "InsRmvMethodFast.h"
 #include "InsRmvBuilder1.h"
 #include "InsRmvBuilder2.h"
@@ -12,27 +11,104 @@
 
 using namespace std;
 
-void Solver::run() {
-
+void Solver::run(){
     feasibleClients = CDPSolver::EliminateCustomer(*_data, 1);
-    std::vector<Customer *> listCust = _data->GetCustomers();
-    std::vector<int> listCustId(_data->GetCustomerCount());
-    std::iota(listCustId.begin(), listCustId.end(), 0);
+    vector<TimeSlot> listInt;
+    for (int i: feasibleClients) {
+        Customer *c = _data->GetCustomer(i);
+        listInt.emplace_back(c->early_tw, c->late_tw, c->custID);
+    }
+    vector<set<int>> linkedClientSlot;
+    vector<set<int>> linkedClientDemand;
+    vector<set<int>> linkedClients;
+    vector<set<int>> linkedClientsInf;
+    vector<set<int>> linkedClientSup;
+    Data dat=*_data;
+    CDPSolver::findCorrelation(dat, listInt, linkedClientSlot, linkedClientDemand, linkedClients, linkedClientsInf,
+                               linkedClientSup);
+    Sol s(&dat);
+    s.keyCustomers=feasibleClients;
+    SolveGrasp(s,dat,linkedClientSlot);
+    SaveResults(s);
+    s.ShowCustomer();
+}
+void Solver::SaveResults(Sol &s){
+    printf("Instance:%s\n", _data->instance_name.c_str());
 
-    SortNode<Customer, Driver>::radixSortMinWidthTW(listCust, _data->maxLateTW - _data->minEarlyTW);
-    Prompt::print(listCust);
-//    Test();
+    printf("Nombre clients %d \t", _data->nbCustomers);
+    printf("Nombre ordre %d \t", _data->nbOrders);
+    printf("Total Cost:%.2lf \t", s.GetLastCost().satisfiedCost);
 
-    Sol s1(_data);
+    if ( _data->result_file.c_str() != nullptr) {
+        FILE *f = fopen(_data->result_file.c_str(), "a");
+        if (f != nullptr) {
+            time_t now = time(nullptr);
+            tm *ltm = localtime(&now);
+            fprintf(f, "%d-", 1900 + ltm->tm_year);
+            fprintf(f, "%d-", 1 + ltm->tm_mon);
+            fprintf(f, "%d;", ltm->tm_mday);
+            fprintf(f, "%d:%d:%d;", ltm->tm_hour, ltm->tm_min, ltm->tm_sec);
+            fprintf(f, "%s;", _data->problem_name.c_str());
+            fprintf(f, "%s;", _data->instance_name.c_str());
+            fprintf(f, "%2.0lf;", s.GetLastCost().satisfiedCost);
+            fprintf(f, "%2.2lf;", s.GetLastCost().travelCost);
+             fprintf(f, "%d;", s.GetLastCost().driverUsed);
+            fprintf(f, "%ld\n", Parameters::GetElapsedTime());
+            fclose(f);
+        }
+    }
+}
+
+void Solver::Test0() {
+
+    Parameters::SORT_TYPE = Parameters::SORT::THREE;
+    feasibleClients = CDPSolver::EliminateCustomer(*_data, 1);
+
     InsRmvMethodFast insrmv(*_data);
     InsRmvBuilder3 builder3(*_data);
-    CustInsertion custIns(*_data, builder3);
+    CustInsertion custIns(*_data,builder3);
     {
-//    custIns.SetK(0);
-//    custIns.Insert2(s1,listCust,listCustId);
-//    s1.ShowCustomer();
-//    exit(1);
+        Parameters::DRIVER_USE=Parameters::MINIMIZEDRIVER::CLIENT;
+
+        Sol s(_data);
+        for(auto id:feasibleClients){
+            Customer *c = _data->GetCustomer(id);
+            std::vector<Customer*> list{c};
+            s.keyCustomers={c->custID};
+            custIns.Insert(s);
+            if(s.isSatisfied(c)){
+                s.ShowCustomer();
+                s.keyCustomers.clear();
+            }
+            else{
+                continue;
+                int iter=0;
+                while(iter++<5){
+                    Sol cur=s;
+                    for(auto conflict_id:Sol::CustomerConflict[c->custID]){
+                        cur.UnassignCustomer(conflict_id);
+                        cur.keyCustomers.insert(conflict_id);
+                    }
+                    Parameters::SHOW= false;
+                    CDPSolver::BuildOnSolution(cur,*_data,1);
+                     s.ShowCustomer();
+                    if(cur.GetLastCost().satisfiedCost <s.GetLastCost().satisfiedCost){
+                        s=cur;
+                    }
+                    if(s.hasScheduled(s.keyCustomers)) break;
+                }
+                if(s.isSatisfied(c)){
+                    s.ShowCustomer();
+                }
+                Parameters::SHOW= false;
+            }
+
+        }
     }
+    exit(1);
+    Sol s1(_data);
+
+
     {
 //        Résouds B_8_20_4
 //        Parameters::SORT_TYPE = Parameters::SORT::THREE;
@@ -47,16 +123,31 @@ void Solver::run() {
 //        s1.ShowCustomer();
 //        //    Test(s1);
 //        exit(1);
-        //    run2(s1,feasibleClients);
+//            run2(s1,feasibleClients);
     }
     {
-        Parameters::SORT_TYPE = Parameters::SORT::THREE;
+//        Parameters::SORT_TYPE = Parameters::SORT::ONE;
+//        Parameters::SORT_TYPE = Parameters::SORT::TWO;
+//        Parameters::SORT_TYPE = Parameters::SORT::THREE;
+        Parameters::SORT_TYPE = Parameters::SORT::FOUR;
+//        Parameters::PENALTY_COST = true;
+        Parameters::DRIVER_USE=Parameters::MINIMIZEDRIVER::HYBRID;
+//        Parameters::DRIVER_USE=Parameters::MINIMIZEDRIVER::SOLUTION;
+        s1.keyCustomers=feasibleClients;
+//        s1.keyCustomers={1};
+//s1.availableDrivers={0,5,6,7,1};
         CDPSolver::SolveInstance(s1, *_data, 1);
+//        s1.keyCustomers.clear();
+//        CDPSolver::BuildOnSolution(s1, *_data, 1);
+
         //   s1.exportCSVFormat(_data->sol_output);
         s1.exportCSVFormat("s0.csv");
-        //    s1.ShowDrivers();
+//        s1.ShowDrivers();
         s1.ShowCustomer();
+        cout<<s1.GetLastCost()<<endl;
+//        s1.ShowSchedule();
     }
+    Parameters::ShowTime();
     exit(1);
     vector<TimeSlot> listInt;
     for (int i: feasibleClients) {
@@ -109,11 +200,11 @@ void Solver::run() {
         for (auto id: linkedClientSlot[c->constID]) {
             Customer *c1 = _data->GetCustomer(id);
 
-            Delivery *first = dynamic_cast<Delivery *>(s1.CustomerNext[c1->StartNodeID]);
+            auto *first = dynamic_cast<Delivery *>(s1.CustomerNext[c1->StartNodeID]);
             int early = c1->early_tw;
             bool sortie=false;
             while(!sortie){
-                Delivery *last = dynamic_cast<Delivery *>(s1.CustomerPrev[c1->EndNodeID]);
+                auto *last = dynamic_cast<Delivery *>(s1.CustomerPrev[c1->EndNodeID]);
                 if (s1.EndServiceTime[last->id] == s1.LateTW(last))
                     break;
                 c1->Show();
@@ -196,7 +287,7 @@ void Solver::run() {
                     Driver *d = _data->GetDriver(k);
                     cout << *d << endl;
                     s1.ShowSlot(d);
-                    for (auto slot: s1.driverWorkingIntervals[d->id]) {
+                    for (const auto& slot: s1.driverWorkingIntervals[d->id]) {
                         auto del = dynamic_cast<Delivery *> (s1.GetNode(slot.nodeID));
                         auto c_slot = _data->GetCustomer(del->custID);
                         auto d_slot = _data->GetDepot(del->depotID);
@@ -344,7 +435,7 @@ void Solver::run() {
 
             InsRmvBuilder3 builder3(*s1.GetData());
 
-            for (auto deli: s1.GetDelivery(c1)) {
+            for (auto deli: s1.GetDeliveries(c1)) {
                 cout << *deli << endl;
                 int start = s1.StartServiceTime[deli->id];
                 cout << "Debut " << start << endl;
@@ -576,7 +667,7 @@ void Solver::Test(Sol &s) {
             if (s.OrderVisitCount[c->custID] == nbMin) {
                 continue;
             }
-            Delivery *del = s.GetDelivery(c)[0];
+            Delivery *del = s.GetDeliveries(c)[0];
             Driver *d = s.GetDriverAssignedTo(del);
             s.ShowSchedule(c);
             for (int k = 0; k < s.GetDriverCount(); k++) {
@@ -816,45 +907,50 @@ void Solver::Test(Sol &s1, Customer *c, std::vector<std::set<int>> const &linked
 
 void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientSlot) {
 
-    InsRmvMethodFast insrmv(dat);
-    InsRmvBuilder1 builder1(dat);
-    InsRmvBuilder2 builder2(dat);
     InsRmvBuilder3 builder3(dat);
-    CustInsertion custIns1(dat, builder1);
-    CustInsertion custIns2(dat, builder2);
     CustInsertion custIns3(dat, builder3);
+    PriorityQueueInsertion prioIns3(dat, builder3);
 
-    vector<InsertOperator<Customer, Driver> *> grasp_heuristics;
-    vector<CustInsertionOperator> custInsertionOp;
+    vector<AllInsertionOperator> grasp_heuristics;
 
     GRASP<Customer, Driver> grasp(&dat);
     vector<pair<int, string>> custInfo = {
             {0, "Cust Sort Early TW"},
             {1, "Cust Sort Greater D"},
-            {6, "Cust Random"},
-            {7, "Cust Sort Kinable"}
+            {2, "Cust Sort Late TW "},
+            {3, "Cust Sort Min Width TW"},
+            {4,"Cust Random"},
+            {5, "Cust Sort Kinable"},
+    };
+    vector<pair<int, string>> priorityInfo = {
+//            {0,"PrioriSort I Early TW"},
+//            {1,"PrioriSort I Late TW"},
+//            {2,"PrioriSort D Early TW"},
+//            {4,"PrioriSort D Demand"},
+//            {5,"PrioriSort I Demand"},
+//            {6,"PrioriSort I TW width"},
+//            {7,"PrioriSort D TW width"},
     };
 
-    custInsertionOp.reserve(3 * custInfo.size());
-    for (const auto &val: custInfo) {
-//        custInsertionOp.emplace_back(&custIns1,val.first,"Builder1 "+ val.second);
-//        custInsertionOp.emplace_back(&custIns2,val.first,"Builder 2 "+ val.second);
-        custInsertionOp.emplace_back(&custIns3, val.first, "Builder 3 " + val.second);
-//        cout<<&temp3<<endl;
-    }
     CustInsertionOperator c0(&custIns3, custInfo[0].first, "Builder 3 " + custInfo[0].second);
     CustInsertionOperator c1(&custIns3, custInfo[1].first, "Builder 3 " + custInfo[1].second);
     CustInsertionOperator c2(&custIns3, custInfo[2].first, "Builder 3 " + custInfo[2].second);
     CustInsertionOperator c3(&custIns3, custInfo[3].first, "Builder 3 " + custInfo[3].second);
+    CustInsertionOperator c4(&custIns3, custInfo[4].first, "Builder 3 " + custInfo[4].second);
+    CustInsertionOperator c5(&custIns3, custInfo[5].first, "Builder 3 " + custInfo[5].second);
+
     grasp.AddInsertOperatorVrp(&c0);
     grasp.AddInsertOperatorVrp(&c1);
     grasp.AddInsertOperatorVrp(&c2);
     grasp.AddInsertOperatorVrp(&c3);
+    grasp.AddInsertOperatorVrp(&c4);
+    grasp.AddInsertOperatorVrp(&c5);
     grasp.verbose = true;
-    grasp.SetIterationCount(500);
+    grasp.SetIterationCount(5);
     RechercheLocale loc_search(s.keyCustomers);
     loc_search.LinkedClientSlot = linkedClientSlot;
-    grasp.Optimize(s, nullptr, nullptr, &loc_search, true);
+//    grasp.Optimize(s, nullptr, nullptr, &loc_search, true);
+    grasp.Optimize(s, nullptr, nullptr, nullptr, true);
 }
 
 /**
