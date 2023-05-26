@@ -80,16 +80,16 @@ public:
     }
     double travelCost;
     double satisfiedCost;
-    double waitingCost;
-    double undeliveredCost;
+    int waitingCost;
+    int undeliveredCost;
     double totalCost;
-    double truckWaitingCost;
-    double clientWaitingCost;
-    double firstDeliveryCost;
+    int truckWaitingCost;
+    int clientWaitingCost;
+    int firstDeliveryCost;
     int firstDeliveryCount;
-    double lateDeliveryCost;
+    int lateDeliveryCost;
     int lateDeliveryCount;
-    double overTimeCost;
+    int overTimeCost;
     int driverUsed;
     bool isFeasible;
     int waste;
