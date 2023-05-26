@@ -1,7 +1,9 @@
 
 #include "CDPSolver.h"
 #include "CustInsertion.h"
+#include "CustInsertionBacktrack.h"
 #include "CustInsertionOperator.h"
+#include "AllInsertionOperator.h"
 #include "DriverInsertion.h"
 #include "InsRmvMethodFast.h"
 #include "InsRmvBuilder1.h"
@@ -58,7 +60,12 @@ std::set<int> CDPSolver::EliminateCustomer(Data &data, const int iter) {
         std::vector<int> temp{i};
         Data dat = data.copyCustomersData(temp);
         Sol s(&dat);
-        CDPSolver::SolveInstance(s, dat, iter);
+        s.keyCustomers = {0};
+        InsRmvBuilder3 builder3(dat);
+        CustInsertionBacktrack custIns_BT3(dat, builder3);
+        custIns_BT3.Insert(s);
+
+//        CDPSolver::SolveInstance(s, dat, iter);
         if (s.isFeasible) {
             cout << i << "-" << std::flush;
             feasibleClients.insert(i);
@@ -75,15 +82,6 @@ std::set<int> CDPSolver::EliminateCustomer(Data &data, const int iter) {
 
 void CDPSolver::SolveInstance(Sol &s, Data &dat, int iter) {
 
-    Sol::FailureCause.resize(dat.GetNodeCount(), Parameters::FAILURECAUSE::NONE);
-    Sol::FailureCount.resize(dat.GetNodeCount(), 0);
-//    Sol::minDelay.resize(dat.GetNodeCount(),0);
-    Sol::StartBefore.resize(dat.GetNodeCount(), 0);
-    Sol::pullVisit.resize(dat.GetNodeCount(), 0);
-    Sol::pushVisit.resize(dat.GetNodeCount(), 0);
-    Sol::TabuFleet.resize(dat.GetNodeCount());
-
-    TimeSlot::myData = dat;
     InsRmvMethodFast insrmv(dat);
     InsRmvBuilder1 builder1(dat);
     InsRmvBuilder2 builder2(dat);
@@ -91,6 +89,7 @@ void CDPSolver::SolveInstance(Sol &s, Data &dat, int iter) {
     CustInsertion custIns1(dat, builder1);
     CustInsertion custIns2(dat, builder2);
     CustInsertion custIns3(dat, builder3);
+    CustInsertionBacktrack custIns_BT3(dat, builder3);
 
     PriorityQueueInsertion prioIns3(dat, builder3);
 
@@ -102,40 +101,35 @@ void CDPSolver::SolveInstance(Sol &s, Data &dat, int iter) {
 //            {1, "Cust Sort Greater D"},
 //            {2, "Cust Sort Late TW "},
 //            {3, "Cust Sort Min Width TW"},
-//            {6,"Cust Random"},
-//            {7, "Cust Sort Kinable"},
-            {-1, "Cust custimized Sort"}
+//            {4,"Cust Random"},
+//            {5, "Cust Sort Kinable"},
+//            {-1, "Cust customized Sort"}
     };
-    vector<CustInsertionOperator> custInsertionOp;
-    custInsertionOp.reserve(3 * custInfo.size());
-    for (const auto &val: custInfo) {
-//        custInsertionOp.emplace_back(&custIns1,val.first,"Builder1 "+ val.second);
-//        custInsertionOp.emplace_back(&custIns2,val.first,"Builder 2 "+ val.second);
-        custInsertionOp.emplace_back(&custIns3, val.first, "Builder 3 " + val.second);
-    }
-
     vector<pair<int, string>> priorityInfo = {
 //            {0,"PrioriSort I Early TW"},
-//            {1,"PrioriSort Greater D"},
+//            {1,"PrioriSort I Late TW"},
 //            {2,"PrioriSort D Early TW"},
 //            {4,"PrioriSort D Demand"},
 //            {5,"PrioriSort I Demand"},
 //            {6,"PrioriSort I TW width"},
 //            {7,"PrioriSort D TW width"},
     };
-
-    vector<PriorityQueueOperator> priorityInsertionOp;
-
-    priorityInsertionOp.reserve(3 * priorityInfo.size());
-    for (const auto &val: priorityInfo) {
-        priorityInsertionOp.emplace_back(&prioIns3, val.first, "Builder 3 " + val.second);
-    }
-
     vector<pair<int, string>> driverInfo = {
 //            {0,"Driver I Cap"},
 //            {1,"PrioriSort Greater D"},
 //            {2,"PrioriSort D Early TW"},
     };
+
+    vector<AllInsertionOperator> AllInsertionOp;
+    AllInsertionOp.reserve(3*(custInfo.size()+priorityInfo.size()));
+    for (const auto &val: custInfo) {
+        AllInsertionOp.emplace_back(&custIns3, val.first, "Builder 3 " + val.second);
+//        AllInsertionOp.emplace_back(&custIns_BT3, val.first, "Builder 3 " + val.second);
+    }
+
+    for (const auto &val: priorityInfo) {
+        AllInsertionOp.emplace_back(&prioIns3, val.first, "Builder 3 " + val.second);
+    }
 
 
     vector<DriverInsertionOperator> driverInsertionOp;
@@ -146,30 +140,21 @@ void CDPSolver::SolveInstance(Sol &s, Data &dat, int iter) {
         driverInsertionOp.emplace_back(&driverIns3, val.first, "Builder 3 " + val.second);
     }
 
-
     for (int i = 0; i < iter; i++) {
-        for (auto heur: custInsertionOp) {
+        for (auto heur: AllInsertionOp) {
             Sol cur(&dat);
             cur.keyCustomers = s.keyCustomers;
             cur.availableDrivers = s.availableDrivers;
-//            cout<<"Iter "<<i<<endl;
+            Prompt::print({"Iter", to_string(i), heur.name});
             heur.Insert(cur);
             if (cur < s) {
-//                cout << "current best cost " << cur.GetCost().satisfiedCost << " with " << heur.name << endl;
+                cout << "current best cost " << cur.GetCost().satisfiedCost << " with " << heur.name << endl;
                 s = cur;
+                if (s.hasScheduled(s.keyCustomers))
+                    break;
             }
         }
-        for (auto heur: priorityInsertionOp) {
-            Sol cur(&dat);
-            cur.keyCustomers = s.keyCustomers;
-            cur.availableDrivers = s.availableDrivers;
-            cur.PutAllCustomersToUnassigned();
-            heur.Insert(cur);
-            if (cur < s) {
-//                cout << "current best cost " << cur.GetCost().satisfiedCost << " with " << heur.name << endl;
-                s = cur;
-            }
-        }
+
         for (auto heur: driverInsertionOp) {
             Sol cur(&dat);
             cur.keyCustomers = s.keyCustomers;
@@ -186,14 +171,6 @@ void CDPSolver::SolveInstance(Sol &s, Data &dat, int iter) {
 
 void CDPSolver::BuildOnSolution(Sol &s, Data &dat, int iter) {
 
-    Sol::FailureCause.resize(dat.GetNodeCount(), Parameters::FAILURECAUSE::NONE);
-    Sol::FailureCount.resize(dat.GetNodeCount(), 0);
-    Sol::minDelay.resize(dat.GetNodeCount(), 0);
-    Sol::pushVisit.resize(dat.GetNodeCount(), 0);
-    Sol::pullVisit.resize(dat.GetNodeCount(), 0);
-    Sol::StartBefore.resize(dat.GetNodeCount(), 0);
-    Sol::TabuFleet.resize(dat.GetNodeCount());
-    TimeSlot::myData = dat;
     InsRmvMethodFast insrmv(dat);
     InsRmvBuilder1 builder1(dat);
     InsRmvBuilder2 builder2(dat);
@@ -205,12 +182,15 @@ void CDPSolver::BuildOnSolution(Sol &s, Data &dat, int iter) {
     vector<CustInsertionOperator> custInsertionOp;
     vector<InsertOperator<Customer, Driver> *> grasp_heuristics;
 
+    //TODO change k
     vector<pair<int, string>> custInfo = {
 //            {0, "Cust Sort Early TW"},
 //            {1, "Cust Sort Greater D"},
-//            {6, "Cust Random"},
-//            {7, "Cust Sort Kinable"},
-            {-1, "Cust custimized Sort"}
+//            {2, "Cust Sort Late TW "},
+//            {3, "Cust Sort Min Width TW"},
+//            {4,"Cust Random"},
+//            {5, "Cust Sort Kinable"},
+//            {-1, "Cust customized Sort"}
     };
     custInsertionOp.reserve(3 * custInfo.size());
     for (const auto &val: custInfo) {
@@ -220,13 +200,13 @@ void CDPSolver::BuildOnSolution(Sol &s, Data &dat, int iter) {
     }
 
     vector<pair<int, string>> priorityInfo = {
-//            {0, "PrioriSort I Early TW"},
-//            {1, "PrioriSort Greater D"},
-//            {2, "PrioriSort D Early TW"},
-//            {4, "PrioriSort D Demand"},
-//            {5, "PrioriSort I Demand"},
-//            {6, "PrioriSort I TW width"},
-//            {7, "PrioriSort D TW width"},
+            {0,"PrioriSort I Early TW"},
+            {1,"PrioriSort I Late TW"},
+            {2,"PrioriSort D Early TW"},
+            {4,"PrioriSort D Demand"},
+            {5,"PrioriSort I Demand"},
+            {6,"PrioriSort I TW width"},
+//            {7,"PrioriSort D TW width"},
     };
     vector<PriorityQueueOperator> priorityInsertionOp;
     PriorityQueueInsertion prioIns3(dat, builder3);
@@ -266,13 +246,13 @@ void CDPSolver::find_all_routes(Sol &s, Customer *c, std::unordered_map<std::str
     Sol::StartBefore.resize(s.GetNodeCount(), 0);
     Sol::pullVisit.resize(s.GetNodeCount(), 0);
     Sol::pushVisit.resize(s.GetNodeCount(), 0);
-    Delivery *del = s.GetDelivery(c)[0];
+    Delivery *del = s.GetDeliveries(c)[0];
     Sol cur(s.GetData());
     RecursiveSols(cur, del, umap);
     set<int> sumServiceTime;
     if (umap != nullptr) {
 //        cout<<"solution count "<<umap->size()<<endl;
-        for (const auto val: *umap) {
+        for (const auto & val: *umap) {
             Sol cur1 = val.second;
 //            cout<<val.first<<endl;
             //        cur.ShowSchedule();
@@ -347,7 +327,7 @@ void CDPSolver::LearnParameters(Sol &s, std::set<int> const &customer) {
         Sol cur1(s.GetData());
         find_all_routes(cur1, c, &myMap);
         int count = 0;
-        for (const auto val: myMap) {
+        for (const auto & val: myMap) {
             Sol cur = val.second;
             cout << count++ << "-" << val.first << endl;
             Node *prev = cur.CustomerNext[c->StartNodeID];
