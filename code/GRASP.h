@@ -49,7 +49,7 @@ template <class NodeT, class DriverT>
 class GRASP : public IAlgorithm<NodeT, DriverT> {
 public:
   GRASP() : _data(nullptr) {
-    _iterator_count = 25000;
+    _iterator_count = 10;
     _temperature = 0.9896;
     _pourcentage_max = 0.4;
     _pourcentage_min = 0.1;
