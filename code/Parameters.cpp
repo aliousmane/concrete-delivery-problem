@@ -22,8 +22,9 @@ std::mt19937 Parameters::RANDOM_GEN =
 int Parameters::LOADING_DURATION=5;
 int Parameters::TIME_BTW_DELIVERY=5;
 bool Parameters::PENALTY_COST = false;
-bool Parameters::KINABLE= true;
+bool Parameters::KINABLE = true;
 bool Parameters::SHOW = false;
+int Parameters::DRIVER_USE = Parameters::MINIMIZEDRIVER::SOLUTION;
 int Parameters::SORT_TYPE= Parameters::SORT::TWO;
  std::chrono::steady_clock::time_point Parameters::START_TIME= std::chrono::high_resolution_clock::now() ;
 
