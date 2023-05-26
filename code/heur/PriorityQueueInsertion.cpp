@@ -9,52 +9,21 @@ using namespace std;
  */
 void PriorityQueueInsertion::Insert(Sol &s) {
     _data = *s.GetData();
+    Sol::InitStructure(s.GetData());
     s.Update();
-
-    if (not s.availableDrivers.empty())
-    {
-        driversList.clear();
-        for (int i : s.availableDrivers)
-        {
-            driversList.push_back(s.GetDriver(i));
-        }
-    }
-    else{
-        driversList.clear();
-        for (int i = 0; i < _data.GetDriverCount(); i++)
-            driversList.push_back(_data.GetDriver(i));
-    }
-    customersList.clear();
     removedList.clear();
-    if (!s.keyCustomers.empty()) {
-        for (int i: s.keyCustomers) {
-            Customer *c = s.GetCustomer(i);
-            if (s.isClientSatisfied(c))
-                continue;
-            customersList.emplace_back(c);
-        }
-    } else {
-        for (int i = 0; i < s.GetCustomerCount(); i++) {
-            Customer *c = s.GetCustomer(i);
-            if (s.isClientSatisfied(c))
-                continue;
-            customersList.emplace_back(c);
-        }
-    }
-
-    InsertByTW(s);
+    _insrmv.FillStructures(s,customersList,driversList);
+    InsertByRules(s);
 }
 
-void PriorityQueueInsertion::InsertByTW(Sol &s) {
+void PriorityQueueInsertion::InsertByRules(Sol &s) {
 
     Insert(s, customersList);
     bool sortie = false;
     while (!removedList.empty() && !sortie) {
         double demand = s.updateCost.satisfiedCost;
-        // cout << s.updateCost << endl;
         customersList = removedList;
         Insert(s, customersList);
-        // cout << s.updateCost << endl;
         sortie = (s.updateCost.satisfiedCost == demand);
     }
     s.Update();
@@ -64,7 +33,7 @@ void PriorityQueueInsertion::Insert(Sol &s, std::vector<Customer *> &list) {
     priority_file.Vider();
     FillQueue(s, list);
     removedList.clear();
-    std::shuffle(driversList.begin(), driversList.end(), Parameters::RANDOM_GEN);
+//    std::shuffle(driversList.begin(), driversList.end(), Parameters::RANDOM_GEN);
 
     while (!priority_file.EstVide()) {
         Move<Delivery, Driver, MoveVrp> best;
@@ -72,7 +41,7 @@ void PriorityQueueInsertion::Insert(Sol &s, std::vector<Customer *> &list) {
 //         for(auto id:listId){
 //           std::cout<<*s.GetDelivery(id)<<endl;
 //         }
-//         std::cout<<endl;
+//         std::cout<<"***********************"<<endl;
 
         std::shuffle(listId.begin(), listId.end(), Parameters::RANDOM_GEN);
         // std::shuffle(_ins_rmv_perators.begin(), _ins_rmv_perators.end(), Parameters::RANDOM_GEN);
@@ -109,6 +78,7 @@ void PriorityQueueInsertion::Insert(Sol &s, std::vector<Customer *> &list) {
         if (best.IsFeasible) {
             _insrmv.ApplyInsertMove(s, best);
             s.Update(best.move.depot, best.move.dock, best.n);
+//            cout<<"insert "<<endl;
 //             s.ShowSchedule(del);
             Order *cur_order = s.GetOrder(del->orderID);
             if (not s.isOrderSatisfied(cur_order)) {
@@ -122,7 +92,9 @@ void PriorityQueueInsertion::Insert(Sol &s, std::vector<Customer *> &list) {
                 DecreaseQueue(s, del, next_del, c);
             }
             else if(s.isClientSatisfied(c)){
+//                s.ShowSchedule(c);
 //                cout<<"Insert "<<c->constID<<endl;
+
             }
         }
     }

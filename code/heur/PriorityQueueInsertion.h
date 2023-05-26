@@ -35,7 +35,7 @@ public:
   std::string name;
 
 private:
-  void InsertByTW(Sol& s);
+  void InsertByRules(Sol& s);
   void Insert(Sol &s,std::vector<Customer *> &list);
   void DecreaseQueue(Sol &s,Delivery *del, Delivery *next_del, Customer *c);
   void Init() {
@@ -58,7 +58,6 @@ private:
   std::vector<Depot *> depotList;
   std::vector<Customer *> customersList;
   std::vector<Customer *> removedList;
-
   std::vector<Driver *> driversList;
 };
 
