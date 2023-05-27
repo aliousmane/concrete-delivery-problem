@@ -15,6 +15,7 @@ RechercheLocale::RechercheLocale(std::set<int> const& feasibleClients)
 
 void RechercheLocale::Run(Sol &s)
 {
+//    s.ShowCustomer();
     Sol cur = s;
     found = true;
     shuffle(customerIdList.begin(), customerIdList.end(), Parameters::RANDOM_GEN);
@@ -200,7 +201,7 @@ void RechercheLocale::Run(Sol &s, std::vector<std::set<int>> &LinkedClientSlot, 
 
 bool RechercheLocale::Swap(Sol &s, Customer *c1, Customer *c2)
 {
-    if (c1->demand < c2->demand)return false;
+    if (c1->demand < c2->demand) return false;
 
     std::set<int> clients = s.satisfiedCustomers;
     clients.erase(c2->custID);
