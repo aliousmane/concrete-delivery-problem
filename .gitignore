@@ -17,3 +17,12 @@ Data/instances/script/backup/
 .vscode/
 Article/versions/13_01_23/cdp_ali.synctex.gz
 modele/timing.mod
+log/
+script/cdp/
+code/CMakeCache.txt
+code/code
+code/cmake_install.cmake
+script/core*
+code/CMakeFiles/
+code/Makefile
+script/code
