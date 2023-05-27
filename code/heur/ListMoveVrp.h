@@ -13,7 +13,7 @@
 #include "../Node.h"
 #include "MoveVrp.h"
 #include <vector>
-
+#include <unordered_map>
 struct ListMoveVrpSorter {
   bool operator()(Move<Delivery, Driver, MoveVrp> &m1,
                   Move<Delivery, Driver, MoveVrp> &m2) ;

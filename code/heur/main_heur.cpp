@@ -19,7 +19,7 @@ int main(int argc, const char **argv) {
     Solver solver(&data);
     solver.run();
 
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - Parameters::START_TIME ).count();
+    // auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - Parameters::START_TIME ).count();
 
     Parameters::ShowTime();
     return 0;

@@ -33,13 +33,16 @@ public:
     static bool SHOW;
     static int DRIVER_USE;
     static int SORT_TYPE;
-    static std::chrono::steady_clock::time_point START_TIME;
+    static std::chrono::time_point<std::chrono::steady_clock> START_TIME;
+    
+       
     static void ShowTime(){
-        auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - Parameters::START_TIME ).count();
+        auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()- Parameters::START_TIME ).count();
         std::cout << "\nTemps " << elapsed_time / 1000.0 << " s "<<(elapsed_time / 1000.0)/60<<" min"<< std::endl;
     }
     static long GetElapsedTime(){
-        return  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - Parameters::START_TIME ).count();
+        return  std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()
+         - Parameters::START_TIME ).count();
     }
     enum TypeNode
     {

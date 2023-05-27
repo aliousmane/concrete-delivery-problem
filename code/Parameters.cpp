@@ -26,6 +26,4 @@ bool Parameters::KINABLE = true;
 bool Parameters::SHOW = false;
 int Parameters::DRIVER_USE = Parameters::MINIMIZEDRIVER::SOLUTION;
 int Parameters::SORT_TYPE= Parameters::SORT::TWO;
- std::chrono::steady_clock::time_point Parameters::START_TIME= std::chrono::high_resolution_clock::now() ;
-
-
+std::chrono::time_point<std::chrono::steady_clock> Parameters::START_TIME= std::chrono::steady_clock::now();

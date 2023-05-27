@@ -1,6 +1,7 @@
 
 #include "Combinatorial.h"
 #include <functional>
+#include <cmath>
 
 using namespace std;
 void Combinatorial::find_combinations(vector<int> &nums, int k, vector<int> &combination, set<vector<int>> &result, set
