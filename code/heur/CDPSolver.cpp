@@ -97,11 +97,11 @@ void CDPSolver::SolveInstance(Sol &s, Data &dat, int iter) {
     vector<InsertOperator<Customer, Driver> *> grasp_heuristics;
 
     vector<pair<int, string>> custInfo = {
-//            {0, "Cust Sort Early TW"},
-//            {1, "Cust Sort Greater D"},
+            {0, "Cust Sort Early TW"},
+            {1, "Cust Sort Greater D"},
 //            {2, "Cust Sort Late TW "},
 //            {3, "Cust Sort Min Width TW"},
-//            {4,"Cust Random"},
+            {4,"Cust Random"},
 //            {5, "Cust Sort Kinable"},
 //            {-1, "Cust customized Sort"}
     };
@@ -145,10 +145,10 @@ void CDPSolver::SolveInstance(Sol &s, Data &dat, int iter) {
             Sol cur(&dat);
             cur.keyCustomers = s.keyCustomers;
             cur.availableDrivers = s.availableDrivers;
-            Prompt::print({"Iter", to_string(i), heur.name});
+//            Prompt::print({"Iter", to_string(i), heur.name});
             heur.Insert(cur);
             if (cur < s) {
-                cout << "current best cost " << cur.GetCost().satisfiedCost << " with " << heur.name << endl;
+//                cout << "current best cost " << cur.GetCost().satisfiedCost << " with " << heur.name << endl;
                 s = cur;
                 if (s.hasScheduled(s.keyCustomers))
                     break;

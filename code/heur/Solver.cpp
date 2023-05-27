@@ -946,11 +946,11 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
     grasp.AddInsertOperatorVrp(&c4);
     grasp.AddInsertOperatorVrp(&c5);
     grasp.verbose = true;
-    grasp.SetIterationCount(5);
+    grasp.SetIterationCount(1);
     RechercheLocale loc_search(s.keyCustomers);
     loc_search.LinkedClientSlot = linkedClientSlot;
-//    grasp.Optimize(s, nullptr, nullptr, &loc_search, true);
-    grasp.Optimize(s, nullptr, nullptr, nullptr, true);
+    grasp.Optimize(s, nullptr, nullptr, &loc_search, true);
+//    grasp.Optimize(s, nullptr, nullptr, nullptr, true);
 }
 
 /**
