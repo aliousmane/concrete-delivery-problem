@@ -9,6 +9,7 @@
 #include "Parameters.h"
 #include "Driver.h"
 #include "Node.h"
+#include <utility>
 #include <vector>
 #include <set>
 #include <cassert>
@@ -20,11 +21,15 @@ public:
     Sol() = default;
 
     explicit Sol(Data *data);
+    explicit Sol(Data *data, std::set<int> const & usedCustomers):Sol(data){
+        this->keyCustomers = usedCustomers;
+    }
 
     bool isFeasible{false};
     int iter{-1};
     double duration_time{0};
     Cost updateCost;
+    bool computeLastCost{false};
     std::vector<Driver *> DriverAssignTo;
     std::vector<Depot *> DepotAssignTo;
     std::vector<Node *> DriverNext;
@@ -46,7 +51,7 @@ public:
     std::vector<int> EndServiceTime;
     std::vector<int> ExpectedServiceTime;
     std::vector<int> DepartureTime;
-    std::vector<int> DeliveryLoad;
+    std::vector<int> DeliveryLoad; // key: delID
     std::vector<int> WaitingTime;
     std::vector<int> ClientWaitingTime;
     std::vector<int> TruckWaitingTime;
@@ -134,6 +139,7 @@ public:
     Node *GetNode(int i) { return _data->GetNode(i); }
 
     Delivery *GetDelivery(Order *o, int index) { return _data->GetDelivery(o, index); }
+
     Delivery *GetDelivery(int orderID, int index) { return _data->GetDelivery(GetOrder(orderID), index); }
 
     std::vector<Delivery *> GetDeliveries(Customer *c) {
@@ -152,10 +158,11 @@ public:
         }
         return temp;
     }
-    std::vector<Delivery *> GetDeliveries(Order *o,int imin,int imax) {
-        std::vector<Delivery *> temp(std::min(imax,GetDeliveryCount(o)-1)-imin+1);
-        int id=0;
-        for (int i = imin; i <= std::min(imax,GetDeliveryCount(o)-1); i++) {
+
+    std::vector<Delivery *> GetDeliveries(Order *o, int imin, int imax) {
+        std::vector<Delivery *> temp(std::min(imax, GetDeliveryCount(o) - 1) - imin + 1);
+        int id = 0;
+        for (int i = imin; i <= std::min(imax, GetDeliveryCount(o) - 1); i++) {
             temp[id++] = GetDelivery(o, i);
         }
         return temp;
@@ -226,7 +233,12 @@ public:
 
     Cost GetCost();
 
-    Cost GetLastCost() { return _last_cost; }
+    Cost GetLastCost() {
+        if (!computeLastCost) {
+            return GetCost();
+        }
+        return _last_cost;
+    }
 
     void GetCost(Depot *dep, Cost &cur_cost);
 
@@ -374,6 +386,10 @@ public:
 
     void BuildFromDepotSetIntervall(Depot *depot);
 
+    void BuildFromDriverSetIntervall();
+
+    void BuildFromDriverSetIntervall(Driver *d);
+
     void InsertAfterDepot(Node *n, Node *prev, Node *dep);
 
     bool operator<(const Sol &rhs) const;
@@ -390,6 +406,7 @@ public:
     }
 
     std::string toString() const;
+    std::string toString(Customer *c) const ;
 
     Order *findIdleOrder(Customer *c) {
         std::vector<Order *> orders(GetOrders(c));
@@ -412,12 +429,24 @@ public:
         return nullptr;
     }
 
+    void ShowDepotSlots() {
+        for (int i = 0; i < GetDepotCount(); i++) {
+            ShowSlot(GetDepot(i));
+        }
+    }
+
     void ShowSlot(Depot *myDep) {
-        std::cout << "Slots for " << myDep->depotLoc << std::endl;
+        std::cout << "Slots for depot " << myDep->depotID << std::endl;
         for (const auto &x: depotLoadingIntervals[myDep->depotID]) {
             std::cout << x << "--";
         }
         std::cout << std::endl;
+    }
+
+    void ShowDriverSlots() {
+        for (int i = 0; i < GetDriverCount(); i++) {
+            ShowSlot(GetDriver(i));
+        }
     }
 
     void ShowSlot(Driver *d) {
@@ -432,7 +461,8 @@ public:
 
     void exportCSVFormat(const std::string &fileName);
 
-    static void InitStructure(Data *dat){
+    static void InitStructure(Data *dat) {
+
         Sol::CustomerConflict.clear();
         Sol::CustomerConflict.resize(dat->GetCustomerCount());
         Sol::FailureCause.clear();
@@ -460,12 +490,8 @@ private:
 
 class MyHashFunction {
 public:
-    size_t operator()(const Sol &s) const {
-        return std::hash<std::string>()(s.toString());
-    }
-
-    size_t operator()(const std::string &s) const {
-        return std::hash<std::string>()(s) << 1;
+    size_t operator()(const std::string &str) const {
+        return std::hash<std::string>()(str) ;
     };
 };
 

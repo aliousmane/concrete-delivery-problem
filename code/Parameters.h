@@ -63,10 +63,12 @@ public:
         PUSH_PREC_CUSTOMER
     };
     enum SORT{
-        ONE,
+        ONE=1,
         TWO,
         THREE,
-        FOUR
+        FOUR,
+        FIVE,
+        SHUFFLE
     };
     enum MINIMIZEDRIVER{
         SOLUTION,

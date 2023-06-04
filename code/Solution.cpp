@@ -12,8 +12,7 @@ std::vector<int> Sol::StartBefore = std::vector<int>();
 std::vector<int> Sol::pullVisit = std::vector<int>();
 std::vector<int> Sol::pushVisit = std::vector<int>();
 std::vector<std::set<int>> Sol::TabuFleet = std::vector<std::set<int>>();
-std::map<std::tuple<int, int>, int> Sol::nodeMaxStartService =
-        std::map < std::tuple<int, int>,
+std::map<std::tuple<int, int>, int> Sol::nodeMaxStartService = std::map < std::tuple<int, int>,
 int>();
 
 
@@ -36,7 +35,7 @@ Sol::Sol(Data *data) : _data(data), _last_cost(false), DriverAssignTo(data->GetN
                        DepartureTime(data->GetNodeCount(), 0),
                        ClientWaitingTime(data->GetNodeCount(), 0),
                        TruckWaitingTime(data->GetNodeCount(), 0),
-                       DeliveryLoad(data->GetNodeCount(), 0), WaitingTime(data->GetNodeCount(), 0),
+                       WaitingTime(data->GetNodeCount(), 0),
                        Unassigned(data->GetNodeCount(), nullptr),
                        VisitFlags(data->GetNodeCount(), false),
                        VisitFlagCost(data->GetNodeCount(), false),
@@ -52,26 +51,32 @@ Sol::Sol(Data *data) : _data(data), _last_cost(false), DriverAssignTo(data->GetN
                        clientDriverUsed(data->GetCustomerCount()),
                        OrderVisitCount(data->GetCustomerCount(), 0),
                        sumServiceTime(data->GetCustomerCount(), 0),
-                       updateCost(), UnassignedCount(0) {
+                       updateCost(), UnassignedCount(0),
+                       DeliveryLoad(data->GetDeliveryCount(), 0) {
     InitCustomers();
-    InitOrders();
+    InitDepots();
+//    InitOrders();
     AssignStationToCustomers();
     AssignStationToDepots();
     AssignStationToDriver();
+    InitDrivers();
 
 }
 
 void Sol::InitCustomers() {
     updateCost.undeliveredCost = 0;
-    if (keyCustomers.empty()) {
+//    if (keyCustomers.empty())
+    {
         for (int i = 0; i < _data->GetCustomerCount(); i++) {
             InitCustomer(_data->GetCustomer(i));
         }
-    } else {
-        for (auto id: keyCustomers) {
-            InitCustomer(_data->GetCustomer(id));
-        }
     }
+//    else
+//    {
+//        for (auto id: keyCustomers) {
+//            InitCustomer(_data->GetCustomer(id));
+//        }
+//    }
 
 }
 
@@ -82,8 +87,7 @@ void Sol::InitCustomer(Customer *c) {
     sumServiceTime[c->custID] = 0;
     WaitingTime[c->id] = 0;
     updateCost.undeliveredCost += c->demand;
-    for(auto o: GetOrders(c))
-    {
+    for (auto o: GetOrders(c)) {
         InitOrder(o);
     }
 }
@@ -93,9 +97,8 @@ void Sol::InitDrivers() {
         for (int i = 0; i < GetDriverCount(); i++) {
             InitDriver(GetDriver(i));
         }
-    }
-    else{
-        for(auto id:availableDrivers){
+    } else {
+        for (auto id: availableDrivers) {
             InitDriver(GetDriver(id));
         }
     }
@@ -239,7 +242,7 @@ void Sol::RemoveDelivery(Delivery *del) {
         updateCost.lateDeliveryCost -=
                 std::max(0, (EndServiceTime[del->id] - LateTW(del))) *
                 Parameters::LATE_ARRIVAL_PENALTY;
-        updateCost.satisfiedCost -= DeliveryLoad[del->id];
+        updateCost.satisfiedCost -= DeliveryLoad[del->delID];
     }
     updateCost.travelCost -= del->travel_time;
 
@@ -248,14 +251,17 @@ void Sol::RemoveDelivery(Delivery *del) {
     updateCost.waitingCost = updateCost.clientWaitingCost +
                              updateCost.truckWaitingCost;
     Sol::FailureCount[del->id] = 0;
-    orderCapRestante[del->orderID] += DeliveryLoad[del->id];
-    clientCapRestante[del->custID] += DeliveryLoad[del->id];
+    assert(DeliveryLoad[del->delID] > 0);
+    orderCapRestante[del->orderID] += DeliveryLoad[del->delID];
+    clientCapRestante[del->custID] += DeliveryLoad[del->delID];
     OrderLateDelivery[del->orderID] -= NodeLateDelivery[del->id];
     NodeLateDelivery[del->id] = 0;
-    DeliveryLoad[del->id] = 0;
+    DeliveryLoad[del->delID] = 0;
     Driver *d = DriverAssignTo[del->id];
     updateCost.waste -= d->capacity;
-    DriverVisitCount[d->id][del->custID]--;
+    if (!DriverVisitCount[d->id].empty()) {
+        DriverVisitCount[d->id][del->custID]--;
+    }
     Remove(del);
     Dock *dock = GetDock(del->dockID);
     RemoveDock(dock);
@@ -390,7 +396,7 @@ void Sol::ShowSchedule(Delivery *del) {
                "|%04d "
                "| %04d |%04d|\n",
                del->id, del->orderID, del->custID, d->id, d->capacity,
-               DeliveryLoad[del->id], DriverPrev[dock->id]->id, Travel(DriverPrev[dock->id], dock), dock->id,
+               DeliveryLoad[del->delID], DriverPrev[dock->id]->id, Travel(DriverPrev[dock->id], dock), dock->id,
                StartServiceTime[dock->id], EndServiceTime[dock->id], Travel(dock, del),
                ArrivalTime[del->id], WaitingTime[del->id],
                StartServiceTime[del->id], EndServiceTime[del->id],
@@ -401,7 +407,7 @@ void Sol::ShowSchedule(Delivery *del) {
                "|%04d "
                "| %04d |%04d|\n",
                del->id, del->orderID, del->custID, -1, -1,
-               DeliveryLoad[del->id], -1, -1, dock->id,
+               DeliveryLoad[del->delID], -1, -1, dock->id,
                StartServiceTime[dock->id], EndServiceTime[dock->id], Travel(dock, del),
                ArrivalTime[del->id], WaitingTime[del->id],
                StartServiceTime[del->id], EndServiceTime[del->id],
@@ -499,6 +505,30 @@ void Sol::BuildFromDepotSetIntervall(Depot *depot) {
     }
 }
 
+
+void Sol::BuildFromDriverSetIntervall() {
+    for (int k = 0; k < GetDriverCount(); k++) {
+        BuildFromDriverSetIntervall(GetDriver(k));
+    }
+}
+
+void Sol::BuildFromDriverSetIntervall(Driver *d) {
+    Node *end = GetNode(d->EndNodeID);
+    Node *prev = GetNode(d->StartNodeID);
+
+    DriverNext[prev->id] = end;
+    DriverPrev[end->id] = prev;
+
+    for (const auto& intv: driverWorkingIntervals[d->id]) {
+        auto *del_int = dynamic_cast<Delivery *>(GetNode(intv.nodeID));
+        Dock *dock_int = GetDock(del_int->dockID);
+        Node *dep = GetDepotAssignedTo(dock_int);
+        InsertAfter(dock_int, prev, d);
+        InsertAfter(del_int, dock_int, d);
+        prev = del_int;
+    }
+}
+
 bool Sol::operator<(const Sol &rhs) const {
     return const_cast<Sol *>(this)->GetCost() < const_cast<Sol &>(rhs).GetCost();
 }
@@ -520,8 +550,16 @@ std::string Sol::CustomerString() {
 std::string Sol::toString() const {
     std::stringstream ss;
     ss << updateCost.satisfiedCost << ":";
-    for (int i = 0; i < GetOrderCount(); i++) {
-        Order *o1 = const_cast<Sol *>(this)->GetOrder(i);
+    for(int i=0;i<GetCustomerCount();i++){
+        Customer *c = const_cast<Sol*>(this)->GetCustomer(i);
+        ss<< const_cast<Sol*>(this)->toString(c);
+    }
+    return ss.str();
+}
+
+std::string Sol::toString(Customer *c) const {
+    std::stringstream ss;
+    for (auto o1:   const_cast<Sol*>(this)->GetOrders(c)) {
         if (!isOrderSatisfied(o1))
             continue;
         std::vector<int> countDriver(GetDriverCount(), 0);
@@ -530,9 +568,8 @@ std::string Sol::toString() const {
             Delivery *del = const_cast<Sol *>(this)->GetDelivery(o1, j);
             Driver *d = const_cast<Sol *>(this)->GetDriverAssignedTo(del);
             if (d != nullptr) {
-
                 ss << del->id << "-(" << int(DriverVisitCount[d->id][del->custID] > 1) << ")-[" << d->capacity << "-"
-                   << DeliveryLoad[del->id];
+                   << DeliveryLoad[del->delID];
                 if (del->rank == 0) {
                     if (StartServiceTime[del->id] <= EarlyTW(del)) {
                         ss << "<]-";
@@ -552,6 +589,7 @@ std::string Sol::toString() const {
     return ss.str();
 }
 
+
 void Sol::exportCSVFormat(const std::string &fileName) {
     std::ofstream myfile(fileName);
     if (myfile.is_open()) {
@@ -568,7 +606,7 @@ void Sol::exportCSVFormat(const std::string &fileName) {
                     // std::cout << _prob->instance_name << std::endl;
                     myfile << _data->instance_name << ";" << del->id << ";"
                            << del->orderID << ";" << del->custID << ";" << d->id << ";"
-                           << d->capacity << ";" << d->rank << ";" << DeliveryLoad[del->id] << ";"
+                           << d->capacity << ";" << d->rank << ";" << DeliveryLoad[del->delID] << ";"
                            << DriverPrev[dock->id]->id << ";" << Travel(DriverPrev[dock->id], dock) << ";" <<
                            dock->id << ";" << StartServiceTime[dock->id] << ";" << EndServiceTime[dock->id] << ";" <<
                            Travel(dock, del) << ";" << ArrivalTime[del->id] << ";" << WaitingTime[del->id] << ";" <<

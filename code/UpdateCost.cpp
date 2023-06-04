@@ -1,4 +1,5 @@
 #include "Solution.h"
+#include "Prompt.h"
 #include <iostream>
 
 using namespace std;
@@ -11,11 +12,10 @@ void Sol::Update() {
     driverUsed.clear();
     BuildFromDepotSetIntervall();
     isFeasible = true;
-
+    computeLastCost=false;
     InitDrivers();
     InitCustomers();
     InitDepots();
-
     nodeServiceIntervals =
             std::vector<TimeSlot>(GetNodeCount(), TimeSlot(0, 1440));
     UpdateForward();
@@ -72,7 +72,6 @@ void Sol::UpdateForward(Depot *dep) {
             continue;
         }
         if (prev->type == Parameters::DOCK) {
-//            cout<<prev<<endl;
             Driver *d = GetDriverAssignedTo(prev);
             if (d != nullptr) {
                 auto *dock = dynamic_cast<Dock *>(prev);
@@ -84,7 +83,8 @@ void Sol::UpdateForward(Depot *dep) {
                     }
                 }
                 auto *del = dynamic_cast<Delivery *>(DriverNext[dock->id]);
-                Update(dep, dock, del);
+                if(!VisitFlags[del->id] )
+                    Update(dep, dock, del);
             }
         }
         VisitFlags[prev->id] = true;
@@ -106,10 +106,11 @@ void Sol::Update(Depot *dep, Dock *dock, Delivery *del) {
     clientDriverUsed[c->custID].insert(d->id);
     driverUsed.insert(d->id);
 
-    DeliveryLoad[del->id] = GetLoad(d, o);
-    updateCost.satisfiedCost += DeliveryLoad[del->id];
+    DeliveryLoad[del->delID] = GetLoad(d, o);
+    assert(DeliveryLoad[del->delID] >0);
+    updateCost.satisfiedCost += DeliveryLoad[del->delID];
     updateCost.waste += d->capacity;
-    UpdateDemand(c, o, DeliveryLoad[del->id]);
+    UpdateDemand(c, o, DeliveryLoad[del->delID]);
     if (isClientSatisfied(c)) {
         satisfiedCustomers.insert(c->constID);
         updateCost.waste -= d->capacity;
@@ -117,7 +118,7 @@ void Sol::Update(Depot *dep, Dock *dock, Delivery *del) {
         updateCost.undeliveredCost-=c->demand;
     }
     DriverVisitCount[d->id][c->custID]++;
-    del->demand = DeliveryLoad[del->id];
+    del->demand = DeliveryLoad[del->delID];
     const int LOAD_DURATION = Data::LoadingTime(dep, del->demand);
     const int ADJUSTMENT_DURATION = Parameters::ADJUSTMENT_DURATION;
     const int UNLOADING_DURATION = Data::UnloadingTime(del, del->demand, d);
@@ -211,7 +212,6 @@ void Sol::Update(Order *o) {
 }
 
 Cost Sol::GetCost() {
-
     _last_cost.Init();
     _last_cost.isFeasible = false;
     if (not isFeasible)
@@ -260,6 +260,7 @@ Cost Sol::GetCost() {
                 int(d->shiftDurationCost > Parameters::MAX_WORKING_TIME);
     }
     _last_cost.setTotal();
+    computeLastCost=true;
     return _last_cost;
 }
 
@@ -272,7 +273,6 @@ void Sol::GetCost(Depot *dep, Cost &cur_cost) {
             continue;
         }
         if (prev->type == Parameters::DOCK) {
-//            cout<<prev<<endl;
             Driver *d = GetDriverAssignedTo(prev);
             if (d != nullptr) {
                 auto *dock = dynamic_cast<Dock *>(prev);
@@ -284,7 +284,8 @@ void Sol::GetCost(Depot *dep, Cost &cur_cost) {
                     }
                 }
                 auto *del = dynamic_cast<Delivery *>(DriverNext[dock->id]);
-                GetCost(dep, dock, del, cur_cost);
+                if(!VisitFlagCost[del->id] )
+                    GetCost(dep, dock, del, cur_cost);
             }
         }
         VisitFlagCost[prev->id] = true;
@@ -369,7 +370,6 @@ void Sol::Show(Driver *d) {
 
 void Sol::UpdateDepotLoadingSet(Depot *dep, Dock *dock, TimeSlot const &intv) {
 
-//    cout<<intv<<endl;
     auto it = std::find_if(
             depotLoadingIntervals[dep->depotID].begin(),
             depotLoadingIntervals[dep->depotID].end(),

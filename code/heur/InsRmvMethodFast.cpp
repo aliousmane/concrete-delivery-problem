@@ -90,8 +90,9 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
     Depot *dep = s.GetDepot(dock->depotID);
     int ELT = expected_del_time - s.Travel(dock, n) - ADJUSTMENT_DURATION - LOAD_DURATION;
     auto *prec_del_of_cust = dynamic_cast<Delivery *>( s.CustomerPrev[n->EndNodeID]);
+//    if(n->custID==3 )Parameters::SHOW=true;
     if (Parameters::SHOW) {
-//        Prompt::print({"Try insertion with", to_string(d->id)});
+//        Prompt::print({"Try insertion of", to_string(n->custID),"with", to_string(d->id)});
 //        s.ShowSlot(d);
 //        s.Show(d);
     }
@@ -141,6 +142,13 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         node_arr += s.Travel(dock, n);
         unloadSlot.lower = node_arr;
 
+        if(next_del!= nullptr){
+            if(node_arr >= s.LateTW(next_del)){
+                prev = next_del;
+                continue;
+            }
+        }
+
         if (Parameters::SHOW) {
 //            Prompt::print({"ELT ", to_string(ELT), ":prev->L", to_string(s.Travel(prev, dock)), "L->D",
 //                           to_string(s.Travel(dock, n))});
@@ -148,8 +156,8 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         if (node_arr > s.LateTW(n)) {
             int delay = node_arr - s.LateTW(n);
             if (Parameters::SHOW) {
-//                Prompt::print({"After ", to_string(prev->id), ",", to_string(n->id), "arrives",
-//                               to_string(delay), "after  LTW  with driver", to_string(d->id)});
+                Prompt::print({"After ", to_string(prev->id), ",", to_string(n->id), "arrives",
+                               to_string(delay), "after  LTW  with driver", to_string(d->id)});
             }
 // TODO           Sol::pullVisit[n->id] = (Sol::pullVisit[n->id]==0)  ? delay: std::min(Sol::pullVisit[n->id],delay);
             if (prev->type == Parameters::DELIVERY) {
@@ -191,14 +199,14 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
                             Parameters::LATE_ARRIVAL_PENALTY;
                 } else {
                     if (Parameters::SHOW) {
-                        Prompt::print(
-                                {"node_arr > s.nodeServiceIntervals[", to_string(prec_del_of_cust->id), "].upper + Parameters::TIME_BTW_DELIVERY"});
-                        Prompt::print(
-                                {to_string(n->id), "(", to_string(n->rank), ") violates delay for ",
-                                 to_string(Sol::FailureCount[n->id]), "times",
-                                 to_string(delay), " min. LTW=",
-                                 to_string(s.LateTW(n)), "arrival = ", to_string(node_arr),
-                                 to_string(Sol::FailureCause[n->id])});
+//                        Prompt::print(
+//                                {"node_arr > s.nodeServiceIntervals[", to_string(prec_del_of_cust->id), "].upper + Parameters::TIME_BTW_DELIVERY"});
+//                        Prompt::print(
+//                                {to_string(n->id), "(", to_string(n->rank), ") violates delay for ",
+//                                 to_string(Sol::FailureCount[n->id]), "times",
+//                                 to_string(delay), " min. LTW=",
+//                                 to_string(s.LateTW(n)), "arrival = ", to_string(node_arr),
+//                                 to_string(Sol::FailureCause[n->id])});
                     }
 //
                     prev = (next_del == nullptr) ? s.DriverNext[prev->id] : next_del;
@@ -212,7 +220,7 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         if (false) {
             if (node_arr > max_arrival_Time) {
                 if (Parameters::SHOW) {
-                    Prompt::print({"node_arr > max_arrival_Time ", to_string(max_arrival_Time)});
+//                    Prompt::print({"node_arr > max_arrival_Time ", to_string(max_arrival_Time)});
                 }
 //            m.FailureCause = Parameters::FAILURECAUSE::LATETW;
                 m.move.prev = prev;
@@ -229,10 +237,11 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         }
         node_arr += UNLOADING_DURATION;
         if (node_arr > s.LateTW(n)) {
-            if (Parameters::SHOW) {
-                Prompt::print({"node_arr > s.LateTW(n) "});
-            }
             if (prev->type == Parameters::DELIVERY) {
+                if (Parameters::SHOW) {
+                    Prompt::print({"prev", to_string(prev->id), "node_arr=", to_string(node_arr),"> s.LateTW(", to_string(n->custID),") de ",
+                                   to_string(node_arr-s.LateTW(n))});
+                }
 //                    m.FailureCause = Parameters::FAILURECAUSE::LATETW;
                 if (prev_del->custID != n->custID) {
                     m.move.prev = prev;
@@ -270,25 +279,35 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
             }
             if (Parameters::SHOW) {
                 Prompt::print({"it != s.driverWorkingIntervals[", to_string(d->id), "].end())"});
-                Prompt::print({" driver ", to_string(d->id), " was busy with ", to_string(it->nodeID), " for node ",
-                               to_string(n->id),"cust", to_string( it_cust->custID)});
+                Prompt::print({" driver ", to_string(d->id), " was busy with ", to_string(it->nodeID),"cust", to_string( it_cust->custID), " for node ",
+                               to_string(n->id)});
+                cout<<*it<< " "<<intv<<endl;
             }
             Sol::FailureCause[n->id] = Parameters::FAILURECAUSE::DRIVERBUSY;
-            Sol::CustomerConflict[n->custID].insert(it_cust->custID);
+            if(it_cust->custID!=n->custID){
+                Sol::CustomerConflict[n->custID].insert(it_cust->custID);
+            }
 
             prev = (next_del == nullptr) ? s.DriverNext[prev->id] : next_del;
             continue;
         }
         if (next_dock != nullptr) {
+
+            if(node_arr >= s.LateTW(next_del)){
+                prev = next_del;
+                continue;
+            }
+
             if (node_arr + s.Travel(n, next_dock) + s.Travel(next_dock, next_del) >
                 std::max(s.StartServiceTime[next_del->id],
                          Sol::nodeMaxStartService[make_tuple(next_del->id, d->capacity)])) {
                 if (Parameters::SHOW) {
-//                    printf("fin %d + s.Travel(%d, %d) + s.Travel(%d, %d) =%d > s.StartServiceTime[next_del->id] , ETW %d NC%d\n",
-//                           node_arr, n->id, next_dock->id, next_dock->id, next_del->id,
-//                           node_arr + s.Travel(n, next_dock) + s.Travel(next_dock,
-//                                                                        next_del), s.EarlyTW(next_del),next_del->custID);
-
+                    printf("fin %d + s.Travel(%d, %d) + s.Travel(%d, %d) =%d > s.StartServiceTime[next_del->id] , ETW %d NC%d\n",
+                           node_arr, n->id, next_dock->id, next_dock->id, next_del->id,
+                           node_arr + s.Travel(n, next_dock) + s.Travel(next_dock,
+                                                                        next_del), s.EarlyTW(next_del),next_del->custID);
+                    Prompt::print({"Ecart", to_string(node_arr + s.Travel(n, next_dock) + s.Travel(next_dock, next_del) -
+                                                      s.StartServiceTime[next_del->id])});
                 }
                 if (Parameters::PENALTY_COST) {
                     newcost.lateDeliveryCost +=
@@ -305,9 +324,9 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
                 Data::UnloadingTime(next_del, next_del->demand, d) >
                 s.LateTW(next_del)) {
                 if (Parameters::SHOW) {
-                    Prompt::print(
-                            {"node_arr + s.Travel(n, next) + s.Travel(next, next_del) + next_del->unload_duration > "
-                             "LateTW(next_del) ","next client ", to_string(next_del->custID)});
+//                    Prompt::print(
+//                            {to_string(node_arr),"+ s.Travel(n, next) + s.Travel(next, next_del) + next_del->unload_duration > "
+//                             "LateTW(next_del) ","next client ", to_string(next_del->custID)});
                 }
 //                if (Parameters::PENALTY_COST) {
 //                    newcost.lateDeliveryCost +=
@@ -334,8 +353,8 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         newcost += s.updateCost;
         if (newcost.lateDeliveryCost > 100) {
             if (Parameters::SHOW) {
-                Prompt::print({"newcost.lateDeliveryCost", to_string(newcost.lateDeliveryCost),
-                               "> 100"});
+//                Prompt::print({"newcost.lateDeliveryCost", to_string(newcost.lateDeliveryCost),
+//                               "> 100"});
             }
 //            prev = s.DriverNext[prev->id];
 //            continue;
@@ -393,6 +412,8 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         best = temp_moves->GetRandom();
     }
     solcost = best.DeltaCost;
+//    Parameters::SHOW=false;
+
     return best;
 }
 
@@ -416,6 +437,7 @@ void InsRmvMethodFast::repairSolution(Sol &s, Customer *c) {
 void InsRmvMethodFast::FillStructures( Sol &s, std::vector<Customer *> & customersList,
                     std::vector<Driver *> & driversList){
     driversList.clear();
+    driversList.shrink_to_fit();
     if (not s.availableDrivers.empty())
     {
         for (int i : s.availableDrivers)
@@ -428,6 +450,7 @@ void InsRmvMethodFast::FillStructures( Sol &s, std::vector<Customer *> & custome
             driversList.push_back(s.GetDriver(i));
     }
     customersList.clear();
+    customersList.shrink_to_fit();
     if (!s.keyCustomers.empty()) {
         for (int i: s.keyCustomers) {
             Customer *c = s.GetCustomer(i);
