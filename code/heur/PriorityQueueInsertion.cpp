@@ -1,7 +1,10 @@
 #include "PriorityQueueInsertion.h"
+#include "CustInsertion.h"
+#include "../Prompt.h"
 #include <iostream>
 
 using namespace std;
+
 /**
  * @brief Insert following specified criterion
  *
@@ -12,14 +15,14 @@ void PriorityQueueInsertion::Insert(Sol &s) {
     Sol::InitStructure(s.GetData());
     s.Update();
     removedList.clear();
-    _insrmv.FillStructures(s,customersList,driversList);
+    _insrmv.FillStructures(s, customersList, driversList);
     InsertByRules(s);
 }
 
 void PriorityQueueInsertion::InsertByRules(Sol &s) {
 
     Insert(s, customersList);
-    bool sortie = false;
+    bool sortie = true;
     while (!removedList.empty() && !sortie) {
         double demand = s.updateCost.satisfiedCost;
         customersList = removedList;
@@ -33,42 +36,52 @@ void PriorityQueueInsertion::Insert(Sol &s, std::vector<Customer *> &list) {
     priority_file.Vider();
     FillQueue(s, list);
     removedList.clear();
-//    std::shuffle(driversList.begin(), driversList.end(), Parameters::RANDOM_GEN);
+    std::shuffle(driversList.begin(), driversList.end(), Parameters::RANDOM_GEN);
 
     while (!priority_file.EstVide()) {
         Move<Delivery, Driver, MoveVrp> best;
         std::vector<int> listId = priority_file.GetMins();
-//         for(auto id:listId){
-//           std::cout<<*s.GetDelivery(id)<<endl;
-//         }
+        std::vector<int> unUsedId;
+        for (auto id: listId) {
+            Delivery *cur_del = s.GetDelivery(id);
+//           std::cout<<*cur_del<<endl;
+            if (!s.isClientSatisfied(cur_del->custID)) {
+                unUsedId.push_back(id);
+            } else {
+                priority_file.Supprimer(id);
+            }
+        }
 //         std::cout<<"***********************"<<endl;
 
-        std::shuffle(listId.begin(), listId.end(), Parameters::RANDOM_GEN);
-        // std::shuffle(_ins_rmv_perators.begin(), _ins_rmv_perators.end(), Parameters::RANDOM_GEN);
-
-        _insrmv.GetBestInsertion(s, listId, driversList, best);
+        if (unUsedId.empty()) {
+            continue;
+        }
+        _insrmv.GetBestInsertion(s, unUsedId, driversList, best);
 
         if (!best.IsFeasible) {
+            Sol cur = s;
+            cur.keyCustomers.clear();
             for (int nodeID: listId) {
                 priority_file.Supprimer(nodeID);
                 Delivery *del = s.GetDelivery(nodeID);
                 Order *o = s.GetOrder(del->orderID);
-
-                if( del->rank>0 && Sol::FailureCount[del->id] <3 && Sol::FailureCause[del->id]==Parameters::FAILURECAUSE::DELAY)
-                {
-                    Delivery *prec_del = s.GetDelivery(o,del->rank-1);
-                    Sol::minDelay[prec_del->id] = Sol::pushVisit[del->id];
-                    Sol::pushVisit[del->id]=0;
-                    Sol::FailureCause[del->id]=Parameters::FAILURECAUSE::NONE;
-                    Sol::FailureCause[prec_del->id]=Parameters::FAILURECAUSE::NONE;
-//                        cout<<" Push "<<prec_del->id << " by "<<Sol::minDelay[prec_del->id]<<endl;
-//                        s.ShowSchedule(cur_order);
-                    prec_del->isdelayed = true;
+                cur.UnassignCustomer(del->custID);
+                cur.keyCustomers.insert(del->custID);
+                if (del->rank > 0) {
+//                    if( Sol::FailureCount[del->id] <3 && Sol::FailureCause[del->id]==Parameters::FAILURECAUSE::DELAY)
+                    if (Sol::FailureCause[del->id] == Parameters::FAILURECAUSE::DELAY) {
+                        Delivery *prec_del = s.GetDelivery(o, del->rank - 1);
+                        Sol::minDelay[prec_del->id] = Sol::pushVisit[del->id];
+                        Sol::pushVisit[del->id] = 0;
+                        Sol::FailureCause[del->id] = Parameters::FAILURECAUSE::NONE;
+                        Sol::FailureCause[prec_del->id] = Parameters::FAILURECAUSE::NONE;
+                        //                        cout<<" Push "<<prec_del->id << " by "<<Sol::minDelay[prec_del->id]<<endl;
+                        //                        s.ShowSchedule(cur_order);
+                        prec_del->isdelayed = true;
+                    }
                 }
-                // s.ShowCustomerSchedule(s.GetCustomer(cur->custID));
                 s.UnassignOrder(o);
                 removedList.emplace_back(s.GetCustomer(del->custID));
-//                 cout<<"unassigned "<<o->custID<<endl;
             }
             continue;
         }
@@ -78,7 +91,7 @@ void PriorityQueueInsertion::Insert(Sol &s, std::vector<Customer *> &list) {
         if (best.IsFeasible) {
             _insrmv.ApplyInsertMove(s, best);
             s.Update(best.move.depot, best.move.dock, best.n);
-//            cout<<"insert "<<endl;
+            assert(s.DeliveryLoad[best.n->delID] > 0);
 //             s.ShowSchedule(del);
             Order *cur_order = s.GetOrder(del->orderID);
             if (not s.isOrderSatisfied(cur_order)) {
@@ -90,11 +103,9 @@ void PriorityQueueInsertion::Insert(Sol &s, std::vector<Customer *> &list) {
                 Delivery *next_del = s.GetNextIdleDelivery(o);
                 assert(next_del != nullptr);
                 DecreaseQueue(s, del, next_del, c);
-            }
-            else if(s.isClientSatisfied(c)){
+            } else if (s.isClientSatisfied(c)) {
 //                s.ShowSchedule(c);
 //                cout<<"Insert "<<c->constID<<endl;
-
             }
         }
     }
@@ -106,7 +117,6 @@ void PriorityQueueInsertion::FillQueue(Sol &s, std::vector<Customer *> &list) {
     std::shuffle(list.begin(), list.end(), Parameters::RANDOM_GEN);
 
     for (Customer *c: list) {
-
         Order *o = s.findIdleOrder(c);
         assert(o != nullptr);
         Delivery *del = _data.GetDelivery(o, 0);
@@ -154,7 +164,7 @@ void PriorityQueueInsertion::DecreaseQueue(Sol &s, Delivery *del, Delivery *next
                                     -c->demand + dis(Parameters::RANDOM_GEN));
             break;
         case 5:
-            dis = std::uniform_int_distribution<int>(0, 0);
+            dis = std::uniform_int_distribution<int>(-1, 1);
             priority_file.Decroitre(next_del->delID,
                                     c->demand + dis(Parameters::RANDOM_GEN));
             break;

@@ -15,10 +15,10 @@
  * k=5, sort by decreasing demand
  * k=5, shuffle customer
  */
-class PriorityQueueOperator : public InsertOperator<Node, Driver> {
+class PriorityQueueOperator : public InsertOperator<Customer, Driver> {
 public:
   PriorityQueueOperator(PriorityQueueInsertion *insert_opt, int k,std::string const & name)
-      : _insert_opt(insert_opt), _k(k),InsertOperator<Node, Driver>(name) {
+      : _insert_opt(insert_opt), _k(k),InsertOperator<Customer, Driver>(name) {
     _insert_opt->SetK(_k);
     _insert_opt->name=name;
   }
