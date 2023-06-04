@@ -24,5 +24,4 @@ public:
                                   std::set<std::vector<int>> &result,
                                   std::set<std::vector<int>> &result_ind);
 };
-
 #endif //CODE_COMBINATORIAL_H
