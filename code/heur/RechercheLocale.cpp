@@ -15,9 +15,12 @@ RechercheLocale::RechercheLocale(std::set<int> const& feasibleClients)
 
 void RechercheLocale::Run(Sol &s)
 {
+//    cout<<"Start LS\n";
 //    s.ShowCustomer();
+    bestCost=s.GetLastCost();
     Sol cur = s;
     found = true;
+    customerIdList= vector<int>(s.unscheduledCustomers.begin(),s.unscheduledCustomers.end());
     shuffle(customerIdList.begin(), customerIdList.end(), Parameters::RANDOM_GEN);
     std::vector<int> seen(s.GetCustomerCount(), -1);
     while (found)
@@ -45,14 +48,14 @@ void RechercheLocale::Run(Sol &s)
                 {
                     _set.insert(c2->custID);
                 }
-                if (Relocate(s, c1, c2))
+                if (Swap(s, c1, c2))
                 {
                     isInserted = true;
                     if (!s.isClientSatisfied(c2))
                         seen[c2->custID] = c2->custID;
                     break;
                 }
-                if (Swap(s, c1, c2))
+                if (Relocate(s, c1, c2))
                 {
                     isInserted = true;
                     if (!s.isClientSatisfied(c2))
@@ -65,6 +68,7 @@ void RechercheLocale::Run(Sol &s)
             // }
         }
     }
+//    cout<<"End LS\n";
 }
 
 void RechercheLocale::Run(Sol &s, std::vector<std::set<int>> const &LinkedClients)
@@ -202,7 +206,6 @@ void RechercheLocale::Run(Sol &s, std::vector<std::set<int>> &LinkedClientSlot, 
 bool RechercheLocale::Swap(Sol &s, Customer *c1, Customer *c2)
 {
     if (c1->demand < c2->demand) return false;
-
     std::set<int> clients = s.satisfiedCustomers;
     clients.erase(c2->custID);
     clients.insert(c1->custID);
@@ -214,26 +217,20 @@ bool RechercheLocale::Swap(Sol &s, Customer *c1, Customer *c2)
                           std::inserter(v_intersection, v_intersection.end()));
     if (!v_intersection.empty())
         return false;
-//    cout << " try to swap " << c1->custID << " with " << c2->custID << " " << s.CustomerString() << endl;
 
-    Sol cur(s.GetData());
+    Sol cur=s;
     cur.keyCustomers = clients;
     bool sortie = false;
-    // cur.UnassignCustomer(c2);
+     cur.UnassignCustomer(c2);
 
 //    if (SolverReduce::findSequence(s, clients))
 //        return false;
-
-//    if (SolverReduce::ComputeCost(s, clients) < bestCost.satisfiedCost)
-//        return false;
-    // Printer::print(clients);
-    // cur.ShowCustomer();
-    CDPSolver::SolveInstance(cur, *s.GetData(),2);
-
+    if (CDPSolver::ComputeCost(s, clients) < bestCost.satisfiedCost)
+        return false;
+    CDPSolver::BuildOnSolution(cur, *s.GetData(),1);
 //    SolverReduce::SolvedSequence[cur.satisfiedCustomers] =
 //        SequenceInfo(true, cur.GetLastCost().satisfiedCost);
-    cur.keyCustomers = s.keyCustomers;
-    if (cur < s)
+    if (cur.GetLastCost().satisfiedCost > s.GetLastCost().satisfiedCost)
     {
         s = cur;
         found = true;
@@ -244,7 +241,6 @@ bool RechercheLocale::Swap(Sol &s, Customer *c1, Customer *c2)
             bestCost = s.GetLastCost();
         }
     }
-//
 
     return sortie;
 }
@@ -297,56 +293,61 @@ bool RechercheLocale::Relocate(Sol &s, Customer *c1, Customer *c2)
         return false;
     set<int> clients = s.satisfiedCustomers;
     clients.insert(c1->custID);
-
     bool sortie = false;
 //    if (SolverReduce::findSequence(s, clients))
 //        return false;
-//    if (SolverReduce::ComputeCost(s, clients) < bestCost.satisfiedCost)
-//        return false;
+    if (CDPSolver::ComputeCost(s, clients) < bestCost.satisfiedCost)
+        return false;
 //    cout << " try to relocate " << c1->custID << " near " << c2->custID << " " << s.CustomerString() << endl;
     Sol cur = s;
     cur.keyCustomers = clients;
     //    Data dat = s.GetData()->copyCustomersData(clients);
-    CDPSolver::SolveInstance(cur,*s.GetData(),2);
-//    SolverReduce::SolveCustomer(cur, {c1->custID}, 5, nullptr, false, true);
+//    Prompt::print(Sol::CustomerConflict[c1->custID]);
+//    Sol::CustomerConflict[c1->custID].clear();
+//    exit(1);
+//    CDPSolver::SolveInstance(cur,*s.GetData(),2);
+    CDPSolver::BuildOnSolution(cur,*s.GetData(),1);
+
 //    // cout<<" sol relocate 1:  "<<cur.CustomerString()<<endl;
 //    SolverReduce::SolvedSequence[cur.satisfiedCustomers] =
 //        SequenceInfo(true, cur.GetLastCost().satisfiedCost);
-    cur.keyCustomers = s.keyCustomers;
-    if (cur < s)
+//    cur.keyCustomers = s.keyCustomers;
+    if (cur.GetCost().satisfiedCost > s.GetCost().satisfiedCost)
     {
         s = cur;
         found = true;
         sortie = true;
 //        cout << "best sol relocate 1) " << cur.CustomerString() << endl;
-        if (cur.GetLastCost() < bestCost)
-        {
-            bestCost = s.GetLastCost();
-        }
     }
-//    else
-//    {
-//        // Printer::print(clients);
-//        cout << " sol relocate 2:  " << endl;
-//        cur.PutAllCustomersToUnassigned();
-//
-//        ModelProb ex;
-//        ex.InitSolveur(cur.GetProb());
-//        ex.Solve(clients, true);
-//        SolverReduce::SolveCustomer(cur, clients, 500, nullptr, true, true);
-//        if (cur.GetLastCost().satisfiedCost > s.GetLastCost().satisfiedCost)
-//        {
-//            s = cur;
-//            found = true;
-//            sortie = true;
-//            cout << "best sol relocate 2) " << cur.CustomerString() << endl;
+    else{
+
+//        if(!Sol::CustomerConflict[c1->custID].empty()){
+//            c1->Show();
+//            Prompt::print(Sol::CustomerConflict[c1->custID]);
+//           for(auto conflict_id:Sol::CustomerConflict[c1->custID]){
+//               Customer *c2= cur.GetCustomer(conflict_id);
+//               int late= c2->late_tw;
+//               c2->late_tw = late-16;
+////               cout<<*c2<<endl;
+////               cur.ShowSchedule();
+//               cur.PutAllCustomersToUnassigned();
+//               Parameters::SHOW=true;
+//               CDPSolver::SolveInstance(cur,*cur.GetData(),1);
+//               Prompt::print(Sol::CustomerConflict[c1->custID]);
+////               cur.ShowSchedule();
+//               cur.ShowCustomer();
+//               exit(1);
+//           }
+//            exit(1);
 //        }
-//    }
-//
-//    if (s.GetLastCost() < bestCost)
-//    {
-//        bestCost = s.GetLastCost();
-//    }
+//        exit(1);
+    }
+
+
+    if (s.GetLastCost() < bestCost)
+    {
+        bestCost = s.GetLastCost();
+    }
 
     return sortie;
 }
