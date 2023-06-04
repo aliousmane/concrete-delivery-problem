@@ -1,6 +1,7 @@
 #include "GRASP.h"
 #include "Driver.h"
 #include "Node.h"
+#include "heur/CDPSolver.h"
 
 using namespace std;
 
@@ -20,20 +21,26 @@ void GRASP<NodeT, DriverT>::Optimize(
         Sol &s, ISolutionList<NodeT, DriverT> *best_sol_list, unordered_map<string, Sol, MyHashFunction> *Mymap,
         RechercheLocale *loc_search, bool first_improvement) {
     Sol best;
-    std::vector<Node *> list_cust;
-    std::vector<BestSolutionList<Node, Driver>> tempVectSolutions;
+    std::vector<Customer *> list_cust;
+    std::vector<BestSolutionList<Customer, Driver>> tempVectSolutions(s.GetCustomerCount(),
+                                                                      BestSolutionList<Customer,Driver>(s.GetData(),
+                                                                                                        3));
+
+    unordered_map<string, Sol, MyHashFunction> customerMap;
+    unordered_map<string, Sol, MyHashFunction> LocalSearchMap;
 
     list_cust.resize(s.GetCustomerCount());
-// TODO	for (int i = 0; i < s.GetCustomerCount(); i++)
-//	{
-//		Node *c = s.GetCustomer(i);
-//		list_cust[i] = c;
-//		tempVectSolutions.emplace_back(BestSolutionList<Node, Driver>(s.GetData(), 5));
-//		Sol::nbSatisfied[c->custID] = 0;
-//	}
+    for (int i = 0; i < s.GetCustomerCount(); i++) {
+        Customer *c = s.GetCustomer(i);
+        list_cust[i] = c;
+//        tempVectSolutions.emplace_back(s.GetData(), 5);
+        CDPSolver::nbSatisfied[c->custID] = 0;
+    }
     //TODO SortNode<Node, Driver>::radixSortGreatDemand(list_cust, s.GetData()->GetMaxDemand());
     std::vector<int> SORT_TYPE_VEC{Parameters::SORT::ONE, Parameters::SORT::TWO,
-                                   Parameters::SORT::THREE, Parameters::SORT::FOUR};
+                                   Parameters::SORT::THREE, Parameters::SORT::FOUR,
+                                   Parameters::SORT::FIVE,
+                                   Parameters::SORT::SHUFFLE};
     std::vector<int> DRIVER_USE_VEC{Parameters::MINIMIZEDRIVER::SOLUTION, Parameters::MINIMIZEDRIVER::CLIENT};
     Cost bestCout(false);
     int iter_k = 0;
@@ -52,13 +59,17 @@ void GRASP<NodeT, DriverT>::Optimize(
                     cur.keyCustomers = s.keyCustomers;
                     auto f = grasp_insert_operators[op];
                     f.opt->Insert(cur);
-                    if (loc_search != nullptr) {
-                        loc_search->Run(cur);
-                    }
                     if (not cur.isFeasible) {
                         iter_k++;
                         continue;
                     }
+                    if (loc_search != nullptr) {
+                        if(LocalSearchMap.count(cur.toString())==0){
+                            loc_search->Run(cur);
+                            LocalSearchMap[cur.toString()]=cur;
+                        }
+                    }
+
                     if (Mymap != nullptr) {
                         if (Mymap->find(cur.toString()) == Mymap->end()) {
                             (*Mymap)[cur.toString()] = cur;
@@ -66,27 +77,32 @@ void GRASP<NodeT, DriverT>::Optimize(
                     }
                     Cost curCout = cur.GetCost();
 
-// TODO			for (Node *c : list_cust)
-//			{
-//				if (cur.isClientSatisfied(c))
-//				{
-//					Sol::nbSatisfied[c->custID]++;
-//					// vectSolutions[c->custID].Add(cur);
-//					tempVectSolutions[c->custID].Add(cur);
-//				}
-//			}
-                    if (iter_k > 0 && iter_k % 3 == 0) {
-//TODO				Sol path_cur(s.GetData());
-//				path_cur.keyCustomers = s.keyCustomers;
-//
-//				PathRelinking(path_cur, list_cust, tempVectSolutions, bestCout, best);
-//
-//				Cost pathCout = path_cur.GetCost();
-//				if (pathCout < curCout)
-//				{
-//					curCout = pathCout;
-//					cur = path_cur;
-//				}
+                    for (auto satisfiedId: cur.satisfiedCustomers) {
+                        Customer *temp_c = cur.GetCustomer(satisfiedId);
+                        if (customerMap.count(cur.toString(temp_c)) == 0) {
+                            customerMap[cur.toString(temp_c)] = cur;
+                            tempVectSolutions[temp_c->custID].Add(cur);
+                            CDPSolver::nbSatisfied[temp_c->custID]++;
+                        }
+                    }
+
+                    if (iter_k > 0 && iter_k % 4 == 0) {
+                        Sol path_cur(s.GetData());
+                        path_cur.keyCustomers = s.keyCustomers;
+                        CDPSolver::PathRelinking(path_cur, list_cust, tempVectSolutions, bestCout, best);
+                        tempVectSolutions = vector<BestSolutionList<Customer,Driver>> (s.GetCustomerCount(),
+                                          BestSolutionList<Customer,Driver>(s.GetData(), 3));
+
+                        if (path_cur < cur) {
+//                            cout << "cur " << cur.GetLastCost() << endl;
+
+                            cur = path_cur;
+                            curCout = path_cur.GetLastCost();
+                            if(curCout<bestCout){
+                                cout << "best Iter " << iter_k << " Path relinking with cost" << curCout << endl;
+                            }
+                        }
+
                     }
                     cur.iter = iter_k++;
 
@@ -94,10 +110,8 @@ void GRASP<NodeT, DriverT>::Optimize(
                         bestCout = curCout;
                         best = cur;
                         if (verbose) {
-                            printf("Iter(%d-%d) %d %.2lf %2.1lf %d %2.0lf real %2.0lf*\n",
-                                   iter, op + 1, iter_k, curCout.travelCost, curCout.getTotal(),
-                                   curCout.lateDeliveryCost, curCout.satisfiedCost,
-                                   bestCout.satisfiedCost);
+                            printf("Iter(%d-%s) %d ", iter, f.opt->name.c_str(), iter_k);
+                            cout<<bestCout<<endl;
                         }
 
                         if (first_improvement) {
@@ -125,7 +139,7 @@ void GRASP<NodeT, DriverT>::Optimize(
         if (verbose) {
             s.ShowCustomer();
             // printf("Best iter %d %2.1lf lateness %d\n", best.iter, s.GetCost().satisfiedCost, s.GetCost().lateDeliveryCost);
-            printf(" iter_k %d %2.1lf lateness %d\n", iter_k, s.GetCost().satisfiedCost, s.GetCost().lateDeliveryCost);
+            printf("iter_k %d %2.1lf lateness %d\n", iter_k, s.GetCost().satisfiedCost, s.GetCost().lateDeliveryCost);
         }
     }
     s.duration_time = _chrono.getTime();
