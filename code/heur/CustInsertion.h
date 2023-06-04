@@ -35,7 +35,6 @@ public:
 private:
     static void Sort(Sol &s,std::vector<Customer *> &list, int k);
     static void Sort(Sol &s,std::vector<int> &list_ID, int k);
-    void Insert2(Sol &s, std::vector<Customer *> &list,std::vector<int> &list_ID);
     void Init()
     {
         for (int i = 0; i < _data.GetDepotCount(); i++)
