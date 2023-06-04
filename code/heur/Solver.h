@@ -9,6 +9,8 @@
 #include "../InsertOperator.h"
 #include "../BestSolutionList.h"
 #include "AllInsertionOperator.h"
+#include "CustInsertionOperator.h"
+#include "PriorityQueueOperator.h"
 #include "RechercheLocale.h"
 #include "../GRASP.h"
 #include <vector>
@@ -22,7 +24,7 @@ public:
         CDPSolver::disjointClients.resize(_data->GetCustomerCount(), std::set < int > ());
     }
     void run();
-    static void SolveGrasp(Sol &s,Data &dat,std::vector<std::set<int>> const & linkedClientSlot);
+    static void SolveGrasp(Sol &s,Data &dat,std::vector<std::set<int>> const & linkedClientSlot,int iter);
     std::set<int> feasibleClients;
 
 private:

@@ -19,19 +19,21 @@ public:
     explicit CDPSolver(Data *data):_data(data){
     }
     void run();
+    static double ComputeCost(Sol &s, const std::set<int>& setClients);
     static void SolveInstance(Sol &s,Data &dat,int iter);
+    static void SolveCDP(Sol &s,Data &dat,int iter,bool restart);
     static std::set<int> EliminateCustomer(Data &dat,const int iter);
     static void BuildOnSolution(Sol &s,Data &dat,int iter);
     static void findCorrelation(Data &dat, std::vector<TimeSlot> const & listInt, std::vector<std::set<int>> & linkedClientSlot,
     std::vector<std::set<int>> & linkedClientDemand, std::vector<std::set<int>>& linkedClients,std::vector<std::set<int>>& linkedClientInf,std::vector<std::set<int>>& linkedClientSup);
     static void findDisjointSet(Data &dat, std::vector<std::set<int>> const & linkedClients);
     static std::vector<std::set<int>> disjointClients;
+    static std::vector<int> nbSatisfied;
+
 
     static void LearnParameters(Sol &s, std::set<int> const &customer);
     static void find_all_routes(Sol &s, Customer *c,std::unordered_map<std::string, Sol, MyHashFunction> * umap);
 
-//    static std::vector<grasp_insert_operator<Node,Driver>> listOperators;
-    static void fillOperatorList(Data &dat);
     static void PathRelinking(Sol &new_cur, std::vector<Customer *> &list_cust,
                               std::vector<BestSolutionList<Customer, Driver>>  & vectSolutions,
                               Cost &bestCout, Sol &best);

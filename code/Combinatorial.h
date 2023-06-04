@@ -4,14 +4,15 @@
 
 #include <set>
 #include <vector>
+#include "Parameters.h"
 #include <unordered_map>
 #include <tuple>
 
 class Combinatorial {
 public:
-    static std::set<std::tuple<int, std::vector<int>>> findCombinationsWithLimit(std::vector<int> &nums, int target);
+    static std::set<std::tuple<int, std::vector<int>>> findCombinationsWithLimit(std::vector<int> &services, std::vector<int> const &all_services, int target,int distance);
 
-    static void findCombination(std::vector<int> &nums, int target, std::unordered_map<int, int> &countMap,
+    static void findCombination(std::vector<int> &services, std::vector<int> const &all_services, int target,int distance,  std::unordered_map<int, int> &countMap,
                                 std::vector<int> &currentCombination,
                                 std::set<std::tuple<int, std::vector<int>>> &result);
 
@@ -23,6 +24,4 @@ public:
                                   std::set<std::vector<int>> &result,
                                   std::set<std::vector<int>> &result_ind);
 };
-
-
 #endif //CODE_COMBINATORIAL_H

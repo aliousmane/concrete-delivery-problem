@@ -1,8 +1,8 @@
 
 #include "CDPSolver.h"
 #include "CustInsertion.h"
+#include "CustInsertion2.h"
 #include "CustInsertionBacktrack.h"
-#include "CustInsertionOperator.h"
 #include "AllInsertionOperator.h"
 #include "DriverInsertion.h"
 #include "InsRmvMethodFast.h"
@@ -16,41 +16,7 @@ using namespace std;
 std::vector<std::set<int>> CDPSolver::disjointClients = vector<set<int>>();
 std::vector<InsertOperator<Node, Driver> *> CDPSolver::listOperators =
         std::vector<InsertOperator<Node, Driver> *>();
-
-void CDPSolver::fillOperatorList(Data &dat) {
-    if (!CDPSolver::listOperators.empty())
-        deleteOperator();
-    Sol::FailureCause.resize(dat.GetNodeCount(), Parameters::FAILURECAUSE::NONE);
-    Sol::minDelay.resize(dat.GetNodeCount(), 0);
-    Sol::StartBefore.resize(dat.GetNodeCount(), 0);
-    InsRmvMethodFast insrmv(dat);
-    InsRmvBuilder1 builder1(dat);
-    InsRmvBuilder2 builder2(dat);
-    InsRmvBuilder3 builder3(dat);
-//    CustInsertion custIns1(dat,builder1);
-//    CustInsertion custIns2(dat,builder2);
-//    CustInsertion custIns3(dat,builder3);
-    vector<CustInsertionOperator> custInsertionOp;
-    vector<pair<int, string>> custInfo = {
-//            {0,"Cust Sort Early TW"},
-//            {1,"Cust Sort Greater D"},
-            {6, "Cust Random"},
-            {7, "Cust Sort Kinable"}
-    };
-    custInsertionOp.reserve(3 * custInfo.size());
-    for (const auto &val: custInfo) {
-//        custInsertionOp.emplace_back(&custIns1,val.first,"Builder1 "+ val.second);
-//        custInsertionOp.emplace_back(&custIns2,val.first,"Builder 2 "+ val.second);
-//        custInsertionOp.emplace_back(&custIns3,val.first,"Builder 3 "+ val.second);
-//        std::unique_ptr<InsRmvBuilder> build3 ( new InsRmvBuilder3(dat));
-
-//        std::unique_ptr<CustInsertion> temp3 ( new CustInsertion (dat,std::move(build3)));
-//        cout<<temp3<<endl;
-//        CDPSolver::listOperators.push_back(new CustInsertionOperator(std::move( temp3),val.first,"Builder 3 "+ val.second));
-//        cout<<temp3<<endl;
-    }
-
-}
+vector<int> CDPSolver::nbSatisfied = vector<int>();
 
 void CDPSolver::run() {}
 
@@ -80,161 +46,89 @@ std::set<int> CDPSolver::EliminateCustomer(Data &data, const int iter) {
     return feasibleClients;
 }
 
-void CDPSolver::SolveInstance(Sol &s, Data &dat, int iter) {
+void CDPSolver::SolveCDP(Sol &s, Data &dat, int iter, bool restart) {
 
-    InsRmvMethodFast insrmv(dat);
     InsRmvBuilder1 builder1(dat);
     InsRmvBuilder2 builder2(dat);
     InsRmvBuilder3 builder3(dat);
     CustInsertion custIns1(dat, builder1);
     CustInsertion custIns2(dat, builder2);
     CustInsertion custIns3(dat, builder3);
+    CustInsertion2 custIns23(dat, builder3);
     CustInsertionBacktrack custIns_BT3(dat, builder3);
-
     PriorityQueueInsertion prioIns3(dat, builder3);
-
-
-    vector<InsertOperator<Customer, Driver> *> grasp_heuristics;
+    DriverInsertion driverIns3(dat, builder3);
 
     vector<pair<int, string>> custInfo = {
             {0, "Cust Sort Early TW"},
             {1, "Cust Sort Greater D"},
-//            {2, "Cust Sort Late TW "},
-//            {3, "Cust Sort Min Width TW"},
-            {4,"Cust Random"},
+            {2, "Cust Sort Late TW "},
+            {3, "Cust Sort Min Width TW"},
+            {4, "Cust Random"},
 //            {5, "Cust Sort Kinable"},
 //            {-1, "Cust customized Sort"}
     };
     vector<pair<int, string>> priorityInfo = {
-//            {0,"PrioriSort I Early TW"},
-//            {1,"PrioriSort I Late TW"},
-//            {2,"PrioriSort D Early TW"},
-//            {4,"PrioriSort D Demand"},
-//            {5,"PrioriSort I Demand"},
-//            {6,"PrioriSort I TW width"},
-//            {7,"PrioriSort D TW width"},
+            {0, "PrioriSort I Early TW"},
+            {1, "PrioriSort I Late TW"},
+            {2, "PrioriSort D Early TW"},
+            {4, "PrioriSort D Demand"},
+            {5, "PrioriSort I Demand"},
+//            {6, "PrioriSort I TW width"},
+//            {7, "PrioriSort D TW width"},
     };
     vector<pair<int, string>> driverInfo = {
-//            {0,"Driver I Cap"},
-//            {1,"PrioriSort Greater D"},
-//            {2,"PrioriSort D Early TW"},
+            {0, "Driver I Cap"},
+            {1, "Driver D Cap"},
+            {2, "Driver Random Cap "},
     };
 
     vector<AllInsertionOperator> AllInsertionOp;
-    AllInsertionOp.reserve(3*(custInfo.size()+priorityInfo.size()));
+    AllInsertionOp.reserve(3 * (custInfo.size() + priorityInfo.size()+ driverInfo.size()));
     for (const auto &val: custInfo) {
         AllInsertionOp.emplace_back(&custIns3, val.first, "Builder 3 " + val.second);
-//        AllInsertionOp.emplace_back(&custIns_BT3, val.first, "Builder 3 " + val.second);
     }
-
     for (const auto &val: priorityInfo) {
-        AllInsertionOp.emplace_back(&prioIns3, val.first, "Builder 3 " + val.second);
+//        AllInsertionOp.emplace_back(&prioIns3, val.first, "Builder 3 " + val.second);
     }
-
-
-    vector<DriverInsertionOperator> driverInsertionOp;
-    DriverInsertion driverIns3(dat, builder3);
-
-    driverInsertionOp.reserve(3 * driverInfo.size());
     for (const auto &val: driverInfo) {
-        driverInsertionOp.emplace_back(&driverIns3, val.first, "Builder 3 " + val.second);
+//            AllInsertionOp.emplace_back(&driverIns3, val.first, "Builder 3 " + val.second);
     }
-
+    Sol best = s;
     for (int i = 0; i < iter; i++) {
         for (auto heur: AllInsertionOp) {
-            Sol cur(&dat);
-            cur.keyCustomers = s.keyCustomers;
+            Sol cur(&dat,s.keyCustomers);
+            if (!restart) {
+                cur = s;
+            }
             cur.availableDrivers = s.availableDrivers;
 //            Prompt::print({"Iter", to_string(i), heur.name});
             heur.Insert(cur);
-            if (cur < s) {
+            if (cur < best) {
 //                cout << "current best cost " << cur.GetCost().satisfiedCost << " with " << heur.name << endl;
-                s = cur;
+                best = cur;
                 if (s.hasScheduled(s.keyCustomers))
                     break;
             }
         }
-
-        for (auto heur: driverInsertionOp) {
-            Sol cur(&dat);
-            cur.keyCustomers = s.keyCustomers;
-            cur.availableDrivers = s.availableDrivers;
-            cur.PutAllCustomersToUnassigned();
-            heur.Insert(cur);
-            if (cur < s) {
-//                cout << "current best cost " << cur.GetCost().satisfiedCost << " with " << heur.name << endl;
-                s = cur;
-            }
-        }
     }
+    s = best;
+}
+
+double CDPSolver::ComputeCost(Sol &s, const std::set<int>& setClients) {
+    double sum = 0;
+    for (auto i: setClients) {
+        sum += s.GetCustomer(i)->demand;
+    }
+    return sum;
+}
+
+void CDPSolver::SolveInstance(Sol &s, Data &dat, int iter) {
+    CDPSolver::SolveCDP(s, dat, iter, true);
 }
 
 void CDPSolver::BuildOnSolution(Sol &s, Data &dat, int iter) {
-
-    InsRmvMethodFast insrmv(dat);
-    InsRmvBuilder1 builder1(dat);
-    InsRmvBuilder2 builder2(dat);
-    InsRmvBuilder3 builder3(dat);
-    CustInsertion custIns1(dat, builder1);
-    CustInsertion custIns2(dat, builder2);
-    CustInsertion custIns3(dat, builder3);
-
-    vector<CustInsertionOperator> custInsertionOp;
-    vector<InsertOperator<Customer, Driver> *> grasp_heuristics;
-
-    //TODO change k
-    vector<pair<int, string>> custInfo = {
-//            {0, "Cust Sort Early TW"},
-//            {1, "Cust Sort Greater D"},
-//            {2, "Cust Sort Late TW "},
-//            {3, "Cust Sort Min Width TW"},
-//            {4,"Cust Random"},
-//            {5, "Cust Sort Kinable"},
-//            {-1, "Cust customized Sort"}
-    };
-    custInsertionOp.reserve(3 * custInfo.size());
-    for (const auto &val: custInfo) {
-//        custInsertionOp.emplace_back(&custIns1,val.first,"Builder1 "+ val.second);
-//        custInsertionOp.emplace_back(&custIns2,val.first,"Builder 2 "+ val.second);
-        custInsertionOp.emplace_back(&custIns3, val.first, "Builder 3 " + val.second);
-    }
-
-    vector<pair<int, string>> priorityInfo = {
-            {0,"PrioriSort I Early TW"},
-            {1,"PrioriSort I Late TW"},
-            {2,"PrioriSort D Early TW"},
-            {4,"PrioriSort D Demand"},
-            {5,"PrioriSort I Demand"},
-            {6,"PrioriSort I TW width"},
-//            {7,"PrioriSort D TW width"},
-    };
-    vector<PriorityQueueOperator> priorityInsertionOp;
-    PriorityQueueInsertion prioIns3(dat, builder3);
-    priorityInsertionOp.reserve(3 * priorityInfo.size());
-    for (const auto &val: priorityInfo) {
-        priorityInsertionOp.emplace_back(&prioIns3, val.first, "Builder 3 " + val.second);
-    }
-
-    Sol best = s;
-    for (int i = 0; i < iter; i++) {
-        for (auto heur: custInsertionOp) {
-            Sol cur = s;
-            heur.Insert(cur);
-            if (cur < s) {
-//                cout << "current best cost " << cur.GetCost().satisfiedCost << " with " << heur.name << endl;
-                best = cur;
-            }
-        }
-        for (auto heur: priorityInsertionOp) {
-            Sol cur = s;
-            heur.Insert(cur);
-            if (cur < s) {
-//                cout << "current best cost " << cur.GetCost().satisfiedCost << " with " << heur.name << endl;
-                best = cur;
-            }
-        }
-    }
-    s = best;
+    CDPSolver::SolveCDP(s, dat, iter, false);
 }
 
 void CDPSolver::find_all_routes(Sol &s, Customer *c, std::unordered_map<std::string, Sol, MyHashFunction> *umap) {
@@ -252,7 +146,7 @@ void CDPSolver::find_all_routes(Sol &s, Customer *c, std::unordered_map<std::str
     set<int> sumServiceTime;
     if (umap != nullptr) {
 //        cout<<"solution count "<<umap->size()<<endl;
-        for (const auto & val: *umap) {
+        for (const auto &val: *umap) {
             Sol cur1 = val.second;
 //            cout<<val.first<<endl;
             //        cur.ShowSchedule();
@@ -327,7 +221,7 @@ void CDPSolver::LearnParameters(Sol &s, std::set<int> const &customer) {
         Sol cur1(s.GetData());
         find_all_routes(cur1, c, &myMap);
         int count = 0;
-        for (const auto & val: myMap) {
+        for (const auto &val: myMap) {
             Sol cur = val.second;
             cout << count++ << "-" << val.first << endl;
             Node *prev = cur.CustomerNext[c->StartNodeID];
@@ -427,57 +321,72 @@ void CDPSolver::findDisjointSet(Data &dat, std::vector<std::set<int>> const &lin
     }
 }
 
-
 void CDPSolver::PathRelinking(Sol &new_cur, std::vector<Customer *> &list_cust,
                               std::vector<BestSolutionList<Customer, Driver>> &vectSolutions,
                               Cost &bestCout, Sol &best) {
-    // cout << "begin path relinking\n";
-    for (Customer *c: list_cust) {
-        //TODO if (Sol::nbSatisfied[c->custID] > 0)
-        {
-            std::vector<Sol *> v;
-            vectSolutions[c->custID].GetSolutions(v);
-            std::vector<Order *> orders = new_cur.GetOrders(c);
+//    cout << "begin path relinking\n";
 
-            int count = 0;
-            bool isfeasible = true;
-            for (auto cur: v) {
-                std::vector<Delivery *> deliveries;
-                for (auto o1: orders) {
-                    for (int i = 0; i < cur->GetDeliveryCount(o1); i++) {
-                        Delivery *del = cur->GetDelivery(o1, i);
-                        if (cur->GetDriverAssignedTo(del) != nullptr)
-                            deliveries.push_back(del);
-                    }
-                }
-                // Insert elements of deliveries in new_cur
-                for (Delivery *del: deliveries) {
+    shuffle(list_cust.begin(), list_cust.end(), Parameters::RANDOM_GEN);
+//    Prompt::print(best.unscheduledCustomers);
+
+    for (Customer *c: list_cust) {
+
+        if (CDPSolver::nbSatisfied[c->custID] == 0) continue;
+
+//            cout<<*c<<endl;
+        std::vector<Sol *> v;
+        vectSolutions[c->custID].GetSolutions(v);
+        std::vector<Order *> orders = new_cur.GetOrders(c);
+        shuffle(v.begin(), v.end(), Parameters::RANDOM_GEN);
+        int count = 0;
+        bool isfeasible = true;
+        for (auto cur: v) {
+//            cout << count << " " << cur->toString(c) << endl;
+//                exit(1);
+//                cur->ShowSchedule(c);
+            std::vector<Delivery *> deliveries;
+            int cust_dmd=0;
+            for (auto o1: orders) {
+                if(cust_dmd >= c->demand )
+                    break;
+                int order_dmd=0;
+                for (int i = 0; i < cur->GetDeliveryCount(o1); i++) {
+                    if(order_dmd >= o1->demand )
+                        break;
+                    Delivery *del = cur->GetDelivery(o1, i);
+                    if (cur->GetDriverAssignedTo(del) == nullptr)
+                        break;
                     if (new_cur.GetDriverAssignedTo(del) != nullptr)
                         continue;
+
                     isfeasible = InsertDel(new_cur, cur, del);
+
                     if (not isfeasible)
                         break;
+
+                    order_dmd+=new_cur.DeliveryLoad[del->delID];
+                    cust_dmd+=new_cur.DeliveryLoad[del->delID];
                 }
                 if (not isfeasible)
-                    continue;
-                count++;
-                // printf("%d realisable\n", count - 1);
-                // cout << "Insert " << c->custID << " in new_cost\n"
-                break;
+                    break;
             }
-            if (not isfeasible) {
-                for (auto o1: orders) {
-                    new_cur.UnassignOrder(o1);
-                }
+            count++;
+            if (not isfeasible){
+                new_cur.UnassignCustomer(c);
+                continue;
             }
+            repairSolution(new_cur);
+//                 printf("%d realisable\n", count - 1);
+//                 cout << "Insert " << c->custID << " in new_cost\n";
+            break;
         }
+        if (not isfeasible) {
+
+//          cout << "Can't insert " << c->custID << " in new_cost\n";
+        }
+
     }
-
     repairSolution(new_cur);
-    if (!new_cur.isFeasible)
-        return;
-    Cost coutActuel = new_cur.GetCost();
-
 }
 
 
@@ -548,9 +457,12 @@ bool CDPSolver::InsertDel(Sol &sol_cur, Sol *cur, Delivery *del) {
         }
     }
     sol_cur.DriverAssignTo[dock->id] = d;
+    sol_cur.DeliveryLoad[del->delID] = cur->DeliveryLoad[del->delID];
     sol_cur.InsertAfter(del, dock, d);
     sol_cur.AssignDeliveryToCustomer(del);
+
     sol_cur.UpdateDepotLoadingSet(dep, dock, cur->nodeServiceIntervals[dock->id]);
+//    sol_cur.ShowSlot(dep);
     sol_cur.driverWorkingIntervals[d->id].insert(
             cur->nodeServiceIntervals[del->id]);
     sol_cur.ArrivalTime[dock->id] = cur->ArrivalTime[dock->id];
@@ -561,9 +473,12 @@ bool CDPSolver::InsertDel(Sol &sol_cur, Sol *cur, Delivery *del) {
 
 
 void CDPSolver::repairSolution(Sol &new_cur) {
+//    new_cur.ShowDepotSlots();
+//    new_cur.ShowDriverSlots();
     new_cur.BuildFromDepotSetIntervall();
-//TODO	new_cur.BuildFromDriverSetIntervall();
-    repairSchedule(new_cur);
+    new_cur.BuildFromDriverSetIntervall();
+//    new_cur.ShowDrivers();
+    new_cur.Update();
 }
 
 void CDPSolver::repairSchedule(Sol &sol) {

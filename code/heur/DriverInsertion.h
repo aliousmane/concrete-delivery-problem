@@ -14,12 +14,12 @@ class DriverInsertion : public InsertOperator<Customer, Driver> {
 public:
     DriverInsertion(Data &prob, InsRmvBuilder &insrmv)
             : _data(prob), _insrmv(insrmv),
-              customersList(0), _k(0),removedList(0),
+              customersList(0), _k(0),
               name("DriverInsertion"),listMoves(0),driverListId(0) {
         Init();
     }
 
-    ~DriverInsertion() override;
+    ~DriverInsertion() override =default;
 
     void Insert(Sol &s) override;
 
@@ -28,7 +28,7 @@ public:
     std::string name;
     void Insert(Sol &s, std::vector<int> const &list);
 private:
-    void Insert(Sol &s, std::vector<int> &list_ID);
+    void Insert(Sol &s, std::vector<Customer*> const &listCust);
     static void Sort(Sol &s,std::vector<Driver *> &list, std::vector<int> &list_ID, int k);
 
     void Init()
@@ -49,11 +49,9 @@ private:
 
     std::vector<Depot *> depotList;
     std::vector<Driver *> driversList;
-    std::set<int> customersListId;
     std::vector<int> driverListId;
-    std::set<int> removedListId;
     std::vector<Customer*> customersList;
-    std::vector<Customer *> removedList;
+    std::set<Customer *> removedList;
 
 };
 

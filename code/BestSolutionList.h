@@ -16,7 +16,7 @@
 #include "Solution.h"
 #include <list>
 #include <memory>
-#include <stdio.h>
+#include <cstdio>
 
 template <class NodeT, class DriverT>
 class BestSolutionList : public ISolutionList<NodeT, DriverT> {
@@ -29,7 +29,7 @@ public:
         _related_functions(0), _nbitems(0) {}
   ~BestSolutionList() {
 
-    while (_list.size() > 0) {
+    while (!_list.empty()) {
       sol_list_it it = _list.begin();
       Sol *s = *it;
       _list.erase(it);
@@ -85,8 +85,10 @@ public:
       Cost d2 = (*it)->GetLastCost();
 
       // avoid solutions with exactly the same cost
-      if (std::abs(d1.totalCost - d2.totalCost) <= 0.03)
-        return;
+      if(s.toString() == (*it)->toString())
+          return;
+//      if (std::abs(d1.totalCost - d2.totalCost) <= 0.03)
+//        return;
       else if (d1 < d2) {
         Sol *newsol = new Sol(s);
         _list.insert(it, newsol);
@@ -135,7 +137,7 @@ public:
     }
   }
   void Clear() {
-    while (_list.size() > 0)
+    while (!_list.empty())
     {
       sol_list_it it = _list.begin();
       Sol *s = *it;

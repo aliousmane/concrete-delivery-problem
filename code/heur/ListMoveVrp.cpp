@@ -6,7 +6,23 @@ using namespace std;
 
 bool ListMoveVrpSorter::operator()(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driver, MoveVrp> &m2) {
     if(m1.FailureCause!=Parameters::FAILURECAUSE::NONE) return false;
-    return m1 <= m2;
+    if (m1.DeltaCost.lateDeliveryCost < m2.DeltaCost.lateDeliveryCost) {
+        return true;
+    } else if (m1.DeltaCost.lateDeliveryCost == m2.DeltaCost.lateDeliveryCost) {
+        if (m1.waste == 0)
+            return true;
+        else if (m2.waste == 0)
+            return false;
+        if (m1.arrival_del < m2.arrival_del) {
+            return true;
+        } else {
+            if (m1.waste == m2.waste) {
+                return (m1.to->capacity > m2.to->capacity);
+            } else
+                return (std::abs(m1.waste) < std::abs(m2.waste));
+        }
+    }
+    return false;
 }
 
 bool ListMoveVrp::Sort1(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driver, MoveVrp> &m2) {
@@ -142,7 +158,6 @@ bool ListMoveVrp::Sort3(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driv
     return (m1 < m2);
 }
 
-
 bool ListMoveVrp::Sort4(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driver, MoveVrp> &m2){
     if(m1.FailureCause!=Parameters::FAILURECAUSE::NONE) return false;
 //    if(m1.DeltaCost.lateDeliveryCost<m2.DeltaCost.lateDeliveryCost)
@@ -162,6 +177,27 @@ bool ListMoveVrp::Sort4(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driv
 //    else if (m2.waste == 0) return false;
     return (m1 < m2);
 }
+bool ListMoveVrp::Sort5(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driver, MoveVrp> &m2){
+    if(m1.FailureCause!=Parameters::FAILURECAUSE::NONE) return false;
+    if (m1.DeltaCost.lateDeliveryCost < m2.DeltaCost.lateDeliveryCost) {
+        return true;
+    } else if (m1.DeltaCost.lateDeliveryCost == m2.DeltaCost.lateDeliveryCost) {
+        if (m1.waste == 0)
+            return true;
+        else if (m2.waste == 0)
+            return false;
+        if (m1.arrival_del < m2.arrival_del) {
+            return true;
+        } else {
+            if (m1.waste == m2.waste) {
+                return (m1.to->capacity > m2.to->capacity);
+            } else
+                return (std::abs(m1.waste) < std::abs(m2.waste));
+        }
+    }
+    return false;
+}
+
 
 ListMoveVrp::ListMoveVrp() : _moves(0) {
 
@@ -200,6 +236,12 @@ Move<Delivery, Driver, MoveVrp> ListMoveVrp::Extract() {
 }
 
 void ListMoveVrp::Sort() {
+
+    if(Parameters::SORT_TYPE == Parameters::SORT::SHUFFLE){
+        std::shuffle(_moves.begin(), _moves.end(),Parameters::RANDOM_GEN);
+        return;
+    }
+
     sort(_moves.begin(), _moves.end(), [this](Move<Delivery, Driver, MoveVrp> &m1,
                                               Move<Delivery, Driver, MoveVrp> &m2) -> bool {
         if (Parameters::SORT_TYPE == Parameters::SORT::ONE) {
@@ -212,11 +254,14 @@ void ListMoveVrp::Sort() {
         }
         else if (Parameters::SORT_TYPE == Parameters::SORT::FOUR) {
             return this->Sort4(m1, m2);
+        }else if (Parameters::SORT_TYPE == Parameters::SORT::FIVE) {
+            return this->Sort5(m1, m2);
         }
         else {
             return this->Sort2(m1, m2);
         }
     });
+
 }
 
 void ListMoveVrp::Insert(int i, Move<Delivery, Driver, MoveVrp> &m) {
@@ -248,7 +293,7 @@ Move<Delivery, Driver, MoveVrp> &ListMoveVrp::GetRandom() {
     Sort();
 //    partial_Sort(Count() - 1);
     const int choice = dis2(Parameters::RANDOM_GEN);
-    if (choice < 11) {
+    if (choice < 4) {
         return _moves[0];
     } else if (choice < 8) {
         return _moves[k];

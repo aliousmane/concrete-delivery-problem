@@ -3,7 +3,7 @@
 #include "CDPSolver.h"
 #include <istream>
 #include "CustInsertion.h"
-#include "CustInsertionOperator.h"
+#include "CustInsertion2.h"
 #include "InsRmvMethodFast.h"
 #include "InsRmvBuilder1.h"
 #include "InsRmvBuilder2.h"
@@ -11,7 +11,7 @@
 
 using namespace std;
 
-void Solver::run(){
+void Solver::run() {
     feasibleClients = CDPSolver::EliminateCustomer(*_data, 1);
     vector<TimeSlot> listInt;
     for (int i: feasibleClients) {
@@ -23,23 +23,47 @@ void Solver::run(){
     vector<set<int>> linkedClients;
     vector<set<int>> linkedClientsInf;
     vector<set<int>> linkedClientSup;
-    Data dat=*_data;
+    Data dat = *_data;
     CDPSolver::findCorrelation(dat, listInt, linkedClientSlot, linkedClientDemand, linkedClients, linkedClientsInf,
                                linkedClientSup);
+    {
+//        Sol s(&dat);
+//        s.keyCustomers = feasibleClients;
+////        s.keyCustomers = {2, 3, 10, 14};
+//        Parameters::SORT_TYPE=Parameters::SORT::SHUFFLE;
+//        CDPSolver::SolveInstance(s, dat, 10);
+//        s.ShowSchedule();
+//        s.ShowCustomer();
+//
+//        exit(1);
+//        s.keyCustomers = {7};
+
+//        CDPSolver::BuildOnSolution(s, dat, 10);
+
+//        s.ShowCustomer();
+//        exit(1);
+    }
+//    Test0();exit(1);
     Sol s(&dat);
-    s.keyCustomers=feasibleClients;
-    SolveGrasp(s,dat,linkedClientSlot);
+    s.keyCustomers = feasibleClients;
+//    s.keyCustomers= {2,3,7,10,14};
+//    Parameters::SORT_TYPE=Parameters::SORT::FIVE;
+//    CDPSolver::SolveInstance(s,dat,10);
+//    exit(1);
+    SolveGrasp(s, dat, linkedClientSlot, 10);
     SaveResults(s);
-    s.ShowCustomer();
+//    s.ShowSchedule();
+//    s.ShowCustomer();
 }
-void Solver::SaveResults(Sol &s){
+
+void Solver::SaveResults(Sol &s) {
     printf("Instance:%s\n", _data->instance_name.c_str());
 
     printf("Nombre clients %d \t", _data->nbCustomers);
     printf("Nombre ordre %d \t", _data->nbOrders);
     printf("Total Cost:%.2lf \t", s.GetLastCost().satisfiedCost);
 
-    if ( _data->result_file.c_str() != nullptr) {
+    if (_data->result_file.c_str() != nullptr) {
         FILE *f = fopen(_data->result_file.c_str(), "a");
         if (f != nullptr) {
             time_t now = time(nullptr);
@@ -52,7 +76,7 @@ void Solver::SaveResults(Sol &s){
             fprintf(f, "%s;", _data->instance_name.c_str());
             fprintf(f, "%2.0lf;", s.GetLastCost().satisfiedCost);
             fprintf(f, "%2.2lf;", s.GetLastCost().travelCost);
-             fprintf(f, "%d;", s.GetLastCost().driverUsed);
+            fprintf(f, "%d;", s.GetLastCost().driverUsed);
             fprintf(f, "%ld\n", Parameters::GetElapsedTime());
             fclose(f);
         }
@@ -66,41 +90,41 @@ void Solver::Test0() {
 
     InsRmvMethodFast insrmv(*_data);
     InsRmvBuilder3 builder3(*_data);
-    CustInsertion custIns(*_data,builder3);
+    CustInsertion custIns(*_data, builder3);
+    CustInsertion2 custIns23(*_data, builder3);
     {
-        Parameters::DRIVER_USE=Parameters::MINIMIZEDRIVER::CLIENT;
+        Parameters::DRIVER_USE = Parameters::MINIMIZEDRIVER::CLIENT;
 
         Sol s(_data);
-        for(auto id:feasibleClients){
+        for (auto id: feasibleClients) {
             Customer *c = _data->GetCustomer(id);
-            std::vector<Customer*> list{c};
-            s.keyCustomers={c->custID};
-            custIns.Insert(s);
-            if(s.isSatisfied(c)){
+            std::vector<Customer *> list{c};
+            s.keyCustomers = {c->custID};
+            custIns23.Insert(s);
+            if (s.isSatisfied(c)) {
                 s.ShowCustomer();
                 s.keyCustomers.clear();
-            }
-            else{
+            } else {
                 continue;
-                int iter=0;
-                while(iter++<5){
-                    Sol cur=s;
-                    for(auto conflict_id:Sol::CustomerConflict[c->custID]){
+                int iter = 0;
+                while (iter++ < 5) {
+                    Sol cur = s;
+                    for (auto conflict_id: Sol::CustomerConflict[c->custID]) {
                         cur.UnassignCustomer(conflict_id);
                         cur.keyCustomers.insert(conflict_id);
                     }
-                    Parameters::SHOW= false;
-                    CDPSolver::BuildOnSolution(cur,*_data,1);
-                     s.ShowCustomer();
-                    if(cur.GetLastCost().satisfiedCost <s.GetLastCost().satisfiedCost){
-                        s=cur;
+                    Parameters::SHOW = false;
+                    CDPSolver::BuildOnSolution(cur, *_data, 1);
+                    s.ShowCustomer();
+                    if (cur.GetLastCost().satisfiedCost < s.GetLastCost().satisfiedCost) {
+                        s = cur;
                     }
-                    if(s.hasScheduled(s.keyCustomers)) break;
+                    if (s.hasScheduled(s.keyCustomers)) break;
                 }
-                if(s.isSatisfied(c)){
+                if (s.isSatisfied(c)) {
                     s.ShowCustomer();
                 }
-                Parameters::SHOW= false;
+                Parameters::SHOW = false;
             }
 
         }
@@ -131,9 +155,9 @@ void Solver::Test0() {
 //        Parameters::SORT_TYPE = Parameters::SORT::THREE;
         Parameters::SORT_TYPE = Parameters::SORT::FOUR;
 //        Parameters::PENALTY_COST = true;
-        Parameters::DRIVER_USE=Parameters::MINIMIZEDRIVER::HYBRID;
+        Parameters::DRIVER_USE = Parameters::MINIMIZEDRIVER::HYBRID;
 //        Parameters::DRIVER_USE=Parameters::MINIMIZEDRIVER::SOLUTION;
-        s1.keyCustomers=feasibleClients;
+        s1.keyCustomers = feasibleClients;
 //        s1.keyCustomers={1};
 //s1.availableDrivers={0,5,6,7,1};
         CDPSolver::SolveInstance(s1, *_data, 1);
@@ -144,7 +168,7 @@ void Solver::Test0() {
         s1.exportCSVFormat("s0.csv");
 //        s1.ShowDrivers();
         s1.ShowCustomer();
-        cout<<s1.GetLastCost()<<endl;
+        cout << s1.GetLastCost() << endl;
 //        s1.ShowSchedule();
     }
     Parameters::ShowTime();
@@ -202,8 +226,8 @@ void Solver::Test0() {
 
             auto *first = dynamic_cast<Delivery *>(s1.CustomerNext[c1->StartNodeID]);
             int early = c1->early_tw;
-            bool sortie=false;
-            while(!sortie){
+            bool sortie = false;
+            while (!sortie) {
                 auto *last = dynamic_cast<Delivery *>(s1.CustomerPrev[c1->EndNodeID]);
                 if (s1.EndServiceTime[last->id] == s1.LateTW(last))
                     break;
@@ -216,16 +240,15 @@ void Solver::Test0() {
                 cur2.UnassignCustomer(c1);
                 CDPSolver::BuildOnSolution(cur2, *_data, 1);
                 if (cur2.isSatisfied(c1)) {
-                  s1=cur2;
+                    s1 = cur2;
                     cur2.ShowSchedule(c1);
                     CDPSolver::BuildOnSolution(s1, *_data, 1);
                     if (s1.isSatisfied(c)) {
                         s1.ShowSchedule(c);
                     }
-                    sortie=false;
-                }
-                else{
-                    sortie= true;
+                    sortie = false;
+                } else {
+                    sortie = true;
                 }
 
             }
@@ -287,7 +310,7 @@ void Solver::Test0() {
                     Driver *d = _data->GetDriver(k);
                     cout << *d << endl;
                     s1.ShowSlot(d);
-                    for (const auto& slot: s1.driverWorkingIntervals[d->id]) {
+                    for (const auto &slot: s1.driverWorkingIntervals[d->id]) {
                         auto del = dynamic_cast<Delivery *> (s1.GetNode(slot.nodeID));
                         auto c_slot = _data->GetCustomer(del->custID);
                         auto d_slot = _data->GetDepot(del->depotID);
@@ -582,7 +605,7 @@ void Solver::Test0() {
 
 //    s.ShowCustomer();
     exit(1);
-    SolveGrasp(s, dat, linkedClientSlot);
+    SolveGrasp(s, dat, linkedClientSlot, 1);
     s.ShowCustomer();
     CDPSolver::deleteOperator();
 
@@ -629,14 +652,21 @@ void Solver::Test() {
     Sol::StartBefore.resize(_data->GetNodeCount(), 0);
     Sol::pullVisit.resize(_data->GetNodeCount(), 0);
     Sol::pushVisit.resize(_data->GetNodeCount(), 0);
+
+    std::vector<int> all_drivers_cap;
+    for (int k = 0; k < _data->GetDriverCount(); k++) {
+        all_drivers_cap.push_back(_data->GetDriver(k)->capacity);
+    }
+
     cout << "learn Parameters\n";
     for (int i = 0; i < _data->GetCustomerCount(); i++) {
         Customer *c = _data->GetCustomer(i);
         cout << *c << endl;
         std::vector<int> vec_cap(_data->driverCapacities.begin(), _data->driverCapacities.end());
 
-        std::set < std::tuple<int, std::vector<int>> > combinations = Combinatorial::findCombinationsWithLimit(vec_cap,
-                                                                                                               c->demand);
+        std::set < std::tuple<int, std::vector<int>> > combinations =
+                Combinatorial::findCombinationsWithLimit(vec_cap, all_drivers_cap,
+                                                         c->demand, _data->Travel(c, c));
         set<int> sumService;
         for (auto [val, vec]: combinations) {
             sumService.insert(val);
@@ -905,11 +935,15 @@ void Solver::Test(Sol &s1, Customer *c, std::vector<std::set<int>> const &linked
 }
 
 
-void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientSlot) {
+void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientSlot, int iter) {
+
+    CDPSolver::nbSatisfied.resize(dat.GetCustomerCount());
 
     InsRmvBuilder3 builder3(dat);
     CustInsertion custIns3(dat, builder3);
+    CustInsertion2 custIns23(dat, builder3);
     PriorityQueueInsertion prioIns3(dat, builder3);
+    DriverInsertion driverIns3(dat, builder3);
 
     vector<AllInsertionOperator> grasp_heuristics;
 
@@ -919,25 +953,44 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
             {1, "Cust Sort Greater D"},
             {2, "Cust Sort Late TW "},
             {3, "Cust Sort Min Width TW"},
-            {4,"Cust Random"},
+            {4, "Cust Random"},
             {5, "Cust Sort Kinable"},
     };
     vector<pair<int, string>> priorityInfo = {
-//            {0,"PrioriSort I Early TW"},
-//            {1,"PrioriSort I Late TW"},
-//            {2,"PrioriSort D Early TW"},
-//            {4,"PrioriSort D Demand"},
-//            {5,"PrioriSort I Demand"},
+            {0, "PrioriSort I Early TW"},
+            {1, "PrioriSort I Late TW"},
+            {2, "PrioriSort D Early TW"},
+            {3, "PrioriSort D Late TW"},
+            {4, "PrioriSort D Demand"},
+            {5, "PrioriSort I Demand"},
 //            {6,"PrioriSort I TW width"},
 //            {7,"PrioriSort D TW width"},
     };
 
-    CustInsertionOperator c0(&custIns3, custInfo[0].first, "Builder 3 " + custInfo[0].second);
-    CustInsertionOperator c1(&custIns3, custInfo[1].first, "Builder 3 " + custInfo[1].second);
-    CustInsertionOperator c2(&custIns3, custInfo[2].first, "Builder 3 " + custInfo[2].second);
-    CustInsertionOperator c3(&custIns3, custInfo[3].first, "Builder 3 " + custInfo[3].second);
-    CustInsertionOperator c4(&custIns3, custInfo[4].first, "Builder 3 " + custInfo[4].second);
-    CustInsertionOperator c5(&custIns3, custInfo[5].first, "Builder 3 " + custInfo[5].second);
+    vector<pair<int, string>> driverInfo = {
+            {0, "Driver I Cap"},
+            {1, "Driver D Cap"},
+            {2, "Driver Random Cap "},
+    };
+
+    AllInsertionOperator c0(&custIns3, custInfo[0].first, "Builder 3 " + custInfo[0].second);
+    AllInsertionOperator c1(&custIns3, custInfo[1].first, "Builder 3 " + custInfo[1].second);
+    AllInsertionOperator c2(&custIns3, custInfo[2].first, "Builder 3 " + custInfo[2].second);
+    AllInsertionOperator c3(&custIns3, custInfo[3].first, "Builder 3 " + custInfo[3].second);
+    AllInsertionOperator c4(&custIns3, custInfo[4].first, "Builder 3 " + custInfo[4].second);
+    AllInsertionOperator c5(&custIns3, custInfo[5].first, "Builder 3 " + custInfo[5].second);
+
+    AllInsertionOperator p0(&prioIns3, priorityInfo[0].first, "Builder 3 " + priorityInfo[0].second);
+    AllInsertionOperator p1(&prioIns3, priorityInfo[1].first, "Builder 3 " + priorityInfo[1].second);
+    AllInsertionOperator p2(&prioIns3, priorityInfo[2].first, "Builder 3 " + priorityInfo[2].second);
+    AllInsertionOperator p3(&prioIns3, priorityInfo[3].first, "Builder 3 " + priorityInfo[3].second);
+    AllInsertionOperator p4(&prioIns3, priorityInfo[4].first, "Builder 3 " + priorityInfo[4].second);
+    AllInsertionOperator p5(&prioIns3, priorityInfo[5].first, "Builder 3 " + priorityInfo[5].second);
+
+    AllInsertionOperator d0(&driverIns3, driverInfo[0].first, "Builder 3 " + driverInfo[0].second);
+    AllInsertionOperator d1(&driverIns3, driverInfo[1].first, "Builder 3 " + driverInfo[1].second);
+    AllInsertionOperator d2(&driverIns3, driverInfo[2].first, "Builder 3 " + driverInfo[2].second);
+
 
     grasp.AddInsertOperatorVrp(&c0);
     grasp.AddInsertOperatorVrp(&c1);
@@ -945,12 +998,25 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
     grasp.AddInsertOperatorVrp(&c3);
     grasp.AddInsertOperatorVrp(&c4);
     grasp.AddInsertOperatorVrp(&c5);
+
+
+    grasp.AddInsertOperatorVrp(&p0);
+    grasp.AddInsertOperatorVrp(&p1);
+    grasp.AddInsertOperatorVrp(&p2);
+    grasp.AddInsertOperatorVrp(&p3);
+    grasp.AddInsertOperatorVrp(&p4);
+    grasp.AddInsertOperatorVrp(&p5);
+
+//    grasp.AddInsertOperatorVrp(&d0);
+//    grasp.AddInsertOperatorVrp(&d1);
+//    grasp.AddInsertOperatorVrp(&d2);
+
     grasp.verbose = true;
-    grasp.SetIterationCount(1);
+    grasp.SetIterationCount(iter);
     RechercheLocale loc_search(s.keyCustomers);
     loc_search.LinkedClientSlot = linkedClientSlot;
-    grasp.Optimize(s, nullptr, nullptr, &loc_search, true);
-//    grasp.Optimize(s, nullptr, nullptr, nullptr, true);
+//    grasp.Optimize(s, nullptr, nullptr, &loc_search, true);
+    grasp.Optimize(s, nullptr, nullptr, nullptr, true);
 }
 
 /**

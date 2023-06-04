@@ -4,8 +4,9 @@
 #include <cmath>
 
 using namespace std;
+
 void Combinatorial::find_combinations(vector<int> &nums, int k, vector<int> &combination, set<vector<int>> &result, set
-<vector<int>> &result_ind) {
+        <vector<int>> &result_ind) {
     vector<int> cur(k);
     vector<int> cur2(k);
     function<void(int, int)> dfs = [&](int start, int depth) {
@@ -26,8 +27,8 @@ void Combinatorial::find_combinations(vector<int> &nums, int k, vector<int> &com
 
     dfs(0, 0);
 }
-void Combinatorial::find_all_combinations(vector<int> &nums, set<vector<int>> &result, int min_k, int max_k)
-{
+
+void Combinatorial::find_all_combinations(vector<int> &nums, set<vector<int>> &result, int min_k, int max_k) {
     set<vector<int>> result_ind;
     for (int k = min_k; k <= max_k; k++) {
         vector<int> combination;
@@ -36,41 +37,45 @@ void Combinatorial::find_all_combinations(vector<int> &nums, set<vector<int>> &r
     result = result_ind;
 }
 
-std::set<std::tuple<int,std::vector<int>>> Combinatorial::findCombinationsWithLimit(vector<int>& nums, int target)
-{
+std::set<std::tuple<int, std::vector<int>>> Combinatorial::findCombinationsWithLimit(std::vector<int> &services, std::vector<int> const &all_services, int target,int distance) {
     unordered_map<int, int> countMap;
-    for(auto cap:nums){
-        countMap[cap] = std::ceil(double(target)/cap);
+    for (auto service: services) {
+        countMap[service] = std::ceil(double(target) / service);
     }
 
-    std::set<std::tuple<int,std::vector<int>>> result;
+    std::set<std::tuple<int, std::vector<int>>> result;
     vector<int> currentCombination;
-    findCombination(nums, target, countMap, currentCombination, result);
+    findCombination(services,all_services, target,distance, countMap, currentCombination, result);
     return result;
 }
 
-void Combinatorial::findCombination(vector<int>& nums, int target, unordered_map<int, int>& countMap,
-                                vector<int>& currentCombination, std::set<std::tuple<int,std::vector<int>>>& result)
-{
+void Combinatorial::findCombination(vector<int> &services, vector<int> const &all_services, int target,int distance,  unordered_map<int, int> &countMap,
+                                    vector<int> &currentCombination,
+                                    std::set<std::tuple<int, std::vector<int>>> &result) {
     int currentSum = 0;
-    for (int num : currentCombination)
+    for (int num: currentCombination)
         currentSum += num;
 
-    if (currentSum >= target)
-    {
+    if (currentSum >= target) {
         result.insert(make_tuple(currentSum, currentCombination));
         return;
     }
 
-
-    for (int i = 0; i < nums.size(); i++)
-    {
-        int num = nums[i];
-        if (countMap[num] > 0)
-        {
+    for (int i = 0; i < services.size(); i++) {
+        int num = services[i];
+        if (countMap[num] > 0) {
+            if (currentCombination.size() > 0) {
+                if (currentCombination[currentCombination.size() - 1] == num) {
+                    if(distance > Parameters::TIME_BTW_DELIVERY){
+                        if(std::count(all_services.begin(),all_services.end(),num)<=1){
+                            continue;
+                        }
+                    }
+                }
+            }
             countMap[num]--;
             currentCombination.push_back(num);
-            findCombination(nums, target, countMap, currentCombination, result);
+            findCombination(services, all_services,  target, distance,  countMap,currentCombination,result);
             currentCombination.pop_back();
             countMap[num]++;
         }
