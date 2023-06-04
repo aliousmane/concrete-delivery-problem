@@ -44,7 +44,9 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *>  &list) {
     }
 //    Parameters::SHOW=true;
     removedList.clear();
+    removedList.shrink_to_fit();
     listMoves.clear();
+    listMoves.shrink_to_fit();
     listMoves.resize(s.GetDeliveryCount());
     std::vector<bool> flags(s.GetDeliveryCount(), false);
     std::shuffle(driversList.begin(), driversList.end(), Parameters::RANDOM_GEN);
