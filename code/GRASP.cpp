@@ -115,7 +115,7 @@ void GRASP<NodeT, DriverT>::Optimize(
                         bestCout = curCout;
                         best = cur;
                         if (verbose) {
-                            printf("Iter(%d-%s) %d ", iter, f.opt->name.c_str(), iter_k);
+                            printf("Iter(%d-%s-%s) %d ", iter, f.opt->name.c_str(),best.heurName.c_str(), iter_k);
                             cout<<bestCout<<endl;
                         }
 

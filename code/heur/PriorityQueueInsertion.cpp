@@ -13,6 +13,7 @@ using namespace std;
 void PriorityQueueInsertion::Insert(Sol &s) {
     _data = *s.GetData();
     Sol::InitStructure(s.GetData());
+    s.heurName=this->name;
     s.Update();
     removedList.clear();
     _insrmv.FillStructures(s, customersList, driversList);

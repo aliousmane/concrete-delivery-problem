@@ -50,7 +50,7 @@ void Solver::run() {
 //    Parameters::SORT_TYPE=Parameters::SORT::FIVE;
 //    CDPSolver::SolveInstance(s,dat,10);
 //    exit(1);
-    SolveGrasp(s, dat, linkedClientSlot, 5);
+    SolveGrasp(s, dat, linkedClientSlot, 2);
     SaveResults(s);
 //    s.ShowSchedule();
 //    s.ShowCustomer();
@@ -949,12 +949,12 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
 
     GRASP<Customer, Driver> grasp(&dat);
     vector<pair<int, string>> custInfo = {
-            {0, "Cust Sort Early TW"},
-            {1, "Cust Sort Greater D"},
-            {2, "Cust Sort Late TW "},
-            {3, "Cust Sort Min Width TW"},
+            {0, "Cust Early TW"},
+            {1, "Cust Greater D"},
+            {2, "Cust Late TW "},
+            {3, "Cust Min Width TW"},
             {4, "Cust Random"},
-            {5, "Cust Sort Kinable"},
+            {5, "Cust Kinable"},
     };
     vector<pair<int, string>> priorityInfo = {
             {0, "PrioriSort I Early TW"},
@@ -1009,14 +1009,14 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
 
 //    grasp.AddInsertOperatorVrp(&d0);
 //    grasp.AddInsertOperatorVrp(&d1);
-    grasp.AddInsertOperatorVrp(&d2);
+//    grasp.AddInsertOperatorVrp(&d2);
 
     grasp.verbose = true;
     grasp.SetIterationCount(iter);
     RechercheLocale loc_search(s.keyCustomers);
     loc_search.LinkedClientSlot = linkedClientSlot;
-//    grasp.Optimize(s, nullptr, nullptr, &loc_search, true);
-    grasp.Optimize(s, nullptr, nullptr, nullptr, true);
+    grasp.Optimize(s, nullptr, nullptr, &loc_search, true);
+//    grasp.Optimize(s, nullptr, nullptr, nullptr, true);
 }
 
 /**

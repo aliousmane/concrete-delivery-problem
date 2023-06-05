@@ -9,6 +9,7 @@ using namespace std;
 void CustInsertion::Insert(Sol &s) {
     Sol::InitStructure(s.GetData());
     removedList.clear();
+    s.heurName=this->name;
     s.Update();
     _insrmv.FillStructures(s,customersList,driversList);
 

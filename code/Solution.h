@@ -30,6 +30,7 @@ public:
     double duration_time{0};
     Cost updateCost;
     bool computeLastCost{false};
+    std::string heurName;
     std::vector<Driver *> DriverAssignTo;
     std::vector<Depot *> DepotAssignTo;
     std::vector<Node *> DriverNext;

@@ -328,7 +328,7 @@ void CDPSolver::PathRelinking(Sol &new_cur, std::vector<Customer *> &list_cust,
 
     shuffle(list_cust.begin(), list_cust.end(), Parameters::RANDOM_GEN);
 //    Prompt::print(best.unscheduledCustomers);
-
+    new_cur.heurName="Path relinking";
     for (Customer *c: list_cust) {
 
         if (CDPSolver::nbSatisfied[c->custID] == 0) continue;
