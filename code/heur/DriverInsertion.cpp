@@ -50,7 +50,7 @@ void DriverInsertion::Insert(Sol &s, std::vector<Customer *> const &listCust) {
 //    Prompt::print(custListID);
     listMoves.clear();
     listMoves.resize(s.GetDriverCount());
-    listMoves.shrink_to_fit();
+//    listMoves.shrink_to_fit();
     std::vector<Delivery *> unScheduledDel;
     removedList.clear();
     for (int k = 0; k < driverListId.size();) {
@@ -78,6 +78,7 @@ void DriverInsertion::Insert(Sol &s, std::vector<Customer *> const &listCust) {
                 Move<Delivery, Driver, MoveVrp> mo;
                 _insrmv.GetBestInsertion(s, listId, candidateDriver, mo);
                 if (mo.IsFeasible) {
+//                    cout<<listMoves.size()<<" "<<d->id<<" "<<listMoves[d->id].Count()<< " "<<  endl;
                     listMoves[d->id].Add(mo);
                 } else {
                     unScheduledDel.push_back(del);

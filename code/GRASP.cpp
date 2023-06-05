@@ -37,11 +37,17 @@ void GRASP<NodeT, DriverT>::Optimize(
         CDPSolver::nbSatisfied[c->custID] = 0;
     }
     //TODO SortNode<Node, Driver>::radixSortGreatDemand(list_cust, s.GetData()->GetMaxDemand());
-    std::vector<int> SORT_TYPE_VEC{Parameters::SORT::ONE, Parameters::SORT::TWO,
-                                   Parameters::SORT::THREE, Parameters::SORT::FOUR,
-                                   Parameters::SORT::FIVE,
-                                   Parameters::SORT::SHUFFLE};
-    std::vector<int> DRIVER_USE_VEC{Parameters::MINIMIZEDRIVER::SOLUTION, Parameters::MINIMIZEDRIVER::CLIENT};
+    std::vector<int> SORT_TYPE_VEC{
+                            Parameters::SORT::ONE,
+                            Parameters::SORT::TWO,
+                            Parameters::SORT::THREE,
+                            Parameters::SORT::FOUR,
+                            Parameters::SORT::FIVE,
+                            Parameters::SORT::SHUFFLE
+    };
+    std::vector<int> DRIVER_USE_VEC{Parameters::MINIMIZEDRIVER::SOLUTION,
+                                    Parameters::MINIMIZEDRIVER::CLIENT
+    };
     Cost bestCout(false);
     int iter_k = 0;
     _chrono.start();
@@ -55,8 +61,7 @@ void GRASP<NodeT, DriverT>::Optimize(
             for (auto drv_usage: DRIVER_USE_VEC) {
                 Parameters::DRIVER_USE = drv_usage;
                 for (int op = 0; op < (int) grasp_insert_operators.size(); op++) {
-                    Sol cur(s.GetData());
-                    cur.keyCustomers = s.keyCustomers;
+                    Sol cur(s.GetData(),s.keyCustomers);
                     auto f = grasp_insert_operators[op];
                     f.opt->Insert(cur);
                     if (not cur.isFeasible) {

@@ -50,7 +50,7 @@ void Solver::run() {
 //    Parameters::SORT_TYPE=Parameters::SORT::FIVE;
 //    CDPSolver::SolveInstance(s,dat,10);
 //    exit(1);
-    SolveGrasp(s, dat, linkedClientSlot, 10);
+    SolveGrasp(s, dat, linkedClientSlot, 5);
     SaveResults(s);
 //    s.ShowSchedule();
 //    s.ShowCustomer();
@@ -997,9 +997,9 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
     grasp.AddInsertOperatorVrp(&c2);
     grasp.AddInsertOperatorVrp(&c3);
     grasp.AddInsertOperatorVrp(&c4);
-    grasp.AddInsertOperatorVrp(&c5);
-
-
+//    grasp.AddInsertOperatorVrp(&c5);
+//
+//
     grasp.AddInsertOperatorVrp(&p0);
     grasp.AddInsertOperatorVrp(&p1);
     grasp.AddInsertOperatorVrp(&p2);
@@ -1009,7 +1009,7 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
 
 //    grasp.AddInsertOperatorVrp(&d0);
 //    grasp.AddInsertOperatorVrp(&d1);
-//    grasp.AddInsertOperatorVrp(&d2);
+    grasp.AddInsertOperatorVrp(&d2);
 
     grasp.verbose = true;
     grasp.SetIterationCount(iter);

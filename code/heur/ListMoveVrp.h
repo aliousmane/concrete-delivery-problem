@@ -17,6 +17,17 @@
 struct ListMoveVrpSorter {
   bool operator()(Move<Delivery, Driver, MoveVrp> &m1,
                   Move<Delivery, Driver, MoveVrp> &m2) ;
+
+    static bool Sort1(Move<Delivery, Driver, MoveVrp> &m1,
+               Move<Delivery, Driver, MoveVrp> &m2) ;
+    static bool Sort2(Move<Delivery, Driver, MoveVrp> &m1,
+               Move<Delivery, Driver, MoveVrp> &m2) ;
+    static bool Sort3(Move<Delivery, Driver, MoveVrp> &m1,
+               Move<Delivery, Driver, MoveVrp> &m2) ;
+    static bool Sort4(Move<Delivery, Driver, MoveVrp> &m1,
+               Move<Delivery, Driver, MoveVrp> &m2) ;
+    static bool Sort5(Move<Delivery, Driver, MoveVrp> &m1,
+                    Move<Delivery, Driver, MoveVrp> &m2) ;
 };
 
 class ListMoveVrp : public ListMove<Delivery, Driver, MoveVrp> {
