@@ -28,6 +28,7 @@ public:
     int allDriver{0};
     MoveT move;
 
+
     Move()
             : n(nullptr), to(nullptr), IsFeasible(false), demand(0),
               DeltaDistance(INFINITY),
