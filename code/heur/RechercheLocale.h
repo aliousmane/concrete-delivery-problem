@@ -10,8 +10,10 @@
 class RechercheLocale
 {
 public:
-    RechercheLocale();
-    RechercheLocale(std::set<int> const& feasibleClients);
+    RechercheLocale():customerIdList(0), bestCost(false){}
+    RechercheLocale(std::set<int> const& feasibleClients):bestCost(false){
+        customerIdList = std::vector<int>(feasibleClients.begin(), feasibleClients.end());
+    }
     ~RechercheLocale(){}
     void Run(Sol &s, std::vector<std::set<int>> const &LinkedClients);
     void Run(Sol &s);

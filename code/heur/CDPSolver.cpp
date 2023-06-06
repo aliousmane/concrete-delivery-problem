@@ -65,7 +65,7 @@ void CDPSolver::SolveCDP(Sol &s, Data &dat, int iter, bool restart) {
             {2, "Cust Sort Late TW "},
             {3, "Cust Sort Min Width TW"},
             {4, "Cust Random"},
-//            {5, "Cust Sort Kinable"},
+            {5, "Cust Sort Kinable"},
 //            {-1, "Cust customized Sort"}
     };
     vector<pair<int, string>> priorityInfo = {
