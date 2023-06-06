@@ -29,8 +29,8 @@ void Solver::run() {
     {
 //        Sol s(&dat);
 //        s.keyCustomers = feasibleClients;
-////        s.keyCustomers = {2, 3, 10, 14};
-//        Parameters::SORT_TYPE=Parameters::SORT::SHUFFLE;
+//        s.keyCustomers = { 0,1,5,9,11,13,14,16,19,};
+//        Parameters::SORT_TYPE=Parameters::SORT::ONE;
 //        CDPSolver::SolveInstance(s, dat, 10);
 //        s.ShowSchedule();
 //        s.ShowCustomer();
@@ -50,10 +50,93 @@ void Solver::run() {
 //    Parameters::SORT_TYPE=Parameters::SORT::FIVE;
 //    CDPSolver::SolveInstance(s,dat,10);
 //    exit(1);
-    SolveGrasp(s, dat, linkedClientSlot, 5);
+    SolveGrasp(s, dat, linkedClientSlot, 2);
     SaveResults(s);
 //    s.ShowSchedule();
 //    s.ShowCustomer();
+}
+void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientSlot, int iter) {
+
+    CDPSolver::nbSatisfied.resize(dat.GetCustomerCount());
+
+    InsRmvBuilder3 builder3(dat);
+    CustInsertion custIns3(dat, builder3);
+    CustInsertion2 custIns23(dat, builder3);
+    PriorityQueueInsertion prioIns3(dat, builder3);
+    DriverInsertion driverIns3(dat, builder3);
+
+    vector<AllInsertionOperator> grasp_heuristics;
+
+    GRASP<Customer, Driver> grasp(&dat);
+    vector<pair<int, string>> custInfo = {
+            {0, "Cust Early TW"},
+            {1, "Cust Greater D"},
+            {2, "Cust Late TW "},
+            {3, "Cust Min Width TW"},
+            {4, "Cust Random"},
+            {5, "Cust Kinable"},
+    };
+    vector<pair<int, string>> priorityInfo = {
+            {0, "PrioriSort I Early TW"},
+            {1, "PrioriSort I Late TW"},
+            {2, "PrioriSort D Early TW"},
+            {3, "PrioriSort D Late TW"},
+            {4, "PrioriSort D Demand"},
+            {5, "PrioriSort I Demand"},
+//            {6,"PrioriSort I TW width"},
+//            {7,"PrioriSort D TW width"},
+    };
+
+    vector<pair<int, string>> driverInfo = {
+            {0, "Driver I Cap"},
+            {1, "Driver D Cap"},
+            {2, "Driver Random Cap "},
+    };
+
+    AllInsertionOperator c0(&custIns3, custInfo[0].first, "Builder 3 " + custInfo[0].second);
+    AllInsertionOperator c1(&custIns3, custInfo[1].first, "Builder 3 " + custInfo[1].second);
+    AllInsertionOperator c2(&custIns3, custInfo[2].first, "Builder 3 " + custInfo[2].second);
+    AllInsertionOperator c3(&custIns3, custInfo[3].first, "Builder 3 " + custInfo[3].second);
+    AllInsertionOperator c4(&custIns3, custInfo[4].first, "Builder 3 " + custInfo[4].second);
+    AllInsertionOperator c5(&custIns3, custInfo[5].first, "Builder 3 " + custInfo[5].second);
+
+    AllInsertionOperator p0(&prioIns3, priorityInfo[0].first, "Builder 3 " + priorityInfo[0].second);
+    AllInsertionOperator p1(&prioIns3, priorityInfo[1].first, "Builder 3 " + priorityInfo[1].second);
+    AllInsertionOperator p2(&prioIns3, priorityInfo[2].first, "Builder 3 " + priorityInfo[2].second);
+    AllInsertionOperator p3(&prioIns3, priorityInfo[3].first, "Builder 3 " + priorityInfo[3].second);
+    AllInsertionOperator p4(&prioIns3, priorityInfo[4].first, "Builder 3 " + priorityInfo[4].second);
+    AllInsertionOperator p5(&prioIns3, priorityInfo[5].first, "Builder 3 " + priorityInfo[5].second);
+
+    AllInsertionOperator d0(&driverIns3, driverInfo[0].first, "Builder 3 " + driverInfo[0].second);
+    AllInsertionOperator d1(&driverIns3, driverInfo[1].first, "Builder 3 " + driverInfo[1].second);
+    AllInsertionOperator d2(&driverIns3, driverInfo[2].first, "Builder 3 " + driverInfo[2].second);
+
+
+    grasp.AddInsertOperatorVrp(&c0);
+    grasp.AddInsertOperatorVrp(&c1);
+    grasp.AddInsertOperatorVrp(&c2);
+    grasp.AddInsertOperatorVrp(&c3);
+    grasp.AddInsertOperatorVrp(&c4);
+    grasp.AddInsertOperatorVrp(&c5);
+//
+//
+//    grasp.AddInsertOperatorVrp(&p0);
+//    grasp.AddInsertOperatorVrp(&p1);
+//    grasp.AddInsertOperatorVrp(&p2);
+//    grasp.AddInsertOperatorVrp(&p3);
+//    grasp.AddInsertOperatorVrp(&p4);
+//    grasp.AddInsertOperatorVrp(&p5);
+
+//    grasp.AddInsertOperatorVrp(&d0);
+//    grasp.AddInsertOperatorVrp(&d1);
+//    grasp.AddInsertOperatorVrp(&d2);
+
+    grasp.verbose = true;
+    grasp.SetIterationCount(iter);
+    RechercheLocale loc_search(s.keyCustomers);
+    loc_search.LinkedClientSlot = linkedClientSlot;
+    grasp.Optimize(s, nullptr, nullptr, &loc_search, true);
+//    grasp.Optimize(s, nullptr, nullptr, nullptr, true);
 }
 
 void Solver::SaveResults(Sol &s) {
@@ -932,91 +1015,6 @@ void Solver::Test(Sol &s1, Customer *c, std::vector<std::set<int>> const &linked
         exit(1);
     }
     s1.Update();
-}
-
-
-void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientSlot, int iter) {
-
-    CDPSolver::nbSatisfied.resize(dat.GetCustomerCount());
-
-    InsRmvBuilder3 builder3(dat);
-    CustInsertion custIns3(dat, builder3);
-    CustInsertion2 custIns23(dat, builder3);
-    PriorityQueueInsertion prioIns3(dat, builder3);
-    DriverInsertion driverIns3(dat, builder3);
-
-    vector<AllInsertionOperator> grasp_heuristics;
-
-    GRASP<Customer, Driver> grasp(&dat);
-    vector<pair<int, string>> custInfo = {
-            {0, "Cust Sort Early TW"},
-            {1, "Cust Sort Greater D"},
-            {2, "Cust Sort Late TW "},
-            {3, "Cust Sort Min Width TW"},
-            {4, "Cust Random"},
-            {5, "Cust Sort Kinable"},
-    };
-    vector<pair<int, string>> priorityInfo = {
-            {0, "PrioriSort I Early TW"},
-            {1, "PrioriSort I Late TW"},
-            {2, "PrioriSort D Early TW"},
-            {3, "PrioriSort D Late TW"},
-            {4, "PrioriSort D Demand"},
-            {5, "PrioriSort I Demand"},
-//            {6,"PrioriSort I TW width"},
-//            {7,"PrioriSort D TW width"},
-    };
-
-    vector<pair<int, string>> driverInfo = {
-            {0, "Driver I Cap"},
-            {1, "Driver D Cap"},
-            {2, "Driver Random Cap "},
-    };
-
-    AllInsertionOperator c0(&custIns3, custInfo[0].first, "Builder 3 " + custInfo[0].second);
-    AllInsertionOperator c1(&custIns3, custInfo[1].first, "Builder 3 " + custInfo[1].second);
-    AllInsertionOperator c2(&custIns3, custInfo[2].first, "Builder 3 " + custInfo[2].second);
-    AllInsertionOperator c3(&custIns3, custInfo[3].first, "Builder 3 " + custInfo[3].second);
-    AllInsertionOperator c4(&custIns3, custInfo[4].first, "Builder 3 " + custInfo[4].second);
-    AllInsertionOperator c5(&custIns3, custInfo[5].first, "Builder 3 " + custInfo[5].second);
-
-    AllInsertionOperator p0(&prioIns3, priorityInfo[0].first, "Builder 3 " + priorityInfo[0].second);
-    AllInsertionOperator p1(&prioIns3, priorityInfo[1].first, "Builder 3 " + priorityInfo[1].second);
-    AllInsertionOperator p2(&prioIns3, priorityInfo[2].first, "Builder 3 " + priorityInfo[2].second);
-    AllInsertionOperator p3(&prioIns3, priorityInfo[3].first, "Builder 3 " + priorityInfo[3].second);
-    AllInsertionOperator p4(&prioIns3, priorityInfo[4].first, "Builder 3 " + priorityInfo[4].second);
-    AllInsertionOperator p5(&prioIns3, priorityInfo[5].first, "Builder 3 " + priorityInfo[5].second);
-
-    AllInsertionOperator d0(&driverIns3, driverInfo[0].first, "Builder 3 " + driverInfo[0].second);
-    AllInsertionOperator d1(&driverIns3, driverInfo[1].first, "Builder 3 " + driverInfo[1].second);
-    AllInsertionOperator d2(&driverIns3, driverInfo[2].first, "Builder 3 " + driverInfo[2].second);
-
-
-    grasp.AddInsertOperatorVrp(&c0);
-    grasp.AddInsertOperatorVrp(&c1);
-    grasp.AddInsertOperatorVrp(&c2);
-    grasp.AddInsertOperatorVrp(&c3);
-    grasp.AddInsertOperatorVrp(&c4);
-//    grasp.AddInsertOperatorVrp(&c5);
-//
-//
-    grasp.AddInsertOperatorVrp(&p0);
-    grasp.AddInsertOperatorVrp(&p1);
-    grasp.AddInsertOperatorVrp(&p2);
-    grasp.AddInsertOperatorVrp(&p3);
-    grasp.AddInsertOperatorVrp(&p4);
-    grasp.AddInsertOperatorVrp(&p5);
-
-//    grasp.AddInsertOperatorVrp(&d0);
-//    grasp.AddInsertOperatorVrp(&d1);
-    grasp.AddInsertOperatorVrp(&d2);
-
-    grasp.verbose = true;
-    grasp.SetIterationCount(iter);
-    RechercheLocale loc_search(s.keyCustomers);
-    loc_search.LinkedClientSlot = linkedClientSlot;
-//    grasp.Optimize(s, nullptr, nullptr, &loc_search, true);
-    grasp.Optimize(s, nullptr, nullptr, nullptr, true);
 }
 
 /**

@@ -15,7 +15,7 @@ RechercheLocale::RechercheLocale(std::set<int> const& feasibleClients)
 
 void RechercheLocale::Run(Sol &s)
 {
-//    cout<<"Start LS\n";
+//    cout<<"Start LS after "<<s.heurName<<endl;
 //    s.ShowCustomer();
     bestCost=s.GetLastCost();
     Sol cur = s;
@@ -217,22 +217,26 @@ bool RechercheLocale::Swap(Sol &s, Customer *c1, Customer *c2)
                           std::inserter(v_intersection, v_intersection.end()));
     if (!v_intersection.empty())
         return false;
-
+//    Prompt::print({"Swap", to_string(c2->custID),"with", to_string(c1->custID)});
     Sol cur=s;
     cur.keyCustomers = clients;
     bool sortie = false;
      cur.UnassignCustomer(c2);
-
+//    Prompt::print(clients,"," );
+//    s.ShowCustomer();
+//    cur.ShowCustomer();
 //    if (SolverReduce::findSequence(s, clients))
 //        return false;
     if (CDPSolver::ComputeCost(s, clients) < bestCost.satisfiedCost)
         return false;
-    CDPSolver::BuildOnSolution(cur, *s.GetData(),1);
+//    CDPSolver::BuildOnSolution(cur, *s.GetData(),1);
+    CDPSolver::SolveInstance(cur, *s.GetData(),1);
 //    SolverReduce::SolvedSequence[cur.satisfiedCustomers] =
 //        SequenceInfo(true, cur.GetLastCost().satisfiedCost);
     if (cur.GetLastCost().satisfiedCost > s.GetLastCost().satisfiedCost)
     {
         s = cur;
+        s.heurName="Swap";
         found = true;
         sortie = true;
 //        cout << "new sol swap " << cur.CustomerString() << endl;
@@ -301,12 +305,13 @@ bool RechercheLocale::Relocate(Sol &s, Customer *c1, Customer *c2)
 //    cout << " try to relocate " << c1->custID << " near " << c2->custID << " " << s.CustomerString() << endl;
     Sol cur = s;
     cur.keyCustomers = clients;
+//    Prompt::print(clients,"," );
     //    Data dat = s.GetData()->copyCustomersData(clients);
 //    Prompt::print(Sol::CustomerConflict[c1->custID]);
 //    Sol::CustomerConflict[c1->custID].clear();
 //    exit(1);
-//    CDPSolver::SolveInstance(cur,*s.GetData(),2);
-    CDPSolver::BuildOnSolution(cur,*s.GetData(),1);
+    CDPSolver::SolveInstance(cur,*s.GetData(),1);
+//    CDPSolver::BuildOnSolution(cur,*s.GetData(),1);
 
 //    // cout<<" sol relocate 1:  "<<cur.CustomerString()<<endl;
 //    SolverReduce::SolvedSequence[cur.satisfiedCustomers] =
@@ -315,6 +320,7 @@ bool RechercheLocale::Relocate(Sol &s, Customer *c1, Customer *c2)
     if (cur.GetCost().satisfiedCost > s.GetCost().satisfiedCost)
     {
         s = cur;
+        s.heurName="Relocate";
         found = true;
         sortie = true;
 //        cout << "best sol relocate 1) " << cur.CustomerString() << endl;
