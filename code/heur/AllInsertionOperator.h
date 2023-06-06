@@ -18,7 +18,7 @@ public:
 
     explicit AllInsertionOperator(int k,std::string const &name):cust_insert_opt(nullptr), _k(k),InsertOperator<Customer, Driver>(name),
                                           cust_insert_bt_opt(nullptr),
-                                         prio_insert_opt(nullptr),cust2_insert_opt(nullptr),drv_insert_opt(nullptr){
+                                         prio_insert_opt(nullptr),cust2_insert_opt(nullptr),drv_insert_opt(nullptr),name(name){
 
     }
 
@@ -55,6 +55,7 @@ public:
     }
 
     void Insert(Sol &s) override {
+        s.heurName=name;
         if (cust_insert_opt != nullptr) {
             cust_insert_opt->SetK(_k);
             cust_insert_opt->Insert(s);
@@ -79,7 +80,7 @@ public:
             exit(1);
         }
     }
-
+std::string name;
 private:
     int _k;
     CustInsertion *cust_insert_opt;

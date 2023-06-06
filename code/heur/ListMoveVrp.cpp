@@ -406,6 +406,7 @@ void ListMoveVrp::Insert( ListMoveVrp &to_insert){
         auto mv = to_insert.Get(i);
         if(moveMap.contains(mv.toString()))
             continue;
+        moveMap[mv.toString()]=mv;
         _moves.insert( _moves.begin(), mv);
     }
 }

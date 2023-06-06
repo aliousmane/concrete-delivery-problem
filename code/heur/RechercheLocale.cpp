@@ -222,7 +222,7 @@ bool RechercheLocale::Swap(Sol &s, Customer *c1, Customer *c2)
     cur.keyCustomers = clients;
     bool sortie = false;
      cur.UnassignCustomer(c2);
-//    Prompt::print(clients );
+//    Prompt::print(clients,"," );
 //    s.ShowCustomer();
 //    cur.ShowCustomer();
 //    if (SolverReduce::findSequence(s, clients))
@@ -236,7 +236,7 @@ bool RechercheLocale::Swap(Sol &s, Customer *c1, Customer *c2)
     if (cur.GetLastCost().satisfiedCost > s.GetLastCost().satisfiedCost)
     {
         s = cur;
-        s.heurName="Relocate";
+        s.heurName="Swap";
         found = true;
         sortie = true;
 //        cout << "new sol swap " << cur.CustomerString() << endl;
@@ -305,11 +305,12 @@ bool RechercheLocale::Relocate(Sol &s, Customer *c1, Customer *c2)
 //    cout << " try to relocate " << c1->custID << " near " << c2->custID << " " << s.CustomerString() << endl;
     Sol cur = s;
     cur.keyCustomers = clients;
+//    Prompt::print(clients,"," );
     //    Data dat = s.GetData()->copyCustomersData(clients);
 //    Prompt::print(Sol::CustomerConflict[c1->custID]);
 //    Sol::CustomerConflict[c1->custID].clear();
 //    exit(1);
-    CDPSolver::SolveInstance(cur,*s.GetData(),2);
+    CDPSolver::SolveInstance(cur,*s.GetData(),1);
 //    CDPSolver::BuildOnSolution(cur,*s.GetData(),1);
 
 //    // cout<<" sol relocate 1:  "<<cur.CustomerString()<<endl;

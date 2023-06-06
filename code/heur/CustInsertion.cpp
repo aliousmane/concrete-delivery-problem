@@ -9,7 +9,6 @@ using namespace std;
 void CustInsertion::Insert(Sol &s) {
     Sol::InitStructure(s.GetData());
     removedList.clear();
-    s.heurName=this->name;
     s.Update();
     _insrmv.FillStructures(s,customersList,driversList);
 
@@ -63,6 +62,7 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *>  &list) {
             cout << *c << "--" << std::endl;
         }
         Order *cur_order = s.GetRandomOrder(c);
+        int count=0;
         for (int j = 0; j < s.GetDeliveryCount(cur_order);) {
             Delivery *del = s.GetDelivery(cur_order, j);
             if (Parameters::SHOW) {
@@ -70,6 +70,10 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *>  &list) {
                         {this->name, " Try to insert del ", to_string(del->id), "(", to_string(del->rank), ") for",
                          to_string(cur_order->orderID)});
             }
+            if(Parameters::SHOW)
+                if(count++>25){
+                    cout<<"here\n";
+                }
             std::vector<int> listId{del->delID};
             if (listMoves[del->delID].Count() > 0) {
                 if (Sol::minDelay[del->id] > 0) {
@@ -79,6 +83,12 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *>  &list) {
                     ListMoveVrp temp_moves;
                     _insrmv.GetBestInsertion(s, listId, driversList, &temp_moves);
                     if (temp_moves.Count() > 0) {
+//                        if(del->id==117)
+//                        {
+//                            for(auto _m:temp_moves._moves){
+//                                cout<<_m.toString()<<endl;
+//                            }
+//                        }
                         listMoves[del->delID].Insert(temp_moves);
                     }
                     Sol::minDelay[del->id] = 0;
@@ -91,8 +101,8 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *>  &list) {
                 _insrmv.GetBestInsertion(s, listId, driversList, &listMoves[del->delID]);
             }
             if (Parameters::SHOW) {
-//                Prompt::print({to_string(listMoves[del->delID].Count()), "moves for del", to_string(del->id)});
-//                listMoves[del->delID].Show();
+                Prompt::print({to_string(listMoves[del->delID].Count()), "moves for del", to_string(del->id)});
+                listMoves[del->delID].Show();
             }
             Move<Delivery, Driver, MoveVrp> best;
             if (listMoves[del->delID].Count() > 0) {
@@ -122,7 +132,7 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *>  &list) {
                             Sol::minDelay[prec_del->id] = std::min(delay, Parameters::TIME_BTW_DELIVERY);
                             Sol::FailureCause[prec_del->id] = Parameters::FAILURECAUSE::NONE;
                             if (Parameters::SHOW) {
-                                Prompt::print({"Return to and delay", to_string(prec_del->id)});
+                                Prompt::print({"Return to and delay", to_string(prec_del->id),"by", to_string(delay)});
                             }
                             backtrackOrder = true;
                             count--;

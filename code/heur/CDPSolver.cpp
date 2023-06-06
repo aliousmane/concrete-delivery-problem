@@ -74,8 +74,8 @@ void CDPSolver::SolveCDP(Sol &s, Data &dat, int iter, bool restart) {
             {2, "PrioriSort D Early TW"},
             {4, "PrioriSort D Demand"},
             {5, "PrioriSort I Demand"},
-//            {6, "PrioriSort I TW width"},
-//            {7, "PrioriSort D TW width"},
+            {6, "PrioriSort I TW width"},
+            {7, "PrioriSort D TW width"},
     };
     vector<pair<int, string>> driverInfo = {
             {0, "Driver I Cap"},
@@ -89,7 +89,7 @@ void CDPSolver::SolveCDP(Sol &s, Data &dat, int iter, bool restart) {
         AllInsertionOp.emplace_back(&custIns3, val.first, "Builder 3 " + val.second);
     }
     for (const auto &val: priorityInfo) {
-//        AllInsertionOp.emplace_back(&prioIns3, val.first, "Builder 3 " + val.second);
+        AllInsertionOp.emplace_back(&prioIns3, val.first, "Builder 3 " + val.second);
     }
     for (const auto &val: driverInfo) {
 //            AllInsertionOp.emplace_back(&driverIns3, val.first, "Builder 3 " + val.second);
