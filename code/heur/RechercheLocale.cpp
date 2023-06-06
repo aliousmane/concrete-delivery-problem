@@ -4,37 +4,33 @@
 
 using namespace std;
 
-RechercheLocale::RechercheLocale() : customerIdList(0), bestCost(false)
-{
-}
-
-RechercheLocale::RechercheLocale(std::set<int> const& feasibleClients)
-{
-    customerIdList = std::vector<int>(feasibleClients.begin(), feasibleClients.end());
-}
 
 void RechercheLocale::Run(Sol &s)
 {
 //    cout<<"Start LS after "<<s.heurName<<endl;
+//    Parameters::ShowTime();
 //    s.ShowCustomer();
     bestCost=s.GetLastCost();
     Sol cur = s;
     found = true;
-    customerIdList= vector<int>(s.unscheduledCustomers.begin(),s.unscheduledCustomers.end());
-    shuffle(customerIdList.begin(), customerIdList.end(), Parameters::RANDOM_GEN);
     std::vector<int> seen(s.GetCustomerCount(), -1);
+    CDPSolver::disjointClients.resize(s.GetCustomerCount());
     while (found)
     {
         // cout<<"Iteration ******************\n";
         found = false;
+        customerIdList= vector<int>(s.unscheduledCustomers.begin(),s.unscheduledCustomers.end());
+        shuffle(customerIdList.begin(), customerIdList.end(), Parameters::RANDOM_GEN);
         for (auto id : customerIdList)
         {
             Customer *c1 = s.GetCustomer(id);
             if (LinkedClientSlot[c1->custID].empty())
                 continue;
-            // if(seen[c1->custID]!=-1)                continue;
+             if(seen[c1->custID]!=-1)                continue;
             if (s.isClientSatisfied(c1))
                 continue;
+//            cout<<*c1<<endl;
+//            Prompt::print(LinkedClientSlot[c1->custID]);
             TimeSlot Intc1 = TimeSlot(c1->early_tw, c1->late_tw, c1->custID);
             bool isInserted = false;
             std::set<int> _set;
@@ -48,6 +44,15 @@ void RechercheLocale::Run(Sol &s)
                 {
                     _set.insert(c2->custID);
                 }
+                if (Relocate(s, c1, c2))
+                {
+                    isInserted = true;
+                    CDPSolver::disjointClients[c1->custID].erase(c2->custID);
+                    CDPSolver::disjointClients[c2->custID].erase(c1->custID);
+                    if (!s.isClientSatisfied(c2))
+                        seen[c2->custID] = c2->custID;
+                    break;
+                }
                 if (Swap(s, c1, c2))
                 {
                     isInserted = true;
@@ -55,20 +60,21 @@ void RechercheLocale::Run(Sol &s)
                         seen[c2->custID] = c2->custID;
                     break;
                 }
-                if (Relocate(s, c1, c2))
-                {
-                    isInserted = true;
-                    if (!s.isClientSatisfied(c2))
-                        seen[c2->custID] = c2->custID;
-                    break;
-                }
+                CDPSolver::disjointClients[c1->custID].insert(c2->custID);
+                CDPSolver::disjointClients[c2->custID].insert(c1->custID);
             }
+
+            seen[c1->custID] = c1->custID;
+
+
             // if(!s.isClientSatisfied(c1) && !_set.empty()){
             //     Relocate(s,c1,_set);
             // }
         }
     }
 //    cout<<"End LS\n";
+//    Parameters::ShowTime();
+
 }
 
 void RechercheLocale::Run(Sol &s, std::vector<std::set<int>> const &LinkedClients)
@@ -217,6 +223,8 @@ bool RechercheLocale::Swap(Sol &s, Customer *c1, Customer *c2)
                           std::inserter(v_intersection, v_intersection.end()));
     if (!v_intersection.empty())
         return false;
+    if (CDPSolver::ComputeCost(s, clients) < bestCost.satisfiedCost)
+        return false;
 //    Prompt::print({"Swap", to_string(c2->custID),"with", to_string(c1->custID)});
     Sol cur=s;
     cur.keyCustomers = clients;
@@ -227,8 +235,7 @@ bool RechercheLocale::Swap(Sol &s, Customer *c1, Customer *c2)
 //    cur.ShowCustomer();
 //    if (SolverReduce::findSequence(s, clients))
 //        return false;
-    if (CDPSolver::ComputeCost(s, clients) < bestCost.satisfiedCost)
-        return false;
+
 //    CDPSolver::BuildOnSolution(cur, *s.GetData(),1);
     CDPSolver::SolveInstance(cur, *s.GetData(),1);
 //    SolverReduce::SolvedSequence[cur.satisfiedCustomers] =
@@ -297,11 +304,12 @@ bool RechercheLocale::Relocate(Sol &s, Customer *c1, Customer *c2)
         return false;
     set<int> clients = s.satisfiedCustomers;
     clients.insert(c1->custID);
+    if (CDPSolver::ComputeCost(s, clients) < bestCost.satisfiedCost)
+        return false;
     bool sortie = false;
 //    if (SolverReduce::findSequence(s, clients))
 //        return false;
-    if (CDPSolver::ComputeCost(s, clients) < bestCost.satisfiedCost)
-        return false;
+
 //    cout << " try to relocate " << c1->custID << " near " << c2->custID << " " << s.CustomerString() << endl;
     Sol cur = s;
     cur.keyCustomers = clients;
@@ -322,8 +330,8 @@ bool RechercheLocale::Relocate(Sol &s, Customer *c1, Customer *c2)
         s = cur;
         s.heurName="Relocate";
         found = true;
-        sortie = true;
 //        cout << "best sol relocate 1) " << cur.CustomerString() << endl;
+        sortie = true;
     }
     else{
 
