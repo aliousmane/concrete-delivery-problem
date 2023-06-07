@@ -2,6 +2,7 @@
 #include "Parameters.h"
 
  int Parameters::NB_MANDATORY_ARGS=2;
+ long Parameters::RUNTIME=300;
  int Parameters::MAX_LATE_TW=1440;
  int Parameters::TW_WIDTH=60;
  int Parameters::UNDELIVERY_PENALTY=10;

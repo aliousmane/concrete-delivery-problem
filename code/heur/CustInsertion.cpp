@@ -10,39 +10,39 @@ void CustInsertion::Insert(Sol &s) {
     Sol::InitStructure(s.GetData());
     removedList.clear();
     s.Update();
-    _insrmv.FillStructures(s,customersList,driversList);
+    _insrmv.FillStructures(s, customersList, driversList);
 
     InsertWithBactrack(s, customersList);
     bool sortie = true;
     while (!removedList.empty() && !sortie) {
         double demand = s.updateCost.satisfiedCost;
         customersList = removedList;
-        Sol cur=s;
-        for(auto c:removedList){
-            for(auto conflict_id:Sol::CustomerConflict[c->custID]){
-                Customer *c1=cur.GetCustomer(conflict_id);
-//                c1->late_tw=c1->late_tw-7;
-                if(cur.isClientSatisfied(c1)){
-                    cur.UnassignCustomer(c1);
-                    customersList.push_back(c1);
-                }
-            }
-        }
+        Sol cur = s;
+//        for (auto c: removedList) {
+//            for (auto conflict_id: Sol::CustomerConflict[c->custID]) {
+//                Customer *c1 = cur.GetCustomer(conflict_id);
+////                c1->late_tw=c1->late_tw-7;
+//                if (cur.isClientSatisfied(c1)) {
+//                    cur.UnassignCustomer(c1);
+//                    customersList.push_back(c1);
+//                }
+//            }
+//        }
         InsertWithBactrack(cur, customersList);
 
-        if(cur<s){
-            s=cur;
+        if (cur < s) {
+            s = cur;
         }
         sortie = (cur.updateCost.satisfiedCost <= demand);
     }
     s.Update();
 }
 
-void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *>  &list) {
+void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *> &list) {
     if (list.size() > 1) {
         Sort(s, list, CustInsertion::_k);
+//        Parameters::SHOW=true;
     }
-//    Parameters::SHOW=true;
     removedList.clear();
     removedList.shrink_to_fit();
     listMoves.clear();
@@ -62,7 +62,6 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *>  &list) {
             cout << *c << "--" << std::endl;
         }
         Order *cur_order = s.GetRandomOrder(c);
-        int count=0;
         for (int j = 0; j < s.GetDeliveryCount(cur_order);) {
             Delivery *del = s.GetDelivery(cur_order, j);
             if (Parameters::SHOW) {
@@ -70,10 +69,7 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *>  &list) {
                         {this->name, " Try to insert del ", to_string(del->id), "(", to_string(del->rank), ") for",
                          to_string(cur_order->orderID)});
             }
-            if(Parameters::SHOW)
-                if(count++>25){
-                    cout<<"here\n";
-                }
+
             std::vector<int> listId{del->delID};
             if (listMoves[del->delID].Count() > 0) {
                 if (Sol::minDelay[del->id] > 0) {
@@ -83,12 +79,6 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *>  &list) {
                     ListMoveVrp temp_moves;
                     _insrmv.GetBestInsertion(s, listId, driversList, &temp_moves);
                     if (temp_moves.Count() > 0) {
-//                        if(del->id==117)
-//                        {
-//                            for(auto _m:temp_moves._moves){
-//                                cout<<_m.toString()<<endl;
-//                            }
-//                        }
                         listMoves[del->delID].Insert(temp_moves);
                     }
                     Sol::minDelay[del->id] = 0;
@@ -132,7 +122,7 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *>  &list) {
                             Sol::minDelay[prec_del->id] = std::min(delay, Parameters::TIME_BTW_DELIVERY);
                             Sol::FailureCause[prec_del->id] = Parameters::FAILURECAUSE::NONE;
                             if (Parameters::SHOW) {
-                                Prompt::print({"Return to and delay", to_string(prec_del->id),"by", to_string(delay)});
+                                Prompt::print({"Return to and delay", to_string(prec_del->id), "by", to_string(delay)});
                             }
                             backtrackOrder = true;
                             count--;
@@ -199,8 +189,10 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *>  &list) {
                     Sol::FailureCause[next_del->id] = Parameters::FAILURECAUSE::NONE;
                     listMoves[next_del->delID].Clear();
                 }
+//                    s.ShowSchedule(del);
+
                 if (Parameters::SHOW) {
-//                    s.ShowSchedule(cur_order);
+                    s.ShowSchedule(cur_order);
                 }
                 j++;
             }
@@ -326,10 +318,10 @@ void CustInsertion::Insert(Sol &s, std::vector<int> const &list) {
     s.Update();
 }
 
-void CustInsertion::Sort(Sol &s, std::vector<Customer *> &list,int k) {
+void CustInsertion::Sort(Sol &s, std::vector<Customer *> &list, int k) {
     switch (k) {
         case -1: {
-            std::vector<int> vec{1, 0, 3, 4, 2, 5, 6, 9, 10, 7, 8, 11, 14, 17, 18, 12, 15, 16, 13, 19,};
+            std::vector<int> vec{2, 6, 3, 0, 1, 5, 7, 4};
             list.clear();
             for (auto id: vec) {
                 list.emplace_back(s.GetCustomer(id));
@@ -360,14 +352,12 @@ void CustInsertion::Sort(Sol &s, std::vector<Customer *> &list,int k) {
     }
 }
 
-void CustInsertion::Sort(Sol &s,std::vector<int> &list_ID, int k){
-    std::vector<Customer*> custList(list_ID.size());
-    int id=0;
-    for(auto val:list_ID){
-        custList[id++]=s.GetCustomer(val);
+void CustInsertion::Sort(Sol &s, std::vector<int> &list_ID, int k) {
+    std::vector<Customer *> custList(list_ID.size());
+    int id = 0;
+    for (auto val: list_ID) {
+        custList[id++] = s.GetCustomer(val);
     }
-    Sort(s,custList,k);
+    Sort(s, custList, k);
 }
 
-
-CustInsertion::~CustInsertion() = default;

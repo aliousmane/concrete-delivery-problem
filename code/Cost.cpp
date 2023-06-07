@@ -56,8 +56,8 @@ bool Cost::operator>=(const Cost &rhs) const {
 }
 
 std::ostream &operator<<(std::ostream &os, const Cost &cost) {
-    os << "travelCost: " << cost.travelCost << " waitingCost: " << cost.waitingCost << " undeliveredCost: "
+    os <<" satisfiedCost: " << cost.satisfiedCost << " travelCost: " << cost.travelCost << " waitingCost: " << cost.waitingCost << " undeliveredCost: "
        << cost.undeliveredCost << " clientWaitingCost: " << cost.clientWaitingCost << " overTimeCost: "
-       << cost.overTimeCost << " driverUsed: " << cost.driverUsed <<" satisfiedCost: " << cost.satisfiedCost;
+       << cost.overTimeCost << " driverUsed: " << cost.driverUsed ;
     return os;
 }

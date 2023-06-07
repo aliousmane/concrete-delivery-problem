@@ -39,6 +39,14 @@ public:
     int MinDemand{0};
     int MaxDemand{0};
     int SumDemand{0};
+    void GetParams(int argc, const char **argv){
+        if(argc>1)
+            input = argv[1];
+        if(argc >2)
+            Parameters::RUNTIME = strtol(argv[2], nullptr,10);
+        if(argc>3)
+            result_file = path + "/result/" + problem_name +  argv[3];
+    }
     void Load();
     void LoadInstance();
     void LoadKinableInstance();
