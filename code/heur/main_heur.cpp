@@ -5,14 +5,13 @@
 using namespace std;
 
 int main(int argc, const char **argv) {
-    std::cout << "Ciment Quebec" << std::endl;
     if (argc < Parameters::NB_MANDATORY_ARGS) {
         Prompt::ShowMissingArgument(argc);
         exit(1);
     }
     Data data;
     data.GetParams(argc, argv);
-    cout << data.result_file << endl;
+    Prompt::print({data.problem_name ,data.input}) ;
     auto start_time = std::chrono::high_resolution_clock::now();
     data.Load();
     Solver solver(&data);

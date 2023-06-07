@@ -42,9 +42,14 @@ public:
             input = argv[1];
         if(argc >2)
             Parameters::RUNTIME = strtol(argv[2], nullptr,10);
+
+        result_file = path + "/result/" + problem_name + "/results.csv";
         if(argc>3)
             result_file = path + "/result/" + problem_name +"/"+  argv[3];
 
+        instance_name = std::filesystem::path(input).stem();
+        problem_name = std::filesystem::path(input).parent_path().filename();
+        sol_output = path + "/solution/" + problem_name + "/" + instance_name + ".csv";
     }
     void Load();
     void LoadInstance();
