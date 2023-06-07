@@ -38,9 +38,9 @@ void Sol::Update() {
         Customer *c = GetCustomer(i);
         if (isClientSatisfied(c)) {
             updateCost.waste += std::abs(clientCapRestante[c->custID]);
-            satisfiedCustomers.insert(c->constID);
+            satisfiedCustomers.insert(c->custID);
         } else {
-            unscheduledCustomers.insert(c->constID);
+            unscheduledCustomers.insert(c->custID);
             count++;
         }
     }
@@ -112,7 +112,7 @@ void Sol::Update(Depot *dep, Dock *dock, Delivery *del) {
     updateCost.waste += d->capacity;
     UpdateDemand(c, o, DeliveryLoad[del->delID]);
     if (isClientSatisfied(c)) {
-        satisfiedCustomers.insert(c->constID);
+        satisfiedCustomers.insert(c->custID);
         updateCost.waste -= d->capacity;
         updateCost.waste += std::abs(clientCapRestante[c->custID]);
         updateCost.undeliveredCost-=c->demand;

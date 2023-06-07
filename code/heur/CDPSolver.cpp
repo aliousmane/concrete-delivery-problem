@@ -2,7 +2,6 @@
 #include "CDPSolver.h"
 #include "CustInsertion.h"
 #include "CustInsertion2.h"
-#include "CustInsertionBacktrack.h"
 #include "AllInsertionOperator.h"
 #include "DriverInsertion.h"
 #include "InsRmvMethodFast.h"
@@ -28,16 +27,11 @@ std::set<int> CDPSolver::EliminateCustomer(Data &data, const int iter) {
         Sol s(&dat);
         s.keyCustomers = {0};
         InsRmvBuilder3 builder3(dat);
-        CustInsertionBacktrack custIns_BT3(dat, builder3);
-        custIns_BT3.Insert(s);
-
-//        CDPSolver::SolveInstance(s, dat, iter);
+        CustInsertion custIns(dat, builder3);
+        custIns.Insert(s);
         if (s.isFeasible) {
             cout << i << "-" << std::flush;
             feasibleClients.insert(i);
-//             s.ShowSchedule();
-//             cout<<s.GetCost()<<endl;
-
         } else {
             cout << "[" << i << "]-" << std::flush;
         }

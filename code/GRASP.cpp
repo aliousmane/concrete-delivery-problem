@@ -23,9 +23,8 @@ void GRASP<NodeT, DriverT>::Optimize(
     Sol best;
     std::vector<Customer *> list_cust;
     std::vector<BestSolutionList<Customer, Driver>> tempVectSolutions(s.GetCustomerCount(),
-                                                                      BestSolutionList<Customer,Driver>(s.GetData(),
-                                                                                                        3));
-
+                                                                      BestSolutionList<Customer, Driver>(s.GetData(),
+                                                                                                         3));
     unordered_map<string, Sol, MyHashFunction> customerMap;
     unordered_map<string, Sol, MyHashFunction> LocalSearchMap;
 
@@ -38,40 +37,60 @@ void GRASP<NodeT, DriverT>::Optimize(
     }
     //TODO SortNode<Node, Driver>::radixSortGreatDemand(list_cust, s.GetData()->GetMaxDemand());
     std::vector<int> SORT_TYPE_VEC{
-                            Parameters::SORT::ONE,
+            Parameters::SORT::ONE,
 //                            Parameters::SORT::TWO,
-                            Parameters::SORT::THREE,
-                            Parameters::SORT::FOUR,
-//                            Parameters::SORT::FIVE,
-                            Parameters::SORT::SHUFFLE
+            Parameters::SORT::THREE,
+//                            Parameters::SORT::FOUR,
+            Parameters::SORT::FIVE,
+            Parameters::SORT::SHUFFLE
     };
     std::vector<int> DRIVER_USE_VEC{Parameters::MINIMIZEDRIVER::SOLUTION,
                                     Parameters::MINIMIZEDRIVER::CLIENT
     };
     Cost bestCout(false);
-    int iter_k = 0;
     _chrono.start();
-    _chrono.setDuration(300);
+    _chrono.setDuration(Parameters::RUNTIME);
     if (verbose) {
         printf("GRASP heuristic: %d iterations: %d Heuristics\n", _iterator_count, (int) grasp_insert_operators.size());
     }
+    int iter_k = 0;
+    bool stop = false;
     for (int iter = 0; iter < _iterator_count; iter++) {
+        if (stop) break;
+
         for (auto sort: SORT_TYPE_VEC) {
+            if (stop) break;
+
             Parameters::SORT_TYPE = sort;
             for (auto drv_usage: DRIVER_USE_VEC) {
+                if (stop) break;
+
                 Parameters::DRIVER_USE = drv_usage;
                 for (int op = 0; op < (int) grasp_insert_operators.size(); op++) {
-                    Sol cur(s.GetData(),s.keyCustomers);
+                    if (stop) break;
+
+                    Sol cur(s.GetData(), s.keyCustomers);
                     auto f = grasp_insert_operators[op];
                     f.opt->Insert(cur);
                     if (not cur.isFeasible) {
                         iter_k++;
                         continue;
                     }
+//                    printf("Iter %d\n",iter_k);
+                    if (first_improvement) {
+                        if (std::includes(cur.satisfiedCustomers.begin(), cur.satisfiedCustomers.end(),
+                                          cur.keyCustomers.begin(), cur.keyCustomers.end())) {
+                            iter = _iterator_count;
+                            best = cur;
+                            bestCout = cur.GetLastCost();
+                            stop = true;
+                            break;
+                        }
+                    }
                     if (loc_search != nullptr) {
-                        if(LocalSearchMap.count(cur.toString())==0){
+                        if (LocalSearchMap.count(cur.toString()) == 0) {
                             loc_search->Run(cur);
-                            LocalSearchMap[cur.toString()]=cur;
+                            LocalSearchMap[cur.toString()] = cur;
                         }
                     }
 
@@ -95,15 +114,16 @@ void GRASP<NodeT, DriverT>::Optimize(
                         Sol path_cur(s.GetData());
                         path_cur.keyCustomers = s.keyCustomers;
                         CDPSolver::PathRelinking(path_cur, list_cust, tempVectSolutions, bestCout, best);
-                        tempVectSolutions = vector<BestSolutionList<Customer,Driver>> (s.GetCustomerCount(),
-                                          BestSolutionList<Customer,Driver>(s.GetData(), 3));
+                        tempVectSolutions = vector<BestSolutionList<Customer, Driver>>(s.GetCustomerCount(),
+                                                                                       BestSolutionList<Customer, Driver>(
+                                                                                               s.GetData(), 3));
 
                         if (path_cur < cur) {
 //                            cout << "cur " << cur.GetLastCost() << endl;
 
                             cur = path_cur;
                             curCout = path_cur.GetLastCost();
-                            if(curCout<bestCout){
+                            if (curCout < bestCout) {
                                 cout << "best Iter " << iter_k << " Path relinking with cost" << curCout << endl;
                             }
                         }
@@ -115,17 +135,23 @@ void GRASP<NodeT, DriverT>::Optimize(
                         bestCout = curCout;
                         best = cur;
                         if (verbose) {
-                            printf("Iter(%d-%s-%s) %d ", iter, f.opt->name.c_str(),best.heurName.c_str(), iter_k);
-                            cout<<bestCout<<endl;
+                            printf("Iter(%d-%s-%s) %d ", iter, f.opt->name.c_str(), best.heurName.c_str(), iter_k);
+                            cout << bestCout << endl;
                         }
 
                         if (first_improvement) {
                             if (std::includes(best.satisfiedCustomers.begin(), best.satisfiedCustomers.end(),
                                               best.keyCustomers.begin(), best.keyCustomers.end())) {
                                 iter = _iterator_count;
+                                stop = true;
                                 break;
                             }
                         }
+                        if (_chrono.hasToEnd()) {
+                            stop = true;
+                            break;
+                        }
+
                     }
                 }
 

@@ -11,16 +11,15 @@ class RechercheLocale
 {
 public:
     RechercheLocale():customerIdList(0), bestCost(false){}
-    RechercheLocale(std::set<int> const& feasibleClients):bestCost(false){
+    explicit RechercheLocale(std::set<int> const& feasibleClients):bestCost(false){
         customerIdList = std::vector<int>(feasibleClients.begin(), feasibleClients.end());
     }
-    ~RechercheLocale(){}
-    void Run(Sol &s, std::vector<std::set<int>> const &LinkedClients);
+    ~RechercheLocale()=default;
     void Run(Sol &s);
-    void Run(Sol &s, std::vector<std::set<int>> &LinkedClientSlot,std::vector<std::set<int>> &LinkedClientDemand);
-    bool Swap(Sol &s, Customer *c1,Customer *c2);
-    bool Relocate(Sol &s, Customer *c1,std::set<int> &  _set);
-    bool Relocate(Sol &s, Customer *c1,Customer *c2);
+    bool Swap1(Sol &s, Customer *c1,Customer *c2);
+    bool Swap2(Sol &s, Customer *c1,Customer *c2);
+    bool Relocate1(Sol &s, Customer *c1,Customer *c2);
+    bool Relocate2(Sol &s, Customer *c1,Customer *c2);
     bool found{true};
     std::vector<int> customerIdList;
     Cost bestCost;

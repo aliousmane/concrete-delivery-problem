@@ -132,7 +132,8 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
             }
 
         }
-        Move <Delivery, Driver, MoveVrp> m(n, d);
+//        cout<<"Travel s.Travel(prev, dock)) "<<s.Travel(prev, dock)<<endl;
+        Move<Delivery, Driver, MoveVrp> m(n, d);
         ELT = std::max(ELT, s.DepartureTime[prev->id] + s.Travel(prev, dock));
         loadSlot = TimeSlot(ELT, ELT + LOAD_DURATION);
         TimeSlot unloadSlot = TimeSlot();
@@ -140,10 +141,12 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         int node_arr = ELT;
         node_arr += LOAD_DURATION + ADJUSTMENT_DURATION;
         node_arr += s.Travel(dock, n);
+//        cout<<"Travel s.Travel(dock, n)"<<s.Travel(dock, n)<<endl;
+
         unloadSlot.lower = node_arr;
 
-        if(next_del!= nullptr){
-            if(node_arr >= s.LateTW(next_del)){
+        if (next_del != nullptr) {
+            if (node_arr >= s.LateTW(next_del)) {
                 prev = next_del;
                 continue;
             }
@@ -270,7 +273,7 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         if (it != s.driverWorkingIntervals[d->id].end()) {
             Depot *temp_dep = s.GetDepot(it->n.depotID);
 
-            Customer *it_cust =  s.GetCustomer( dynamic_cast<Delivery*>(s.GetNode(it->n.id))->custID);
+            Customer *it_cust = s.GetCustomer(dynamic_cast<Delivery *>(s.GetNode(it->n.id))->custID);
             if (Parameters::PENALTY_COST) {
                 newcost.lateDeliveryCost +=
                         std::max(0,
@@ -284,7 +287,7 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
 //                cout<<*it<< " "<<intv<<endl;
             }
             Sol::FailureCause[n->id] = Parameters::FAILURECAUSE::DRIVERBUSY;
-            if(it_cust->custID!=n->custID){
+            if (it_cust->custID != n->custID) {
                 Sol::CustomerConflict[n->custID].insert(it_cust->custID);
             }
 
@@ -293,7 +296,7 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         }
         if (next_dock != nullptr) {
 
-            if(node_arr >= s.LateTW(next_del)){
+            if (node_arr >= s.LateTW(next_del)) {
                 prev = next_del;
                 continue;
             }
@@ -347,7 +350,7 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
                              s.Travel(prev->distID, d->distID) - s.Travel(prev->distID, d->distID);
 
         newcost.waitingCost = newcost.clientWaitingCost + newcost.truckWaitingCost;
-        newcost.undeliveredCost=0;
+        newcost.undeliveredCost = 0;
         newcost.satisfiedCost = demand;
         newcost.isFeasible = true;
         newcost += s.updateCost;
@@ -360,7 +363,7 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
 //            continue;
         }
         if (Parameters::SHOW) {
-//            Prompt::print({"Installation possible of del", to_string(n->id), "with driver ", to_string(d->id)});
+            Prompt::print({"Installation possible of del", to_string(n->id), "with driver ", to_string(d->id)});
         }
         m.n = n;
         m.to = d;
@@ -371,16 +374,15 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         m.arrival_dock = ELT;
         m.arrival_del = unloadSlot.lower;
         m.DeltaCost = newcost;
-        m.DeltaDistance = newcost.travelCost;
         m.demand = demand;
         m.IsFeasible = true;
         int rem = d->capacity - s.orderCapRestante[n->orderID];
         if (rem == 0) {
             m.waste = 0;
-            m.DeltaCost.undeliveredCost -= s.GetOrder(n->orderID)->demand ;
+            m.DeltaCost.undeliveredCost -= s.GetOrder(n->orderID)->demand;
         } else if (rem > 0) {
             m.waste = s.updateCost.waste + rem;
-            m.DeltaCost.undeliveredCost -= s.GetOrder(n->orderID)->demand ;
+            m.DeltaCost.undeliveredCost -= s.GetOrder(n->orderID)->demand;
         } else {
             m.waste = s.updateCost.waste + std::abs(rem + s.GetData()->minDriverCap);
         }
@@ -392,14 +394,12 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         driverUsed.insert(d->id);
         clientdriverUsed.insert(d->id);
 
-        if(Parameters::DRIVER_USE==Parameters::MINIMIZEDRIVER::CLIENT ){
-            m.allDriver = int(clientdriverUsed.size()) ;
-        }
-        else if(Parameters::DRIVER_USE==Parameters::MINIMIZEDRIVER::SOLUTION ){
-            m.allDriver = int(driverUsed.size()) ;
-        }
-        else{
-            m.clientDriver = int(clientdriverUsed.size()) ;
+        if (Parameters::DRIVER_USE == Parameters::MINIMIZEDRIVER::CLIENT) {
+            m.allDriver = int(clientdriverUsed.size());
+        } else if (Parameters::DRIVER_USE == Parameters::MINIMIZEDRIVER::SOLUTION) {
+            m.allDriver = int(driverUsed.size());
+        } else {
+            m.clientDriver = int(clientdriverUsed.size());
             m.allDriver = int(driverUsed.size());
         }
 
@@ -407,7 +407,7 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         prev = s.DriverNext[prev->id];
     }
 
-    Move <Delivery, Driver, MoveVrp> best;
+    Move<Delivery, Driver, MoveVrp> best;
     if (temp_moves->Count() > 0) {
         best = temp_moves->GetRandom();
     }
@@ -434,18 +434,15 @@ void InsRmvMethodFast::repairSolution(Sol &s, Order *o) {
 void InsRmvMethodFast::repairSolution(Sol &s, Customer *c) {
 }
 
-void InsRmvMethodFast::FillStructures( Sol &s, std::vector<Customer *> & customersList,
-                    std::vector<Driver *> & driversList){
+void InsRmvMethodFast::FillStructures(Sol &s, std::vector<Customer *> &customersList,
+                                      std::vector<Driver *> &driversList) {
     driversList.clear();
     driversList.shrink_to_fit();
-    if (not s.availableDrivers.empty())
-    {
-        for (int i : s.availableDrivers)
-        {
+    if (not s.availableDrivers.empty()) {
+        for (int i: s.availableDrivers) {
             driversList.push_back(s.GetDriver(i));
         }
-    }
-    else{
+    } else {
         for (int i = 0; i < s.GetDriverCount(); i++)
             driversList.push_back(s.GetDriver(i));
     }
