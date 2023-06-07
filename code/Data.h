@@ -20,8 +20,6 @@ public:
     {
         time_mat_file= "../../matrices/Matrice_de_temps_all.csv";
         distance_mat_file= "../../matrices/Matrice_de_distance_all.csv";
-
-
     }
     std::string input;
     std::string output;
@@ -45,7 +43,8 @@ public:
         if(argc >2)
             Parameters::RUNTIME = strtol(argv[2], nullptr,10);
         if(argc>3)
-            result_file = path + "/result/" + problem_name +  argv[3];
+            result_file = path + "/result/" + problem_name +"/"+  argv[3];
+
     }
     void Load();
     void LoadInstance();
