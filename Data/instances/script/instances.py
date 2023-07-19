@@ -12,7 +12,7 @@ INSTANCE_FOLDER = "/".join([os.path.dirname(__file__), "instances/"])
 
 #%%
 # Load dataframes
-df_nodes = pd.read_excel(f"{os.path.dirname(__file__)}/DORDERSTAB_BETON.xlsx")
+df_nodes = pd.read_excel(f"{os.path.dirname(__file__)}/DORDERSTAB_BETON.xlsx",sheet_name="data")
 df_depots = pd.read_excel(
     f"{os.path.dirname(__file__)}/adresses_complete.xlsx")
 df_depots = df_depots[df_depots['Location_type'] != 'customer']
