@@ -3,7 +3,7 @@ import sys
 
 
 class CreateScript():
-    def __init__(self, alg, walltime, mem, class_instance,input_file, workDir, exec_line, iteration=1000,penalty=0):
+    def __init__(self, alg, walltime, mem, class_instance,input_file, workDir, exec_line, runtime=300):
         self.alg = alg
         self.walltime = walltime
         self.mem = mem
@@ -12,8 +12,8 @@ class CreateScript():
         self.OutputFile = workDir + alg + '/' + input_file + '.sh'
         self.workDir = workDir
         self.exec_line = exec_line
-        self.iteration = iteration
-        self.penalty = penalty
+        self.runtime = runtime
+
 
     def create(self):
         self.method()
@@ -28,16 +28,12 @@ class CreateScript():
                     filename = "../script/" + self.alg + "/" + instance_name + ".sb"
                     result_file = "test_"+ instance_name[0]+".csv"
                     weight=[10,20,5]
-                    self.iteration = max(100,sum([int(a)*weight[i] for i, a  in enumerate(instance_name[2:].split("_"))]))
                     with open(filename, "w") as script_file:
                         script_file.write(header)
                         script_file.write(
                             self.exec_line + " ../instances/" + self.class_instance + "/" + instance_name + ".rmc " 
-                            + str(self.iteration) +" "+ f"test_{instance_name[0]}.csv " + "15 " )
-                        # script_file.write( " & "
-                        #     self.exec_line + " ../instances/" + self.class_instance + "/" + instance_name + ".rmc " 
-                        #     + str(self.iteration) +" "+ f"test_{instance_name[0]}.csv " + "1\n" )
- 
+                            + str(self.runtime) +" "+ f"test_{instance_name[0]}.csv " )
+  
                         script_file.close()
                     output_file.write("sbatch " + instance_name + ".sb\n")
             output_file.close()
@@ -63,7 +59,7 @@ class CreateScript():
 
 
 if __name__ == "__main__":
-    cdpA = CreateScript('cdp', '0:05:00', '2', 'cdp','cdpA','/home/alious/works/CimentQuebec/script/', './code',10,0)
-    cdpB = CreateScript('cdp', '0:10:00', '5', 'cdp','cdpB','/home/alious/works/CimentQuebec/script/', './code',500,0)
+    cdpA = CreateScript('cdp', '1:30:00', '3', 'cdp','cdpA','/home/alious/works/CimentQuebec/script/', './code',1800)
+    cdpB = CreateScript('cdp', '1:30:00', '3', 'cdp','cdpB','/home/alious/works/CimentQuebec/script/', './code',1800)
     cdpA.create()
     cdpB.create()
