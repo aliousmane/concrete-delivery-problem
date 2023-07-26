@@ -11,6 +11,7 @@ Cost::Cost(bool value)
         totalCost = (double) std::numeric_limits<time_t>::max();
         waitingCost = (double) std::numeric_limits<time_t>::max();
         travelCost = (double) std::numeric_limits<time_t>::max();
+        distanceCost = (double) std::numeric_limits<time_t>::max();
         undeliveredCost = (double) std::numeric_limits<time_t>::max();
     }
 }
@@ -49,16 +50,24 @@ bool Cost::ObtainMinCQ(const Cost &rhs) const {
         if (this->firstDeliveryCost < rhs.firstDeliveryCost) {
             return true;
         } else if (this->firstDeliveryCost == rhs.firstDeliveryCost) {
-            {
+            if (true) {
                 if (this->travelCost < rhs.travelCost)
-                    return  true;
-                else if (this->travelCost == rhs.travelCost){
+                    return true;
+                else if (this->travelCost == rhs.travelCost) {
+                    return (this->waitingCost < rhs.waitingCost);
+                }
+                return false;
+            }
+            if (false) {
+                if (this->distanceCost < rhs.distanceCost)
+                    return true;
+                else if (this->distanceCost == rhs.distanceCost) {
                     return (this->waitingCost < rhs.waitingCost);
                 }
                 return false;
             }
 
-            {
+            if (false) {
                 if (this->overTimeCost < rhs.overTimeCost) {
                     return true;
                 } else if (this->overTimeCost == rhs.overTimeCost) {
@@ -88,7 +97,10 @@ bool Cost::operator>=(const Cost &rhs) const {
 }
 
 std::ostream &operator<<(std::ostream &os, const Cost &cost) {
-    os << " satisfiedCost: " << cost.satisfiedCost << " travelCost: " << cost.travelCost << " waitingCost: "
+    os << " satisfiedCost: " << cost.satisfiedCost <<
+       " travelCost: " << cost.travelCost <<
+       " distanceCost: " << cost.distanceCost <<
+       " waitingCost: "
        << cost.waitingCost << " undeliveredCost: "
        << cost.undeliveredCost << " clientWaitingCost: " << cost.clientWaitingCost << " driverUsed: " << cost.driverUsed
        << " firstDelivery: " << cost.firstDeliveryCost << " underTime: "
@@ -99,7 +111,8 @@ std::ostream &operator<<(std::ostream &os, const Cost &cost) {
 
 std::string Cost::str() const {
     std::stringstream ss;
-    ss << satisfiedCost << ";" << travelCost << ";" << undeliveredCost << ";" << firstDeliveryCost << ";";
+    ss << satisfiedCost << ";" << undeliveredCost << ";" << travelCost << ";" << distanceCost << ";"
+       << firstDeliveryCost << ";";
     ss << clientWaitingCost << ";" << driverUsed << ";" << underWorkCost << ";" << overTimeCost;
     return ss.str();
 }

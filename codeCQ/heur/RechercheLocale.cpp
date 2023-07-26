@@ -5,27 +5,66 @@ using namespace std;
 
 void RechercheLocale::Run(Sol &s) {
     cout << "Start LS after " << s.heurName << s.GetLastCost() << endl;
-//    Parameters::ShowTime();
     Prompt::print(s.unscheduledCustomers);
     set<int> keyCustomer(s.keyCustomers);
     bestCost = s.GetLastCost();
-
     if (!s.unscheduledCustomers.empty()) {
+//        ShiftLoading(s);
+        UnscheduledFirst(s);
         RemoveAndReschedule(s);
     }
 //    if (s.unscheduledCustomers.empty())
     {
         RunAllFeasible(s);
     }
-
 //    RelocateDriver(s);
 //    return;
-
+    LoadBackward(s);
     cout << "End LS" << s.GetLastCost() << endl;
     s.keyCustomers = keyCustomer;
 }
 
+bool RechercheLocale::UnscheduledFirst(Sol &s) {
+    bool sortie = false;
+    Sol cur(s.GetData());
+    cout<<"UnscheduledFirst"<<endl;
+    cur.keyCustomers = s.unscheduledCustomers;
+    CDPSolver::SolveInstance(cur, *cur.GetData(), 1);
+    cur.keyCustomers = s.satisfiedCustomers;
+    CDPSolver::BuildOnSolution(cur, *cur.GetData(), 1);
+    if (cur < s) {
+        s = cur;
+        sortie = true;
+    }
+    return sortie;
+}
+
+bool RechercheLocale::LoadBackward(Sol &s) {
+    cout<<"LoadBackward"<<endl;
+
+    bool sortie = false;
+    std::set<int> lateCustomers = s.lateCustomers;
+    for (auto cId: lateCustomers) {
+        Customer *c = s.GetCustomer(cId);
+        Sol cur(s);
+        cur.keyCustomers = {c->custID};
+        cur.UnassignCustomer(c);
+        const int ins = Parameters::LOAD_INSERTION;
+        Parameters::LOAD_INSERTION = Parameters::DEPOTINSERTION::BACKWARD;
+        CDPSolver::BuildOnSolution(cur, *cur.GetData(), 1);
+        if (cur < s) {
+            s = cur;
+            sortie = true;
+        }
+        Parameters::LOAD_INSERTION = ins;
+    }
+    return sortie;
+}
+
+
 void RechercheLocale::RunAllFeasible(Sol &s) {
+    cout<<"RunAllFeasible"<<endl;
+
     runtime = Parameters::GetElapsedTime();
     found = true;
     std::vector<int> seen(s.GetOrderCount(), -1);
@@ -33,7 +72,7 @@ void RechercheLocale::RunAllFeasible(Sol &s) {
     std::iota(orderList.begin(), orderList.end(), 0);
     std::shuffle(orderList.begin(), orderList.end(), Parameters::RANDOM_GEN);
     while (found) {
-        if (Parameters::GetElapsedTime() - runtime > 1200) break;
+        if (Parameters::GetElapsedTime() - runtime > 30) break;
         found = false;
         for (int i: orderList) {
             Order *o = s.GetOrder(i);
@@ -59,6 +98,8 @@ void RechercheLocale::RunAllFeasible(Sol &s) {
 }
 
 void RechercheLocale::RemoveAndReschedule(Sol &s) {
+    cout<<"RemoveAndReschedule"<<endl;
+
     found = true;
     runtime = Parameters::GetElapsedTime();
     std::set<int> keyCustomer = s.keyCustomers;
@@ -66,7 +107,7 @@ void RechercheLocale::RemoveAndReschedule(Sol &s) {
     CDPSolver::disjointClients.resize(s.GetCustomerCount());
     while (found) {
         found = false;
-        if (Parameters::GetElapsedTime() - runtime > 1200) break;
+        if (Parameters::GetElapsedTime() - runtime > 30) break;
         customerIdList = vector<int>(s.unscheduledCustomers.begin(), s.unscheduledCustomers.end());
         shuffle(customerIdList.begin(), customerIdList.end(), Parameters::RANDOM_GEN);
         for (auto id: customerIdList) {
@@ -141,7 +182,7 @@ bool RechercheLocale::UseSingleDriver(Sol &s, Order *o) {
 
 bool RechercheLocale::SwapLoad(Sol &s, Order *o) {
     bool sortie = false;
-            Sol cur(s);
+    Sol cur(s);
     set<int> keyCustomer = s.keyCustomers;
     std::vector<int> DeliveryList(s.GetDeliveryCount(o));
     int depth = 0;
@@ -179,7 +220,7 @@ bool RechercheLocale::SwapLoad(Sol &s, Order *o) {
             Sol::FixLoad[dj->delID] = -1;
             if (cur < s) {
                 s = cur;
-                cout << "Swap load same order " << s.GetLastCost() << endl;
+//                cout << "Swap load same order " << s.GetLastCost() << endl;
                 sortie = true;
                 break;
             }
@@ -331,5 +372,24 @@ bool RechercheLocale::Relocate2(Sol &s, Customer *c1, Customer *c2) {
         }
 //        cout << "best sol relocate 2) " << bestCost << endl;
     }
+    return sortie;
+}
+
+bool RechercheLocale::ShiftLoading(Sol &s) {
+    bool sortie = false;
+
+    for (auto cId: s.unscheduledCustomers) {
+        Customer *c = s.GetCustomer(cId);
+//        cout<<*c<<endl;
+//        Prompt::print(s.depotLoadingIntervals[c->depotID]);
+        set<int> UsedOrder;
+        Order *cur_order = s.GetRandomOrder(c, UsedOrder);
+        for (int j = 0; j < s.GetDeliveryCount(cur_order);) {
+            Delivery *del = s.GetDelivery(cur_order, j);
+            exit(1);
+        }
+        exit(1);
+    }
+
     return sortie;
 }

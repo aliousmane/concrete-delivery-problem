@@ -19,6 +19,7 @@ public:
     static int TW_WIDTH;
     static int UNDELIVERY_PENALTY;
     static int FIRST_DEL_PENALTY;
+    static int FIRST_DEL_MAX_ARRIVAL;
     static int LATE_ARRIVAL_PENALTY;
     static int OVERTIME_PENALTY;
     static int UNDERWORK_PENALTY;
@@ -35,6 +36,7 @@ public:
     static int CLEANING_DURATION;
     static bool PENALTY_COST;
     static bool KINABLE;
+    static bool LOCAL_SEARCH;
     static bool SHOW;
     static int DRIVER_USE;
     static int SORT_TYPE;

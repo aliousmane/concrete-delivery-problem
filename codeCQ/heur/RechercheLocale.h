@@ -7,24 +7,42 @@
 #include <iostream>
 #include<set>
 
-class RechercheLocale
-{
+class RechercheLocale {
 public:
-    RechercheLocale():customerIdList(0), bestCost(false){}
-    explicit RechercheLocale(std::set<int> const& feasibleClients):bestCost(false){
+    RechercheLocale() : customerIdList(0), bestCost(false) {}
+
+    explicit RechercheLocale(std::set<int> const &feasibleClients) : bestCost(false) {
         customerIdList = std::vector<int>(feasibleClients.begin(), feasibleClients.end());
     }
-    ~RechercheLocale()=default;
+
+    ~RechercheLocale() = default;
+
     void Run(Sol &s);
+
     void RunAllFeasible(Sol &s);
+
     void RemoveAndReschedule(Sol &s);
+
     bool SwapLoad(Sol &s, Order *o);
+
     bool UseSingleDriver(Sol &s, Order *o);
-    bool Swap1(Sol &s, Customer *c1,Customer *c2);
-    bool Swap2(Sol &s, Customer *c1,Customer *c2);
-    bool Relocate1(Sol &s, Customer *c1,Customer *c2);
-    bool Relocate2(Sol &s, Customer *c1,Customer *c2);
+
+    bool Swap1(Sol &s, Customer *c1, Customer *c2);
+
+    bool Swap2(Sol &s, Customer *c1, Customer *c2);
+
+    bool Relocate1(Sol &s, Customer *c1, Customer *c2);
+
+    bool Relocate2(Sol &s, Customer *c1, Customer *c2);
+
     bool RelocateDriver(Sol &s);
+
+    bool ShiftLoading(Sol &s);
+
+    bool UnscheduledFirst(Sol &s);
+
+    bool LoadBackward(Sol &s);
+
     bool found{true};
     std::vector<int> customerIdList;
     Cost bestCost;

@@ -311,17 +311,15 @@ void Sol::RemoveFromDepot(Dock *n) {
     }
     DepotNext[n->id] = nullptr;
     DepotPrev[n->id] = nullptr;
-    TimeSlot in =
-            TimeSlot(StartServiceTime[n->id], EndServiceTime[n->id], n->id);
 
     auto it = std::find_if(depotLoadingIntervals[dep->depotID].begin(),
                            depotLoadingIntervals[dep->depotID].end(),
                            [n](const TimeSlot &i1) {
-                               return ((i1.nodeID == n->id) and i1.nodeID != -1);
+                               return ((i1.n.id == n->id) and i1.nodeID != -1);
                            });
 
     if (it != depotLoadingIntervals[dep->depotID].end()) {
-        depotLoadingIntervals[dep->depotID].erase(it);
+        depotLoadingIntervals[dep->depotID].erase(it);       
     }
     DepotAssignTo[n->id] = nullptr;
 }

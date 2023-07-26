@@ -13,12 +13,13 @@ public:
              truckWaitingCost(0), clientWaitingCost(0), driverUsed(0),
              firstDeliveryCost(0), lateDeliveryCost(0), overTimeCost(0),
              firstDeliveryCount(0), lateDeliveryCount(0), satisfiedCost(0),
-             isFeasible(true), waste(0), underWorkCost(0) {}
+             isFeasible(true), waste(0), underWorkCost(0), distanceCost(0) {}
 
     explicit Cost(bool value);
 
     bool operator==(const Cost &rhs) const {
         return travelCost == rhs.travelCost &&
+               distanceCost == rhs.distanceCost &&
                satisfiedCost == rhs.satisfiedCost &&
                waitingCost == rhs.waitingCost &&
                undeliveredCost == rhs.undeliveredCost &&
@@ -50,6 +51,7 @@ public:
 
     Cost &operator+=(const Cost &c) {
         this->travelCost += c.travelCost;
+        this->distanceCost += c.distanceCost;
         this->waitingCost += c.waitingCost;
         this->undeliveredCost += c.undeliveredCost;
         this->truckWaitingCost += c.truckWaitingCost;
@@ -73,8 +75,8 @@ public:
     }
 
     void setTotal() {
-        totalCost = travelCost +  firstDeliveryCost +underWorkCost + overTimeCost+
-                undeliveredCost ;
+        totalCost = travelCost + firstDeliveryCost + underWorkCost + overTimeCost +
+                    undeliveredCost;
 //                waitingCost +lateDeliveryCost  ;
     }
 
@@ -98,8 +100,10 @@ public:
         satisfiedCost = 0;
         waste = 0;
         underWorkCost = 0;
+        distanceCost = 0;
     }
 
+    double distanceCost;
     double travelCost;
     double satisfiedCost;
     double waitingCost;

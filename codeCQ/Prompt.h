@@ -6,32 +6,55 @@
 #include <vector>
 #include "Node.h"
 #include <iostream>
+
 class Prompt {
 public:
-  static  void ShowMissingArgument(int argc);
+    static void ShowMissingArgument(int argc);
 
     template<typename T>
-    static void print(const T  container,const std::string sep=" "){
+    static void print(const T container, const std::string sep = " ") {
         std::cout << "{ ";
-        for (auto& element : container) {
-            std::cout << element << sep <<std::flush;
+        for (auto &element: container) {
+            std::cout << element << sep << std::flush;
         }
-        std::cout << "}"<<std::endl;
+        std::cout << "}" << std::endl;
     }
 
-    static void print(const std::vector<std::string> container,const std::string sep=" "){
-        std::cout << "{ ";
-        for (auto& element : container) {
-            std::cout << element << sep <<std::flush;
+    template<typename T>
+    static void log(const T container, const std::string sep = " ") {
+        if (Parameters::SHOW == true) {
+
+            std::cout << "{ ";
+            for (auto &element: container) {
+                std::cout << element << sep << std::flush;
+            }
+            std::cout << "}" << std::endl;
         }
-        std::cout << "}"<<std::endl;
     }
-    static void print(const std::vector<Customer*> & container,const std::string sep=" "){
-        std::cout << "{ ";
-        for (auto& element : container) {
-            std::cout << element->custID << sep <<std::flush;
+    static void log(const std::vector<std::string> container, const std::string sep = " ") {
+        if (Parameters::SHOW == true) {
+            std::cout << "{ ";
+            for (auto &element: container) {
+                std::cout << element << sep << std::flush;
+            }
+            std::cout << "}" << std::endl;
         }
-        std::cout << "}"<<std::endl;
+    }
+
+    static void print(const std::vector<std::string> container, const std::string sep = " ") {
+        std::cout << "{ ";
+        for (auto &element: container) {
+            std::cout << element << sep << std::flush;
+        }
+        std::cout << "}" << std::endl;
+    }
+
+    static void print(const std::vector<Customer *> &container, const std::string sep = " ") {
+        std::cout << "{ ";
+        for (auto &element: container) {
+            std::cout << element->custID << sep << std::flush;
+        }
+        std::cout << "}" << std::endl;
     }
 
 };

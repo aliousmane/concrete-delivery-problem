@@ -54,7 +54,7 @@ void CDPSolver::SolveCDP(Sol &s, Data &dat, int iter, bool restart) {
     vector<pair<int, string>> custInfo = {
             {0, "Cust Sort Early TW"},
             {1, "Cust Sort Greater D"},
-//            {2, "Cust Sort Late TW "},
+//            {2, "Cust Sort Late TW"},
 //            {3, "Cust Sort Min Width TW"},
             {4, "Cust Random"},
 //            {5, "Cust Sort Kinable"},
@@ -146,7 +146,6 @@ void CDPSolver::find_all_routes(Sol &s, Customer *c, std::unordered_map<std::str
             sumServiceTime.insert(cur1.sumServiceTime[c->custID]);
         }
     }
-
 }
 
 
@@ -239,8 +238,7 @@ void CDPSolver::findCorrelation(Data &dat, std::vector<TimeSlot> const &listInt,
                                 std::vector<std::set<int>> &linkedClientDemand,
                                 std::vector<std::set<int>> &linkedClients,
                                 std::vector<std::set<int>> &linkedClientsInf,
-                                std::vector<std::set<int>> &linkedClientSup
-) {
+                                std::vector<std::set<int>> &linkedClientSup) {
     linkedClientSlot.clear();
     linkedClientDemand.clear();
     linkedClients.clear();
@@ -337,9 +335,9 @@ void CDPSolver::PathRelinking(Sol &new_cur, std::vector<Customer *> &list_cust,
 //            cout << count << " " << cur->toString(c) << endl;
 //                exit(1);
 //                cur->ShowSchedule(c);
-            Node * prev = cur->CustomerNext[c->StartNodeID];
-            while(prev->type== Parameters::DELIVERY){
-                isfeasible = InsertDel(new_cur, cur, dynamic_cast<Delivery*>(prev));
+            Node *prev = cur->CustomerNext[c->StartNodeID];
+            while (prev->type == Parameters::DELIVERY) {
+                isfeasible = InsertDel(new_cur, cur, dynamic_cast<Delivery *>(prev));
                 if (not isfeasible)
                     break;
                 prev = cur->CustomerNext[prev->id];
@@ -451,20 +449,10 @@ bool CDPSolver::InsertDel(Sol &sol_cur, Sol *cur, Delivery *del) {
 void CDPSolver::repairSolution(Sol &new_cur) {
     new_cur.BuildFromDepotSetIntervall();
     new_cur.BuildFromDriverSetIntervall();
-//    new_cur.ShowDrivers();
-//    new_cur.ShowDepotSlots();
-//    new_cur.ShowDriverSlots();
-//    Parameters::SHOW=true;
     new_cur.Update();
-//    Parameters::SHOW= false;
-
 }
 
 void CDPSolver::repairSchedule(Sol &sol) {
-//TODO    if (_insrmv != nullptr)
-//    {
-//        _insrmv->repairSolution(sol);
-//    }
 }
 
 

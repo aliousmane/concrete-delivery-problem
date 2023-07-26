@@ -92,12 +92,12 @@ public:
 class Delivery : public Node {
 public:
     int delID, orderID, rank, custID, dockID;
-    double travel_time;
+    double travel_time, distance;
     double arrival_time, start_service, end_service, departure_time;
     bool isdelayed;
 
     Delivery() : delID(-1), orderID(-1), arrival_time(0), start_service(0), end_service(0), departure_time(0),
-                 rank(-1), custID(-1), dockID(-1), travel_time(0), isdelayed(false) {}
+                 rank(-1), custID(-1), dockID(-1), travel_time(0), isdelayed(false),distance(0) {}
 
     friend std::ostream &operator<<(std::ostream &os, const Delivery &delivery) {
         os << static_cast<const Node &>(delivery) << " delID: " << delivery.delID << " o: " << delivery.orderID << " c: " << delivery.custID

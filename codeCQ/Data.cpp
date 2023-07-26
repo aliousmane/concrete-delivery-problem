@@ -31,8 +31,8 @@ void Data::Load() {
 //        LoadInstance();
         LoadCQInstance();
         //Data::LoadMatrices(_distances,distance_mat_file,1);
-//        Data::LoadMatrices(_times, time_mat_file, 60);
-        Data::LoadMatrices(_times, distance_mat_file, 1);
+        Data::LoadMatrices(_times, time_mat_file, 60);
+        Data::LoadMatrices(_distances, distance_mat_file, 1);
     }
     AddDeliveryNodes();
     AddDockNodes();

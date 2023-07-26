@@ -41,18 +41,22 @@ public:
         if (argc > 2)
             Parameters::RUNTIME = strtol(argv[2], nullptr, 10);
 
+        if (argc > 3)
+            Parameters::LOCAL_SEARCH = bool(strtol(argv[3], nullptr, 10));
+
         instance_name = std::filesystem::path(input).stem();
         problem_name = std::filesystem::path(input).parent_path().filename();
         sol_output = path + "/solution/" + problem_name + "/" + instance_name + ".csv";
         result_file = path + "/result/" + problem_name + "/results.csv";
-        if (argc > 3)
-            result_file = path + "/result/" + problem_name + "/" + argv[3];
+        if (argc > 4)
+            result_file = path + "/result/" + problem_name + "/" + argv[4];
 
     }
 
     void Load();
 
     void LoadInstance();
+
     void LoadCQInstance();
 
     void LoadKinableInstance();
@@ -146,7 +150,11 @@ public:
     [[maybe_unused]] void ShowData();
 
     double Travel(Node *from, Node *to) {
-        return Travel(from->distID,to->distID);
+        return Travel(from->distID, to->distID);
+    }
+
+    double Distance(Node *from, Node *to) {
+        return Distance(from->distID, to->distID);
     }
 
     double Travel(Customer *from, Customer *to) {
@@ -154,8 +162,17 @@ public:
         return Travel(from, dep_to) + Travel(dep_to, to);
     }
 
+    double Distance(Customer *from, Customer *to) {
+        Depot *dep_to = GetDepot(to->depotID);
+        return Distance(from, dep_to) + Distance(dep_to, to);
+    }
+
     double Travel(int from, int to) {
         return _times[from][to];
+    }
+
+    double Distance(int from, int to) {
+        return _distances[from][to];
     }
 
     static double LoadingTime(Depot *dep, double load) {
@@ -182,9 +199,9 @@ public:
         return Parameters::CLEANING_DURATION;
     }
 
-    int GetTimeBtwDel(Delivery *n1, Delivery *n2){
+    int GetTimeBtwDel(Delivery *n1, Delivery *n2) {
 
-        if(n1->orderID == n2->orderID)
+        if (n1->orderID == n2->orderID)
             return Parameters::INTRA_ORDER_DELIVERY;
         else
             return Parameters::INTER_ORDER_DELIVERY;
@@ -228,7 +245,7 @@ public:
 
             temp.SumDemand += cur_c.demand;
             temp.MinDemand = std::min(temp.MinDemand, cur_c.demand);
-            temp.MaxDemand = std::max(temp.MaxDemand,  cur_c.demand);
+            temp.MaxDemand = std::max(temp.MaxDemand, cur_c.demand);
 
             temp.minEarlyTW = std::min(temp.minEarlyTW, cur_c.early_tw);
             temp.maxEarlyTW = std::max(temp.maxEarlyTW, cur_c.early_tw);

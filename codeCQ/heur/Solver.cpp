@@ -3,18 +3,14 @@
 #include "CDPSolver.h"
 #include <istream>
 #include "CustInsertion.h"
-#include "CustInsertion2.h"
 #include "InsRmvMethodFast.h"
 #include "InsRmvBuilder1.h"
-#include "InsRmvBuilder2.h"
 #include "InsRmvBuilder3.h"
 
 using namespace std;
 
 void Solver::run() {
 
-//    feasibleClients = CDPSolver::EliminateCustomer(*_data, 1);
-//    Test();exit(1);
     vector<TimeSlot> listInt;
 
     vector<set<int>> linkedClientSlot;
@@ -36,16 +32,10 @@ void Solver::run() {
 
     Sol s(&dat);
     s.keyCustomers = feasibleClients;
-    SolveGrasp(s, dat, linkedClientSlot, 200);
+    SolveGrasp(s, dat, linkedClientSlot, 50);
     SaveResults(s);
-//    s.ShowSchedule();
 //    s.exportCSVFormat("s1.csv");
-//    s.ShowDepotSlots();
-//    s.ShowDriverSlots();
-//    s.ShowDrivers();
     cout << s.GetLastCost() << endl;
-//    cout << s.updateCost << endl;
-//    s.ShowSchedule();
     Prompt::print(s.unscheduledCustomers);
 }
 
@@ -136,8 +126,8 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
     grasp.AddInsertOperatorVrp(&c5_3);
 //    grasp.AddInsertOperatorVrp(&cFixed);
 
-    grasp.AddInsertOperatorVrp(&p01);
-    grasp.AddInsertOperatorVrp(&p03);
+//    grasp.AddInsertOperatorVrp(&p01);
+//    grasp.AddInsertOperatorVrp(&p03);
 //    grasp.AddInsertOperatorVrp(&p11);
 //    grasp.AddInsertOperatorVrp(&p13);
 //    grasp.AddInsertOperatorVrp(&p23);
@@ -153,13 +143,16 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
     grasp.SetIterationCount(iter);
     RechercheLocale loc_search(s.keyCustomers);
     loc_search.LinkedClientSlot = linkedClientSlot;
-//    grasp.Optimize(s, nullptr, nullptr, &loc_search, false);
-    grasp.Optimize(s, nullptr, nullptr, nullptr, false);
+    if(Parameters::LOCAL_SEARCH){
+        grasp.Optimize(s, nullptr, nullptr, &loc_search, false);
+    }
+    else{
+        grasp.Optimize(s, nullptr, nullptr, nullptr, false);
+    }
 }
 
 void Solver::SaveResults(Sol &s) {
     printf("Instance:%s\n", _data->instance_name.c_str());
-
     printf("Nombre clients %d \t", _data->nbCustomers);
     printf("Nombre ordre %d \t", _data->nbOrders);
     printf("Total Cost:%.2lf \t", s.GetLastCost().satisfiedCost);

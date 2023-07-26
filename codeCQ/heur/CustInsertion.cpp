@@ -12,7 +12,7 @@ void CustInsertion::Insert(Sol &s) {
     s.Update();
     _insrmv.FillStructures(s, customersList, driversList);
     assert(!customersList.empty());
-    int insertion_type = Parameters::LOAD_INSERTION;
+    const int insertion_type = Parameters::LOAD_INSERTION;
     InsertWithBactrack(s, customersList);
     bool beginLoop = false;
     while (!removedList.empty() && beginLoop) {
@@ -75,13 +75,14 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *> &list) {
 bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
     bool nextCustomer = false;
     int depth = 0;
+//    if (c->custID == 86)
+//        Parameters::SHOW = true;
+    Prompt::log(s.depotLoadingIntervals[c->depotID]);
     for (int j = 0; j < s.GetDeliveryCount(cur_order);) {
         Delivery *del = s.GetDelivery(cur_order, j);
         if (Parameters::SHOW) {
-            Prompt::print(
-                    {this->name, " Try to insert del ", to_string(del->id), "(", to_string(del->rank + 1), "of ",
-                     to_string(s.GetDeliveryCount(cur_order)), " for",
-                     to_string(cur_order->orderID)});
+            Prompt::print({this->name, " Try to insert del ", to_string(del->id), "(", to_string(del->rank + 1), "of ",
+                           to_string(s.GetDeliveryCount(cur_order)), " for", to_string(cur_order->orderID)});
         }
 
         if (depth++ > Parameters::BACKTRACK_DEPTH * s.GetDeliveryCount(cur_order)) {
@@ -110,12 +111,10 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
         }
         if (Parameters::SHOW) {
             Prompt::print({to_string(listMoves[del->delID].Count()), "moves for del", to_string(del->id)});
-            listMoves[del->delID].Show();
+//            listMoves[del->delID].Show();
         }
         Move<Delivery, Driver, MoveVrp> best;
-        if (listMoves[del->delID].Count() > 0) {
-            best = listMoves[del->delID].Extract();
-        }
+        if (listMoves[del->delID].Count() > 0) { best = listMoves[del->delID].Extract(); }
         if (!best.IsFeasible) {
             if (del->rank > 0) {
                 Delivery *prec_del = s.GetDelivery(cur_order, del->rank - 1);
@@ -191,7 +190,6 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
             if (Parameters::SHOW) {
                 cout << cur_order->orderID << " is not scheduled\n";
                 Prompt::print(Sol::CustomerConflict[c->custID]);
-//                    s.ShowSchedule();
             }
             s.UnassignOrder(cur_order);
             removedList.emplace_back(c);
@@ -207,9 +205,6 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
                 Sol::FailureCause[next_del->id] = Parameters::FAILURECAUSE::NONE;
                 listMoves[next_del->delID].Clear();
             }
-//                cout<<*best.to<<endl;
-//                    s.ShowSchedule(del);
-
             if (Parameters::SHOW) {
                 s.ShowSchedule(cur_order);
             }
@@ -219,23 +214,16 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
             if (Parameters::SHOW) {
                 cout << "order " << cur_order->orderID << " is scheduled\n";
             }
-//                    cout << "order " <<cur_order->orderID << " is scheduled\n";
             break;
         }
     }
-
-
     if (s.isClientSatisfied(c)) {
-//            Sol::CustomerConflict[c->custID].clear();
         if (Parameters::SHOW) {
             cout << "Customer " << c->custID << " is scheduled\n";
-//                s.ShowSchedule(c);
         }
-//                s.ShowSchedule(c);
-//                cout << "Customer " <<c->custID << " is scheduled\n";
-
         nextCustomer = true;
     }
+    Parameters::SHOW = false;
     return nextCustomer;
 }
 

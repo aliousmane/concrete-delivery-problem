@@ -10,14 +10,16 @@ void Sol::Update() {
     satisfiedCustomers.clear();
     unscheduledCustomers.clear();
     driverUsed.clear();
+    lateCustomers.clear();
     BuildFromDepotSetIntervall();
     isFeasible = true;
     computeLastCost = false;
     InitDrivers();
     InitCustomers();
     InitDepots();
-    nodeServiceIntervals =
-            std::vector<TimeSlot>(GetNodeCount(), TimeSlot(0, 1440));
+    loopCount = 0;
+    abort = false;
+    nodeServiceIntervals = std::vector<TimeSlot>(GetNodeCount(), TimeSlot(0, 1440));
     UpdateForward();
     updateCost.underWorkCost = 0;
     updateCost.overTimeCost = 0;
@@ -58,7 +60,9 @@ void Sol::Update() {
 
 void Sol::UpdateForward() {
     std::fill(VisitFlags.begin(), VisitFlags.end(), false);
-
+//    cout << " Start update\n";
+    loopCount = 0;
+    isFeasible = true;
     for (int i = 0; i < GetDepotCount(); i++) {
         Depot *dep = GetDepot(i);
         if (DepotSize[dep->depotID] < 1) {
@@ -68,9 +72,17 @@ void Sol::UpdateForward() {
         if (!isFeasible)
             break;
     }
+//    cout << " End update\n";
+
 }
 
 void Sol::UpdateForward(Depot *dep) {
+//    cout << "Update depot " << dep->depotID << "- ";
+
+    if (loopCount++ > GetDeliveryCount()) {
+        isFeasible = false;
+        return;
+    }
     Node *prev = DepotNext[dep->StartNodeID];
     while (prev->type != Parameters::END_LINK) {
         if (VisitFlags[prev->id]) {
@@ -81,11 +93,17 @@ void Sol::UpdateForward(Depot *dep) {
             Driver *d = GetDriverAssignedTo(prev);
             if (d != nullptr) {
                 auto *dock = dynamic_cast<Dock *>(prev);
+//                cout << " Update " << dock->id << " V "<<VisitFlags[dock->id]<<" |";
                 auto *prec_del = dynamic_cast<Delivery *>(DriverPrev[dock->id]);
                 if (prec_del != nullptr) {
                     Depot *prec_dep = GetDepotAssignedTo(DriverPrev[prec_del->id]);
                     if (!VisitFlags[prec_del->id] and dep != prec_dep) {
+//                        cout << "Update at first " << DriverPrev[prec_del->id]->id << " of depot " << prec_dep->depotID
+//                        << " with driver "<<d->id << " [ ";
+//                        Show(d);
                         UpdateForward(prec_dep);
+//                        ShowSlot(d);
+//                        ShowSlot(prec_dep);
                     }
                 }
                 auto *del = dynamic_cast<Delivery *>(DriverNext[dock->id]);
@@ -146,8 +164,13 @@ void Sol::Update(Depot *dep, Dock *dock, Delivery *del) {
     del->travel_time = Travel(lastOfDriver, dock) + Travel(dock, del) +
                        Travel(del->distID, d->distID);
 
+    del->distance = Distance(lastOfDriver, dock) + Distance(dock, del) +
+                    Distance(del->distID, d->distID);
+
     del->travel_time -= Travel(lastOfDriver->distID, d->distID);
+    del->distance -= Distance(lastOfDriver->distID, d->distID);
     updateCost.travelCost += del->travel_time;
+    updateCost.distanceCost += del->distance;
 
     StartServiceTime[dock->id] = ArrivalTime[dock->id];
     double start1 = StartServiceTime[dock->id];
@@ -166,7 +189,6 @@ void Sol::Update(Depot *dep, Dock *dock, Delivery *del) {
 
     StartServiceTime[dock->id] = loadSlot.lower;
 
-    assert(start1 == StartServiceTime[dock->id]);
     double arr_node = StartServiceTime[dock->id];
     arr_node += LOAD_DURATION;
     EndServiceTime[dock->id] = arr_node;
@@ -183,7 +205,12 @@ void Sol::Update(Depot *dep, Dock *dock, Delivery *del) {
         }
         assert(GetDriverAssignedTo(prec_del) != nullptr);
         assert(-WaitingTime[del->id] <= this->GetTimeBtwDel(del) + EPS);
+    } else {
+        if (WaitingTime[del->id] < 0) {
+            lateCustomers.insert(c->custID);
+        }
     }
+
     NodeLateDelivery[del->id] = updateCost.lateDeliveryCost;
     ClientWaitingTime[del->id] = updateCost.clientWaitingCost;
     TruckWaitingTime[del->id] = updateCost.truckWaitingCost;
@@ -348,6 +375,11 @@ void Sol::GetCost(Depot *dep, Dock *dock, Delivery *del, Cost &cur_cost) {
                            Travel(del->distID, d->distID) -
                            Travel(lastOfDriver->distID, d->distID);
 
+    cur_cost.distanceCost += Distance(lastOfDriver, dock) +
+                             Distance(dock, del) +
+                             Distance(del->distID, d->distID) -
+                             Distance(lastOfDriver->distID, d->distID);
+
     double arr_node = ArrivalTime[del->id];
 
     Sol::SetTimingCost(del, arr_node, real_del_time, EarlyTW(del),
@@ -433,7 +465,7 @@ void Sol::UpdateDepotLoadingSet(Depot *dep, Dock *dock, TimeSlot const &intv) {
     if (it_load != depotLoadingIntervals[dep->depotID].end()) {
         cout << "1 " << *it_load << intv << endl;
         cout << *dock << endl;
-        cout<<"Slot occupé update\n";
+        cout << "Slot occupé update\n";
         ShowSlot(dep);
         exit(1);
     }
@@ -445,32 +477,63 @@ void Sol::UpdateDepotLoadingSet(Depot *dep, Dock *dock, TimeSlot const &intv) {
 
 void Sol::FindEmptySlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, const double duration) {
     auto it_load = SlotSet.find(slot);
-//    if(Parameters::SHOW)
     if (it_load != SlotSet.end()) {
-//        cout << "Debut " << slot << endl;
+
         bool forward = (it_load->n.siteID == slot.n.siteID);
         if ((Parameters::LOAD_INSERTION == Parameters::DEPOTINSERTION::FORWARD) ||
             forward) {
             FindForwardSlot(SlotSet, slot, duration);
         } else if (Parameters::LOAD_INSERTION == Parameters::DEPOTINSERTION::BACKWARD) {
-            FindBackwardSlot(SlotSet, slot, duration);
-        } else if (Parameters::LOAD_INSERTION == Parameters::DEPOTINSERTION::RANDOM) {
+            auto backSlot = slot;
+            if (!FindBackwardSlot(SlotSet, backSlot, duration)) {
+//                cout << "LÀ\n";
 
-            mat_func_get_rand_double() <= 0.5 || forward ? FindForwardSlot(SlotSet, slot, duration) : FindBackwardSlot(SlotSet,
-                                                                                                            slot,
-                                                                                                            duration);
-//            if (mat_func_get_rand_double() <= 0.5) {
-//                FindForwardSlot(SlotSet,slot,duration);
-//            } else {
-//                FindBackwardSlot(SlotSet,slot,duration);
-//            }
+                FindForwardSlot(SlotSet, slot, duration);
+            } else {
+//                cout << "ICI\n";
+//                cout << slot << " " << backSlot << endl;
+                slot = backSlot;
+//                cout << " NEW slot " << " " << slot << endl;
+
+            }
+        } else if (Parameters::LOAD_INSERTION == Parameters::DEPOTINSERTION::RANDOM) {
+            if (false) {
+                auto forwardSlot = slot;
+                auto backwardSlot = slot;
+                FindForwardSlot(SlotSet, forwardSlot, duration);
+                FindBackwardSlot(SlotSet, backwardSlot, duration);
+//            cout<<*it_load<<"-"<< slot<<"- "<<forwardSlot<<"-"<<backwardSlot<<endl;
+                if (forwardSlot.lower - slot.lower < slot.lower - backwardSlot.lower) {
+                    slot = forwardSlot;
+                } else {
+                    slot = backwardSlot;
+                }
+            }
+            if (true) {
+                mat_func_get_rand_double() <= 0.5 || forward ? FindForwardSlot(SlotSet, slot, duration)
+                                                             : FindBackwardSlot(
+                        SlotSet,
+                        slot,
+                        duration);
+                if (mat_func_get_rand_double() <= 0.5) {
+                    FindForwardSlot(SlotSet, slot, duration);
+                } else {
+                    bool find = FindBackwardSlot(SlotSet, slot, duration);
+                    if (!find) {
+                        FindForwardSlot(SlotSet, slot, duration);
+                    }
+                }
+            }
+
         }
     }
 }
 
-void Sol::FindForwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, const double duration) {
+bool Sol::FindForwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, const double duration) {
     auto it_load = SlotSet.find(slot);
 //    if(Parameters::SHOW)
+    bool find = false;
+
     if (it_load != SlotSet.end()) {
 //        cout << "Debut " << slot << endl;
 
@@ -481,27 +544,46 @@ void Sol::FindForwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, con
 
             if (next_it != SlotSet.end()) {
                 if (slot.upper <= next_it->lower) {
+                    find = true;
                     break;
                 }
             } else {
+                find = true;
                 break;
             }
             cur_it = next_it;
         }
     }
-//    if(Parameters::SHOW)
+    return find;
 }
 
-void Sol::FindBackwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, const double duration) {
+bool Sol::FindBackwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, const double duration) {
     auto it_load = SlotSet.find(slot);
-//    if(Parameters::SHOW)
+    Dock *dock = dynamic_cast<Dock *> (TimeSlot::myData.GetNode(slot.n.id));
+
+    bool find = false;
+    bool abort = false;
     if (it_load != SlotSet.end()) {
 //        cout << "Debut " << slot << endl;
-        bool find = false;
         for (auto cur_it = it_load; cur_it != SlotSet.begin();) {
             auto prev_it = std::prev(cur_it);
+            Dock *cur_dock = dynamic_cast<Dock *> (TimeSlot::myData.GetNode(cur_it->n.id));
+
+            if (dock->orderID == cur_dock->orderID) {
+                if (cur_dock->rank < dock->rank) {
+                    find = false;
+                    abort = true;
+                    break;
+                }
+            }
+            if (cur_dock->early_tw + 60 < dock->early_tw) {
+                find = false;
+                abort = true;
+                break;
+            }
             slot.upper = cur_it->lower;
             slot.lower = slot.upper - duration;
+//            cout << " BACK " << slot << "--" << *cur_it << endl;
             if (prev_it != SlotSet.begin()) {
                 if (slot.lower >= prev_it->upper) {
                     find = true;
@@ -515,13 +597,25 @@ void Sol::FindBackwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, co
             }
             cur_it = prev_it;
         }
-        if (!find) {
+        if (!abort and !find) {
+            find = true;
             slot.upper = it_load->lower;
             slot.lower = slot.upper - duration;
+//            cout<<"ICI!!!!!\n";
         }
+
 
 //        cout << "End " << slot << endl;
 //        Prompt::print(SlotSet);
     }
-//    if(Parameters::SHOW)
+    if (find) {
+        if (SlotSet.find(slot) != SlotSet.end()) {
+            cout << "End " << slot << endl;
+            Prompt::print(SlotSet);
+            exit(1);
+
+        }
+
+    }
+    return find;
 }

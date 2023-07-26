@@ -71,6 +71,7 @@ public:
     std::vector<std::set<TimeSlot>> driverWorkingIntervals;
     std::vector<TimeSlot> nodeServiceIntervals;
     std::set<int> keyCustomers;
+    std::set<int> lateCustomers;
     std::set<int> availableDrivers;
     std::set<int> driverUsed;
     std::vector<std::set<int>> clientDriverUsed;
@@ -79,6 +80,9 @@ public:
     std::set<int> unscheduledCustomers;
 
     std::vector<std::set<double>> orderLoads;
+
+    int loopCount{0};
+    bool abort{false};
 
     static std::vector<int> FailureCause;
     static std::vector<std::set<int>> CustomerConflict;
@@ -323,13 +327,21 @@ public:
     double Travel(Node *from, Node *to) {
         return _data->Travel(from, to);
     }
+    double Distance(Node *from, Node *to) {
+        return _data->Distance(from, to);
+    }
 
     double Travel(Customer *from, Customer *to) {
         return _data->Travel(from, to);
     }
-
+    double Distance(Customer *from, Customer *to) {
+        return _data->Distance(from, to);
+    }
     double Travel(int from, int to) {
         return _data->Travel(from, to);
+    }
+    double Distance(int from, int to) {
+        return _data->Distance(from, to);
     }
 
     double GetLoad(Driver *d, Order *o) {
@@ -542,8 +554,8 @@ public:
     }
 
     static void FindEmptySlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, double duration);
-    static void FindForwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, const double duration);
-    static void FindBackwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, const double duration);
+    static bool FindForwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, const double duration);
+    static bool FindBackwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, const double duration);
 
 
 private:
