@@ -13,12 +13,12 @@ def time_to_minute(stamps):
 
 #%%
 TICKET_FOLDER = "/".join([os.path.dirname(__file__), "tickets/"])
-INSTANCE_FOLDER = "/".join([os.path.dirname(__file__), "instances/"])
+INSTANCE_FOLDER = "/".join([os.path.dirname(__file__), "createInstances/instances/"])
 #%%
 """ Load dataframes """
 df_tickets = pd.read_excel(f"{os.path.dirname(__file__)}/DTICKETHISTAB_BETON.xlsx")
 #%%
-df_orders = pd.read_excel(f"{os.path.dirname(__file__)}/DORDERSTAB_BETON.xlsx")
+df_orders = pd.read_excel(f"{os.path.dirname(__file__)}/DORDERSTAB_BETON.xlsx","data")
 #%%
 df_employee = pd.read_excel(f"{os.path.dirname(__file__)}/EMPLOYETAB.xlsx")
 df_employee.drop(['COMP_NBR', 'emp_sch_specificite'], axis=1, inplace=True)
