@@ -12,6 +12,8 @@
 using namespace std;
 
 void Solver::run() {
+
+   
     feasibleClients = CDPSolver::EliminateCustomer(*_data, 1);
 
 //    Test0();exit(1);

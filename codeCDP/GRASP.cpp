@@ -77,6 +77,14 @@ void GRASP<NodeT, DriverT>::Optimize(
                         continue;
                     }
 //                    printf("Iter %d\n",iter_k);
+
+                    if(cur.GetData()->UpperBound == cur.GetLastCost().satisfiedCost){
+                        iter = _iterator_count;
+                        best = cur;
+                        bestCout = cur.GetLastCost();
+                        stop = true;
+                        break;
+                    }
                     if (first_improvement) {
                         if (std::includes(cur.satisfiedCustomers.begin(), cur.satisfiedCustomers.end(),
                                           cur.keyCustomers.begin(), cur.keyCustomers.end())) {
@@ -87,6 +95,8 @@ void GRASP<NodeT, DriverT>::Optimize(
                             break;
                         }
                     }
+
+
                     if (loc_search != nullptr) {
                         if (LocalSearchMap.count(cur.toString()) == 0) {
                             loc_search->Run(cur);
@@ -136,9 +146,13 @@ void GRASP<NodeT, DriverT>::Optimize(
                         best = cur;
                         if (verbose) {
                             printf("Iter(%d-%s-%s) %d ", iter, f.opt->name.c_str(), best.heurName.c_str(), iter_k);
-                            cout << bestCout << endl;
+                            cout << bestCout << " Vs " << best.GetData()->UpperBound << endl;
                         }
-
+                        if(best.GetData()->UpperBound == bestCout.satisfiedCost){
+                            iter = _iterator_count;
+                            stop = true;
+                            break;
+                        }
                         if (first_improvement) {
                             if (std::includes(best.satisfiedCustomers.begin(), best.satisfiedCustomers.end(),
                                               best.keyCustomers.begin(), best.keyCustomers.end())) {
