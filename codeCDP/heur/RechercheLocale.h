@@ -16,10 +16,10 @@ public:
     }
     ~RechercheLocale()=default;
     void Run(Sol &s);
-    bool Swap1(Sol &s, Customer *c1,Customer *c2);
-    bool Swap2(Sol &s, Customer *c1,Customer *c2);
-    bool Relocate1(Sol &s, Customer *c1,Customer *c2);
-    bool Relocate2(Sol &s, Customer *c1,Customer *c2);
+    bool SwapBuild(Sol &s, Customer *c1, Customer *c2);
+    bool SwapReStart(Sol &s, Customer *c1, Customer *c2);
+    bool RelocateBuild(Sol &s, Customer *c1, Customer *c2);
+    bool RelocateReStart(Sol &s, Customer *c1, Customer *c2);
     bool found{true};
     std::vector<int> customerIdList;
     Cost bestCost;

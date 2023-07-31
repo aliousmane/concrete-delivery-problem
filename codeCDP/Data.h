@@ -320,7 +320,7 @@ public:
         return curDrivers;
     }
 
-
+    double UpperBound{0};
 private:
     std::vector<int> _depots;
     std::vector<int> _customers;
