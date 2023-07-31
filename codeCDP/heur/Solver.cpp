@@ -12,11 +12,7 @@
 using namespace std;
 
 void Solver::run() {
-
-   
     feasibleClients = CDPSolver::EliminateCustomer(*_data, 1);
-
-//    Test0();exit(1);
     vector<TimeSlot> listInt;
 
     vector<set<int>> linkedClientSlot;
@@ -27,6 +23,7 @@ void Solver::run() {
     Data dat = *_data;
     if (feasibleClients.size() < _data->GetCustomerCount()) {
         dat = _data->copyCustomersData(feasibleClients);
+        dat.UpperBound = _data->UpperBound;
     }
     feasibleClients.clear();
     for (int i = 0; i < dat.GetCustomerCount(); i++) {
