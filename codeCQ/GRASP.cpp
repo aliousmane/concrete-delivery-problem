@@ -32,7 +32,6 @@ void GRASP<NodeT, DriverT>::Optimize(
     for (int i = 0; i < s.GetCustomerCount(); i++) {
         Customer *c = s.GetCustomer(i);
         list_cust[i] = c;
-//        tempVectSolutions.emplace_back(s.GetData(), 5);
         CDPSolver::nbSatisfied[c->custID] = 0;
     }
     //TODO SortNode<Node, Driver>::radixSortGreatDemand(list_cust, s.GetData()->GetMaxDemand());
@@ -52,7 +51,8 @@ void GRASP<NodeT, DriverT>::Optimize(
     _chrono.start();
     _chrono.setDuration(Parameters::RUNTIME);
     if (verbose) {
-        printf("GRASP heuristic: %d iterations: %d Heuristic(s)\n", _iterator_count, (int) grasp_insert_operators.size());
+        printf("GRASP heuristic: %d iterations: %d Heuristic(s)\n", _iterator_count,
+               (int) grasp_insert_operators.size());
     }
     int iter_k = 0;
     bool stop = false;
@@ -69,7 +69,7 @@ void GRASP<NodeT, DriverT>::Optimize(
                 Parameters::DRIVER_USE = drv_usage;
 
 
-                int op = std::min(grasp_insert_operators.size()-1, iter%grasp_insert_operators.size());
+                int op = std::min(grasp_insert_operators.size() - 1, iter % grasp_insert_operators.size());
 //                for (int op = 0; op < (int) grasp_insert_operators.size(); op++)
                 {
                     if (stop) break;

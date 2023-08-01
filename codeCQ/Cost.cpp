@@ -43,50 +43,46 @@ bool Cost::ObtainMinCDP(const Cost &rhs) const {
 
 bool Cost::ObtainMinCQ(const Cost &rhs) const {
 
-    if (this->undeliveredCost < rhs.undeliveredCost)
+    if (this->undeliveredCost + EPS < rhs.undeliveredCost) {
         return true;
-    if (this->undeliveredCost == rhs.undeliveredCost) {
+    }
+    if (std::abs(this->undeliveredCost - rhs.undeliveredCost) <= 0.001) {
 
-        if (this->firstDeliveryCost < rhs.firstDeliveryCost) {
+        if (this->firstDeliveryCost + EPS < rhs.firstDeliveryCost) {
             return true;
         } else if (this->firstDeliveryCost == rhs.firstDeliveryCost) {
             if (true) {
-                if (this->travelCost < rhs.travelCost)
+                if (this->travelCost + EPS < rhs.travelCost)
                     return true;
                 else if (this->travelCost == rhs.travelCost) {
-                    return (this->waitingCost < rhs.waitingCost);
-                }
-                return false;
-            }
-            if (false) {
-                if (this->distanceCost < rhs.distanceCost)
-                    return true;
-                else if (this->distanceCost == rhs.distanceCost) {
-                    return (this->waitingCost < rhs.waitingCost);
-                }
-                return false;
-            }
-            if(true){
-                if(this->waitingCost < rhs.waitingCost){
-                    return true;
-                }
-                else if(this->waitingCost == rhs.waitingCost){
-                    return (this->travelCost < rhs.travelCost);
-                }
-                return false;
-            }
-
-            if (false) {
-                if (this->overTimeCost < rhs.overTimeCost) {
-                    return true;
-                } else if (this->overTimeCost == rhs.overTimeCost) {
-
-                    if (this->underWorkCost < rhs.underWorkCost) {
+                    if (this->waitingCost + EPS < rhs.waitingCost) {
                         return true;
-                    } else if (this->underWorkCost == rhs.underWorkCost) {
-                        return (this->travelCost < rhs.travelCost);
+                    } else if (this->waitingCost == rhs.waitingCost) {
+                        if (this->overTimeCost + EPS < rhs.overTimeCost) {
+                            return true;
+                        } else if (this->overTimeCost == rhs.overTimeCost) {
+                            return (this->underWorkCost < rhs.underWorkCost);
+                        }
                     }
                 }
+                return false;
+            }
+
+            if (false) {
+                if (this->distanceCost + EPS < rhs.distanceCost)
+                    return true;
+                else if (this->distanceCost == rhs.distanceCost) {
+                    if (this->waitingCost + EPS < rhs.waitingCost) {
+                        return true;
+                    } else if (this->waitingCost == rhs.waitingCost) {
+                        if (this->overTimeCost + EPS < rhs.overTimeCost) {
+                            return true;
+                        } else if (this->overTimeCost == rhs.overTimeCost) {
+                            return (this->underWorkCost < rhs.underWorkCost);
+                        }
+                    }
+                }
+                return false;
             }
         }
     }
