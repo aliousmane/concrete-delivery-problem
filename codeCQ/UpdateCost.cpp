@@ -37,11 +37,6 @@ void Sol::Update() {
     int count = 0;
     updateCost.waste = 0;
 
-//TODO    for (int i = 0; i < GetOrderCount(); i++) {
-//        Order *o = GetOrder(i);
-//
-//    }
-
     for (int i = 0; i < GetCustomerCount(); i++) {
         Customer *c = GetCustomer(i);
         if (isClientSatisfied(c)) {
@@ -57,14 +52,6 @@ void Sol::Update() {
         isFeasible = false;
     }
     updateCost.setTotal();
-    if(!lateCustomers.empty() && !unscheduledCustomers.empty())
-    if (std::includes(lateCustomers.begin(), lateCustomers.end(),unscheduledCustomers.begin(), unscheduledCustomers.end())
-                     ) {
-        Prompt::print(unscheduledCustomers);
-        Prompt::print(lateCustomers);
-        cout<<"here\n";
-        exit(1);
-    }
 }
 
 void Sol::UpdateForward() {
