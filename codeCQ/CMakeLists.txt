@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.23.1)
 project(codeCq)
 
 ADD_CUSTOM_TARGET(debug
@@ -73,8 +73,10 @@ target_link_libraries(codeCq
         ${GUROBI_LIB_DIRS}/libgurobi_c++.a
         ${GUROBI_LIB_DIRS}/${GUROBI_LIB2}
         ${LEMON_LIB_DIRS}/libemon.a
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${CMAKE_DL_LIBS}
         )
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -DIL_STD")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -DIL_STD -lpthread")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGRB_USE_STD_VECTOR -DGRB_USE_UNORDERED_MAP")
 
 add_compile_options(-Wdeprecated-declaration)
