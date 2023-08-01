@@ -23,7 +23,7 @@ void Solver::run() {
     feasibleClients.clear();
     for (int i = 0; i < dat.GetCustomerCount(); i++) {
         Customer *c = dat.GetCustomer(i);
-        listInt.emplace_back(c->early_tw, c->early_tw + ceil(dat.UnloadingTime(c->demand, c->demand)) + 120, c->custID);
+        listInt.emplace_back(c->early_tw, c->early_tw + ceil(Data::UnloadingTime(c->demand, c->demand)) + 120, c->custID);
         feasibleClients.insert(c->custID);
     }
 

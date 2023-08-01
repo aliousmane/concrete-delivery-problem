@@ -189,7 +189,7 @@ public:
         return double(60 * demand) / Parameters::UNLOADING_RATE;
     }
 
-    static double UnloadingTime(int demand, int serviceDuration) {
+    static double UnloadingTime(double demand, double serviceDuration) {
         if (Parameters::KINABLE)
             return serviceDuration;
 
@@ -201,7 +201,6 @@ public:
     }
 
     int GetTimeBtwDel(Delivery *n1, Delivery *n2) {
-
         if (n1->orderID == n2->orderID)
             return Parameters::INTRA_ORDER_DELIVERY;
         else
