@@ -130,59 +130,64 @@ public:
         insrmv.UNLOADING_DURATION = Data::UnloadingTime(n, demand, d);
         insrmv.LOAD_DURATION = Data::LoadingTime(dep, demand);
         insrmv.ADJUSTMENT_DURATION = Parameters::ADJUSTMENT_DURATION;
+        if(Sol::FixStartLoad[n->delID]==-1)
+        {
+            Order *o = s.GetOrder(n->orderID);
+            Node *prec_del_of_cust = s.CustomerPrev[n->EndNodeID];
 
-        Order *o = s.GetOrder(n->orderID);
-        Node *prec_del_of_cust = s.CustomerPrev[n->EndNodeID];
-
-        insrmv.expected_del_time = s.EarlyTW(n);
-        insrmv.real_del_time = s.EndServiceTime[prec_del_of_cust->id];
+            insrmv.expected_del_time = s.EarlyTW(n);
+            insrmv.real_del_time = s.EndServiceTime[prec_del_of_cust->id];
 
 //        insrmv.max_arrival_Time =s.LateTW(n) -(o->nbDelMax - n->rank) * s.GetData()->minDriverCap;
 //        if (insrmv.max_arrival_Time < insrmv.real_del_time) {
 //            insrmv.max_arrival_Time =s.LateTW(n) -std::max(o->nbDelMin - n->rank, 0) * s.GetData()->maxDriverCap;
 //        }
-        insrmv.max_arrival_Time = insrmv.real_del_time + s.GetTimeBtwDel(n);
+            insrmv.max_arrival_Time = insrmv.real_del_time + s.GetTimeBtwDel(n);
 
 //        insrmv.max_arrival_Time = std::max(insrmv.max_arrival_Time, insrmv.real_del_time);
 
-        std::vector<std::pair<int, int>> _arrival;
-        if (prec_del_of_cust->type != Parameters::DELIVERY) {
-            double temps = Sol::StartBefore[n->id] == 0 ? s.EarlyTW(n) + Sol::minDelay[n->id] :
-                           std::min(Sol::StartBefore[n->id], s.EarlyTW(n) + Sol::minDelay[n->id]);
+            std::vector<std::pair<int, int>> _arrival;
+            if (prec_del_of_cust->type != Parameters::DELIVERY) {
+                double temps = Sol::StartBefore[n->id] == 0 ? s.EarlyTW(n) + Sol::minDelay[n->id] :
+                               std::min(Sol::StartBefore[n->id], s.EarlyTW(n) + Sol::minDelay[n->id]);
 //            temps = std::max(temps,insrmv.max_arrival_Time);
-            _arrival.emplace_back(temps, temps);
-        } else {
-            const int val = mat_func_get_rand_int(-s.GetTimeBtwDel(n), s.GetTimeBtwDel(n) + 1);
-            insrmv.max_arrival_Time = std::min(insrmv.max_arrival_Time, s.EndServiceTime[prec_del_of_cust->id] +
-                                                                        s.GetTimeBtwDel(n));
-            int temps = Sol::StartBefore[n->id] == 0 ? s.EndServiceTime[prec_del_of_cust->id] + Sol::minDelay[n->id] :
+                _arrival.emplace_back(temps, temps);
+            } else {
+                const int val = mat_func_get_rand_int(-s.GetTimeBtwDel(n), s.GetTimeBtwDel(n) + 1);
+                insrmv.max_arrival_Time = std::min(insrmv.max_arrival_Time, s.EndServiceTime[prec_del_of_cust->id] +
+                                                                            s.GetTimeBtwDel(n));
+                int temps =
+                        Sol::StartBefore[n->id] == 0 ? s.EndServiceTime[prec_del_of_cust->id] + Sol::minDelay[n->id] :
                         std::min((double) Sol::StartBefore[n->id],
                                  s.EndServiceTime[prec_del_of_cust->id] + Sol::minDelay[n->id]);
 
 //            temps = std::max(temps,insrmv.max_arrival_Time);
-            _arrival.emplace_back(temps, temps);
+                _arrival.emplace_back(temps, temps);
 
-        }
-        if (_arrival[0].first > _arrival[0].second)//TODO || insrmv.max_arrival_Time < _arrival[0].second )
-        {
-            insrmv.cancel = true;
-            return;
-        }
-        double remaining_demand = s.orderCapRestante[n->orderID] - demand;
-        if (remaining_demand > 0) {
-            int end_service = _arrival[0].second + insrmv.UNLOADING_DURATION;
-            if (end_service + std::max(remaining_demand, s.GetData()->minDriverCap) > s.LateTW(n)) {
+            }
+            if (_arrival[0].first > _arrival[0].second)//TODO || insrmv.max_arrival_Time < _arrival[0].second )
+            {
                 insrmv.cancel = true;
                 return;
             }
+            double remaining_demand = s.orderCapRestante[n->orderID] - demand;
+            if (remaining_demand > 0) {
+                int end_service = _arrival[0].second + insrmv.UNLOADING_DURATION;
+                if (end_service + std::max(remaining_demand, s.GetData()->minDriverCap) > s.LateTW(n)) {
+                    insrmv.cancel = true;
+                    return;
+                }
 
+            }
+
+
+            int id1 = mat_func_get_rand_int(0, (int) _arrival.size());
+            insrmv.expected_del_time = (int) mat_func_get_rand_double_between(
+                    _arrival[id1].first, _arrival[id1].second);
         }
 
+}
 
-        int id1 = mat_func_get_rand_int(0, (int) _arrival.size());
-        insrmv.expected_del_time = (int) mat_func_get_rand_double_between(
-                _arrival[id1].first, _arrival[id1].second);
-    }
 };
 
 #endif

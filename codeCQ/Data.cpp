@@ -260,7 +260,7 @@ void Data::LoadCQInstance() {
 
         for (int i = 0; i < this->nbOrders; ++i) {
             Order o;
-            inputFile >> o.orderID >> o.custID >> o.demand;
+            inputFile >> o.orderID >> o.custID >> o.demand >> dummy;
             o.orderID = GetOrderCount();
             AddOrder(o);
         }
@@ -677,7 +677,7 @@ void Data::LoadMatrices(std::vector<std::vector<double>> &array, const string &m
         perror(("error while opening file " + matrix_filename).c_str());
         exit(1);
     }
-
+    cout<<"Start loading "<<matrix_filename<<" "<< std::flush;
     while (getline(f, line)) {                       // read each line
         string val;           // string to hold value
         vector<double> row;   // vector for row of values
@@ -690,6 +690,8 @@ void Data::LoadMatrices(std::vector<std::vector<double>> &array, const string &m
         array.push_back(row);
     }
     f.close();
+    cout<<"End *******"<<endl;
+
 }
 
 

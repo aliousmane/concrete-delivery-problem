@@ -66,6 +66,15 @@ bool Cost::ObtainMinCQ(const Cost &rhs) const {
                 }
                 return false;
             }
+            if(true){
+                if(this->waitingCost < rhs.waitingCost){
+                    return true;
+                }
+                else if(this->waitingCost == rhs.waitingCost){
+                    return (this->travelCost < rhs.travelCost);
+                }
+                return false;
+            }
 
             if (false) {
                 if (this->overTimeCost < rhs.overTimeCost) {
