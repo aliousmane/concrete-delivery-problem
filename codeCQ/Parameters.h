@@ -14,8 +14,8 @@ class Parameters {
 public:
     static int NB_MANDATORY_ARGS;
     static long RUNTIME;
+    static int ITERATION;
     static int MAX_LATE_TW;
-    static int LOADING_DURATION;
     static int TW_WIDTH;
     static int UNDELIVERY_PENALTY;
     static int FIRST_DEL_PENALTY;

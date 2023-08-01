@@ -49,6 +49,7 @@ void Sol::Update() {
             satisfiedCustomers.insert(c->custID);
         } else {
             unscheduledCustomers.insert(c->custID);
+            lateCustomers.erase(c->custID);
             count++;
         }
     }
@@ -56,6 +57,14 @@ void Sol::Update() {
         isFeasible = false;
     }
     updateCost.setTotal();
+    if(!lateCustomers.empty() && !unscheduledCustomers.empty())
+    if (std::includes(lateCustomers.begin(), lateCustomers.end(),unscheduledCustomers.begin(), unscheduledCustomers.end())
+                     ) {
+        Prompt::print(unscheduledCustomers);
+        Prompt::print(lateCustomers);
+        cout<<"here\n";
+        exit(1);
+    }
 }
 
 void Sol::UpdateForward() {

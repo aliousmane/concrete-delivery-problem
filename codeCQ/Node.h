@@ -24,7 +24,7 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, const Node &node) {
         os << "id: " << node.id << " no: " << node.no << "["
-           << node.early_tw << " - " << node.late_tw << " ]";
+           << node.early_tw << " - " << node.late_tw << " ] Depot"<<node.depotID;
         return os;
     }
 

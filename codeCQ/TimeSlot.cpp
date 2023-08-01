@@ -89,8 +89,10 @@ bool TimeSlot::operator!=(const TimeSlot &rhs) const {
 
 std::ostream &operator<<(std::ostream &os, const TimeSlot &slot) {
     os <<  slot.typeNoeud <<slot.nodeID <<  ":[" << slot.lower << ":" << slot.upper << "]-";
-    if(TimeSlot::myData.nbCustomers>0){
-        os<<"C:"<< TimeSlot::myData.GetCustomerOf(slot.nodeID)->custID<<"-";
+    if(slot.nodeID!=-1){
+        if(TimeSlot::myData.nbCustomers>0){
+            os<<"C:"<< TimeSlot::myData.GetCustomerOf(slot.nodeID)->custID<<"-";
+        }
     }
     return os;
 }

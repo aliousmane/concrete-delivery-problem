@@ -128,45 +128,50 @@ public:
         insrmv.UNLOADING_DURATION = Data::UnloadingTime(n, demand, d);
         insrmv.LOAD_DURATION = Data::LoadingTime(dep, demand);
         insrmv.ADJUSTMENT_DURATION = Parameters::ADJUSTMENT_DURATION;
+        if (Sol::FixStartLoad[n->delID] == -1) {
 
-        Order *o = s.GetOrder(n->orderID);
-        Node *prec_del_of_cust = s.CustomerPrev[n->EndNodeID];
+            Order *o = s.GetOrder(n->orderID);
+            Node *prec_del_of_cust = s.CustomerPrev[n->EndNodeID];
 
-        insrmv.expected_del_time = s.EarlyTW(n);
-        insrmv.real_del_time = s.EndServiceTime[prec_del_of_cust->id];
+            insrmv.expected_del_time = s.EarlyTW(n);
+            insrmv.real_del_time = s.EndServiceTime[prec_del_of_cust->id];
 
 //        insrmv.max_arrival_Time = s.LateTW(n) - (o->nbDelMax - n->rank) * s.GetData()->minDriverCap;
 //        if (insrmv.max_arrival_Time < insrmv.real_del_time) {
 //            insrmv.max_arrival_Time = s.LateTW(n) - std::max(o->nbDelMin - n->rank, 0) * s.GetData()->maxDriverCap;
 //        }
-        insrmv.max_arrival_Time = insrmv.real_del_time + s.GetTimeBtwDel(n);
+            insrmv.max_arrival_Time = insrmv.real_del_time + s.GetTimeBtwDel(n);
 
 //        insrmv.max_arrival_Time = std::max(insrmv.max_arrival_Time, insrmv.real_del_time);
 
-        std::vector<std::pair<double, double>> _arrival;
-        if (prec_del_of_cust->type != Parameters::DELIVERY) {
-            insrmv.max_arrival_Time+=20;
-            _arrival.
-                    emplace_back(s.EarlyTW(n) - s.GetTimeBtwDel(n) - 1, insrmv.max_arrival_Time - Sol::minDelay[n->id]);
+            std::vector<std::pair<double, double>> _arrival;
+            if (prec_del_of_cust->type != Parameters::DELIVERY) {
+                insrmv.max_arrival_Time += 20;
+                _arrival.
+                        emplace_back(s.EarlyTW(n) - s.GetTimeBtwDel(n) - 1,
+                                     insrmv.max_arrival_Time - Sol::minDelay[n->id]);
 //            std::cout << s.EarlyTW(n) - s.GetTimeBtwDel(n) - 1 << " " << insrmv.max_arrival_Time - Sol::minDelay[n->id]<< std::endl;
-        } else {
-            int val = mat_func_get_rand_int(-s.GetTimeBtwDel(n), s.GetTimeBtwDel(n) + 1);
-            insrmv.max_arrival_Time = std::min(insrmv.max_arrival_Time, s.EndServiceTime[prec_del_of_cust->id] +
-                                                                        s.GetTimeBtwDel(n));
+            } else {
+                int val = mat_func_get_rand_int(-s.GetTimeBtwDel(n), s.GetTimeBtwDel(n) + 1);
+                insrmv.max_arrival_Time = std::min(insrmv.max_arrival_Time, s.EndServiceTime[prec_del_of_cust->id] +
+                                                                            s.GetTimeBtwDel(n));
 
-            _arrival.
-                    emplace_back(
-                    std::min(insrmv.max_arrival_Time, std::max(s.EndServiceTime[prec_del_of_cust->id] + val,
-                                                               s.EndServiceTime[prec_del_of_cust->id] +
-                                                               Sol::minDelay[n->id])), insrmv.max_arrival_Time);
+                _arrival.
+                        emplace_back(
+                        std::min(insrmv.max_arrival_Time, std::max(s.EndServiceTime[prec_del_of_cust->id] + val,
+                                                                   s.EndServiceTime[prec_del_of_cust->id] +
+                                                                   Sol::minDelay[n->id])), insrmv.max_arrival_Time);
+
+            }
+            if (_arrival[0].first > _arrival[0].second) {
+                insrmv.cancel = true;
+                return;
+            }
+            int id1 = mat_func_get_rand_int(0, (int) _arrival.size());
+            insrmv.expected_del_time = (int) mat_func_get_rand_double_between(_arrival[id1].first,
+                                                                              _arrival[id1].second);
 
         }
-        if (_arrival[0].first > _arrival[0].second) {
-            insrmv.cancel = true;
-            return;
-        }
-        int id1 = mat_func_get_rand_int(0, (int) _arrival.size());
-        insrmv.expected_del_time = (int) mat_func_get_rand_double_between(_arrival[id1].first, _arrival[id1].second);
     }
 };
 

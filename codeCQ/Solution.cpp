@@ -15,6 +15,8 @@ std::vector<std::set<int>> Sol::TabuFleet = std::vector<std::set<int>>();
 std::map<std::tuple<int, int>, double> Sol::nodeMaxStartService = std::map < std::tuple<int, int>,
 double>();
 std::vector<double> Sol::FixLoad = std::vector<double>();
+std::vector<double> Sol::FixStartLoad = std::vector<double>();
+std::vector<double> Sol::FixCustomerStartLoad = std::vector<double>();
 
 Sol::Sol(Data *data) : _data(data), _last_cost(false), DriverAssignTo(data->GetNodeCount(), nullptr),
                        RoutesLength(data->GetDriverCount(), 0),
@@ -286,6 +288,7 @@ void Sol::RemoveDelivery(Delivery *del) {
     if (!find) {
         clientDriverUsed[del->custID].erase(d->id);
     }
+    lateCustomers.erase(del->custID);
 }
 
 void Sol::RemoveDock(Dock *dock) {

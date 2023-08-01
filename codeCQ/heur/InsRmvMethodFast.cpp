@@ -1,6 +1,7 @@
 
 #include "InsRmvMethodFast.h"
 #include "../Prompt.h"
+#include <cassert>
 
 using namespace std;
 
@@ -155,11 +156,17 @@ void InsRmvMethodFast::ApplyInsertMove(Sol &s, Move<Delivery, Driver, MoveVrp> &
 
 Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, Driver *d, Cost &solcost, double demand,
                                                           ListMove<Delivery, Driver, MoveVrp> *temp_moves) {
+
+    assert(s.DriverAssignTo[n->id]== nullptr);
     Customer *c = s.GetCustomer(n->custID);
     Dock *dock = s.GetDock(n->dockID);
+    assert(s.DriverAssignTo[dock->id]== nullptr);
     Depot *dep = s.GetDepot(dock->depotID);
     Move<Delivery, Driver, MoveVrp> best;
     double ELT = expected_del_time - s.Travel(dock, n) - ADJUSTMENT_DURATION - LOAD_DURATION;
+    if(Sol::FixStartLoad[n->delID]!=-1){
+        ELT = Sol::FixStartLoad[n->delID];
+    }
     auto *prec_del_of_cust = dynamic_cast<Delivery *>( s.CustomerPrev[n->EndNodeID]);
     if (Parameters::SHOW) {
         Prompt::print({"Try insertion of", to_string(n->id), "with driver", to_string(d->id)});
@@ -186,7 +193,7 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
             }
         }
 //        if (Parameters::SHOW) {Prompt::print({"Try Insert after", to_string(prev->id)});}
-
+        assert(prev->id != n->id);
         Dock *next_dock = dynamic_cast<Dock *>(s.DriverNext[prev->id]);
         Delivery *next_del = nullptr;
         if (next_dock != nullptr) {
@@ -522,6 +529,7 @@ void InsRmvMethodFast::FillStructures(Sol &s, std::vector<Customer *> &customers
                                       std::vector<Driver *> &driversList) {
     driversList.clear();
     driversList.shrink_to_fit();
+
     if (not s.availableDrivers.empty()) {
         for (int i: s.availableDrivers) {
             driversList.push_back(s.GetDriver(i));

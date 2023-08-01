@@ -24,6 +24,7 @@ public:
     void RemoveAndReschedule(Sol &s);
 
     bool SwapLoad(Sol &s, Order *o);
+    bool RelocateStartLoad(Sol &s);
 
     bool UseSingleDriver(Sol &s, Order *o);
 

@@ -80,6 +80,11 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
     Prompt::log(s.depotLoadingIntervals[c->depotID]);
     for (int j = 0; j < s.GetDeliveryCount(cur_order);) {
         Delivery *del = s.GetDelivery(cur_order, j);
+        if (del == nullptr) break;
+        if (s.DriverAssignTo[del->id] != nullptr) {
+            j++;
+            continue;
+        }
         if (Parameters::SHOW) {
             Prompt::print({this->name, " Try to insert del ", to_string(del->id), "(", to_string(del->rank + 1), "of ",
                            to_string(s.GetDeliveryCount(cur_order)), " for", to_string(cur_order->orderID)});
@@ -121,11 +126,11 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
                 bool backtrackOrder = false;
                 if (Sol::FailureCount[del->id] < 4 &&
                     Sol::FailureCause[del->id] == Parameters::FAILURECAUSE::DELAY) {
-                    int delay = Sol::pushVisit[del->id];
+                    double delay = Sol::pushVisit[del->id];
                     int count = j;
                     while (delay > 0) {
                         if (s.WaitingTime[prec_del->id] < 0) {
-                            if (std::min(delay, s.GetTimeBtwDel(prec_del)) - s.WaitingTime[prec_del->id] >
+                            if (std::min(delay, (double) s.GetTimeBtwDel(prec_del)) - s.WaitingTime[prec_del->id] >
                                 s.GetTimeBtwDel(prec_del)) {
                                 count--;
                                 if (prec_del->rank > 0) {
@@ -136,7 +141,7 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
                                 }
                             }
                         }
-                        Sol::minDelay[prec_del->id] = std::min(delay, s.GetTimeBtwDel(prec_del));
+                        Sol::minDelay[prec_del->id] = std::min(delay, (double) s.GetTimeBtwDel(prec_del));
                         Sol::FailureCause[prec_del->id] = Parameters::FAILURECAUSE::NONE;
                         if (Parameters::SHOW) {
                             Prompt::print({"Return to and delay", to_string(prec_del->id), "by", to_string(delay)});
@@ -191,7 +196,8 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
                 cout << cur_order->orderID << " is not scheduled\n";
                 Prompt::print(Sol::CustomerConflict[c->custID]);
             }
-            s.UnassignOrder(cur_order);
+//            s.UnassignOrder(cur_order);
+            s.UnassignCustomer(c);
             removedList.emplace_back(c);
             break;
         }

@@ -23,7 +23,7 @@ void Solver::run() {
     feasibleClients.clear();
     for (int i = 0; i < dat.GetCustomerCount(); i++) {
         Customer *c = dat.GetCustomer(i);
-        listInt.emplace_back(c->early_tw, c->late_tw, c->custID);
+        listInt.emplace_back(c->early_tw, c->early_tw + ceil(dat.UnloadingTime(c->demand, c->demand)) + 120, c->custID);
         feasibleClients.insert(c->custID);
     }
 
@@ -32,9 +32,9 @@ void Solver::run() {
 
     Sol s(&dat);
     s.keyCustomers = feasibleClients;
-    SolveGrasp(s, dat, linkedClientSlot, 50);
+    SolveGrasp(s, dat, linkedClientSlot, Parameters::ITERATION);
     SaveResults(s);
-//    s.exportCSVFormat("s1.csv");
+    s.exportCSVFormat("s1.csv");
     cout << s.GetLastCost() << endl;
     Prompt::print(s.unscheduledCustomers);
 }
@@ -126,14 +126,14 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
     grasp.AddInsertOperatorVrp(&c5_3);
 //    grasp.AddInsertOperatorVrp(&cFixed);
 
-//    grasp.AddInsertOperatorVrp(&p01);
-//    grasp.AddInsertOperatorVrp(&p03);
-//    grasp.AddInsertOperatorVrp(&p11);
-//    grasp.AddInsertOperatorVrp(&p13);
-//    grasp.AddInsertOperatorVrp(&p23);
-//    grasp.AddInsertOperatorVrp(&p33);
-//    grasp.AddInsertOperatorVrp(&p43);
-//    grasp.AddInsertOperatorVrp(&p53);
+    grasp.AddInsertOperatorVrp(&p01);
+    grasp.AddInsertOperatorVrp(&p03);
+    grasp.AddInsertOperatorVrp(&p11);
+    grasp.AddInsertOperatorVrp(&p13);
+    grasp.AddInsertOperatorVrp(&p23);
+    grasp.AddInsertOperatorVrp(&p33);
+    grasp.AddInsertOperatorVrp(&p43);
+    grasp.AddInsertOperatorVrp(&p53);
 
 //    grasp.AddInsertOperatorVrp(&d0);
 //    grasp.AddInsertOperatorVrp(&d1);
@@ -143,10 +143,9 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
     grasp.SetIterationCount(iter);
     RechercheLocale loc_search(s.keyCustomers);
     loc_search.LinkedClientSlot = linkedClientSlot;
-    if(Parameters::LOCAL_SEARCH){
+    if (Parameters::LOCAL_SEARCH) {
         grasp.Optimize(s, nullptr, nullptr, &loc_search, false);
-    }
-    else{
+    } else {
         grasp.Optimize(s, nullptr, nullptr, nullptr, false);
     }
 }
@@ -169,6 +168,7 @@ void Solver::SaveResults(Sol &s) {
             fprintf(f, "%s;", _data->problem_name.c_str());
             fprintf(f, "%s;", _data->instance_name.c_str());
             fprintf(f, "%s;", s.GetLastCost().str().c_str());
+            fprintf(f, "%d;", s.GetDepotCount());
             fprintf(f, "%ld\n", Parameters::GetElapsedTime());
             fclose(f);
             printf("Saved to %s\n", _data->result_file.c_str());
