@@ -39,17 +39,18 @@ public:
         if (argc > 1)
             input = argv[1];
         if (argc > 2)
-            Parameters::RUNTIME = strtol(argv[2], nullptr, 10);
-
+            Parameters::LOCAL_SEARCH = bool(strtol(argv[2], nullptr, 10));
         if (argc > 3)
-            Parameters::LOCAL_SEARCH = bool(strtol(argv[3], nullptr, 10));
+            Parameters::ITERATION = strtol(argv[3], nullptr, 10);
+        if (argc > 4)
+            Parameters::RUNTIME = strtol(argv[4], nullptr, 10);
 
         instance_name = std::filesystem::path(input).stem();
         problem_name = std::filesystem::path(input).parent_path().filename();
         sol_output = path + "/solution/" + problem_name + "/" + instance_name + ".csv";
         result_file = path + "/result/" + problem_name + "/results.csv";
-        if (argc > 4)
-            result_file = path + "/result/" + problem_name + "/" + argv[4];
+        if (argc > 5)
+            result_file = path + "/result/" + problem_name + "/" + argv[5];
 
     }
 

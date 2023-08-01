@@ -9,7 +9,8 @@
 
 using namespace std;
 
-void Solver::run() {
+void Solver::run()
+{
 
     vector<TimeSlot> listInt;
 
@@ -21,7 +22,8 @@ void Solver::run() {
     Data dat = *_data;
 
     feasibleClients.clear();
-    for (int i = 0; i < dat.GetCustomerCount(); i++) {
+    for (int i = 0; i < dat.GetCustomerCount(); i++)
+    {
         Customer *c = dat.GetCustomer(i);
         listInt.emplace_back(c->early_tw, c->late_tw, c->custID);
         feasibleClients.insert(c->custID);
@@ -32,14 +34,15 @@ void Solver::run() {
 
     Sol s(&dat);
     s.keyCustomers = feasibleClients;
-    SolveGrasp(s, dat, linkedClientSlot, 50);
+    SolveGrasp(s, dat, linkedClientSlot, Parameters::ITERATION);
     SaveResults(s);
-//    s.exportCSVFormat("s1.csv");
+    //    s.exportCSVFormat("s1.csv");
     cout << s.GetLastCost() << endl;
     Prompt::print(s.unscheduledCustomers);
 }
 
-void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientSlot, int iter) {
+void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientSlot, int iter)
+{
 
     CDPSolver::nbSatisfied.resize(dat.GetCustomerCount());
 
@@ -55,29 +58,29 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
 
     GRASP<Customer, Driver> grasp(&dat);
     vector<pair<int, string>> custInfo = {
-            {0,  "Cust Early TW"},
-            {1,  "Cust Greater D"},
-            {2,  "Cust Late TW "},
-            {3,  "Cust Min Width TW"},
-            {4,  "Cust Random"},
-            {5,  "Cust Kinable"},
-            {-1, "Cust Fixed"},
+        {0, "Cust Early TW"},
+        {1, "Cust Greater D"},
+        {2, "Cust Late TW "},
+        {3, "Cust Min Width TW"},
+        {4, "Cust Random"},
+        {5, "Cust Kinable"},
+        {-1, "Cust Fixed"},
     };
     vector<pair<int, string>> priorityInfo = {
-            {0, "PrioriSort I Early TW"},
-            {1, "PrioriSort I Late TW"},
-            {2, "PrioriSort D Early TW"},
-            {3, "PrioriSort D Late TW"},
-            {4, "PrioriSort D Demand"},
-            {5, "PrioriSort I Demand"},
-//            {6,"PrioriSort I TW width"},
-//            {7,"PrioriSort D TW width"},
+        {0, "PrioriSort I Early TW"},
+        {1, "PrioriSort I Late TW"},
+        {2, "PrioriSort D Early TW"},
+        {3, "PrioriSort D Late TW"},
+        {4, "PrioriSort D Demand"},
+        {5, "PrioriSort I Demand"},
+        //            {6,"PrioriSort I TW width"},
+        //            {7,"PrioriSort D TW width"},
     };
 
     vector<pair<int, string>> driverInfo = {
-            {0, "Driver I Cap"},
-            {1, "Driver D Cap"},
-            {2, "Driver Random Cap "},
+        {0, "Driver I Cap"},
+        {1, "Driver D Cap"},
+        {2, "Driver Random Cap "},
     };
 
     AllInsertionOperator c0_1(&custIns1, custInfo[0].first, "Builder 1 " + custInfo[0].second);
@@ -111,7 +114,6 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
     AllInsertionOperator d1(&driverIns3, driverInfo[1].first, "Builder 3 " + driverInfo[1].second);
     AllInsertionOperator d2(&driverIns3, driverInfo[2].first, "Builder 3 " + driverInfo[2].second);
 
-
     grasp.AddInsertOperatorVrp(&c0_1);
     grasp.AddInsertOperatorVrp(&c0_3);
     grasp.AddInsertOperatorVrp(&c1_1);
@@ -124,42 +126,47 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
     grasp.AddInsertOperatorVrp(&c4_3);
     grasp.AddInsertOperatorVrp(&c5_1);
     grasp.AddInsertOperatorVrp(&c5_3);
-//    grasp.AddInsertOperatorVrp(&cFixed);
+    //    grasp.AddInsertOperatorVrp(&cFixed);
 
-//    grasp.AddInsertOperatorVrp(&p01);
-//    grasp.AddInsertOperatorVrp(&p03);
-//    grasp.AddInsertOperatorVrp(&p11);
-//    grasp.AddInsertOperatorVrp(&p13);
-//    grasp.AddInsertOperatorVrp(&p23);
-//    grasp.AddInsertOperatorVrp(&p33);
-//    grasp.AddInsertOperatorVrp(&p43);
-//    grasp.AddInsertOperatorVrp(&p53);
+       grasp.AddInsertOperatorVrp(&p01);
+       grasp.AddInsertOperatorVrp(&p03);
+       grasp.AddInsertOperatorVrp(&p11);
+       grasp.AddInsertOperatorVrp(&p13);
+       grasp.AddInsertOperatorVrp(&p23);
+       grasp.AddInsertOperatorVrp(&p33);
+       grasp.AddInsertOperatorVrp(&p43);
+       grasp.AddInsertOperatorVrp(&p53);
 
-//    grasp.AddInsertOperatorVrp(&d0);
-//    grasp.AddInsertOperatorVrp(&d1);
-//    grasp.AddInsertOperatorVrp(&d2);
+    //    grasp.AddInsertOperatorVrp(&d0);
+    //    grasp.AddInsertOperatorVrp(&d1);
+    //    grasp.AddInsertOperatorVrp(&d2);
 
     grasp.verbose = true;
     grasp.SetIterationCount(iter);
     RechercheLocale loc_search(s.keyCustomers);
     loc_search.LinkedClientSlot = linkedClientSlot;
-    if(Parameters::LOCAL_SEARCH){
+    if (Parameters::LOCAL_SEARCH)
+    {
         grasp.Optimize(s, nullptr, nullptr, &loc_search, false);
     }
-    else{
+    else
+    {
         grasp.Optimize(s, nullptr, nullptr, nullptr, false);
     }
 }
 
-void Solver::SaveResults(Sol &s) {
+void Solver::SaveResults(Sol &s)
+{
     printf("Instance:%s\n", _data->instance_name.c_str());
     printf("Nombre clients %d \t", _data->nbCustomers);
     printf("Nombre ordre %d \t", _data->nbOrders);
     printf("Total Cost:%.2lf \t", s.GetLastCost().satisfiedCost);
 
-    if (_data->result_file.c_str() != nullptr) {
+    if (_data->result_file.c_str() != nullptr)
+    {
         FILE *f = fopen(_data->result_file.c_str(), "a");
-        if (f != nullptr) {
+        if (f != nullptr)
+        {
             time_t now = time(nullptr);
             tm *ltm = localtime(&now);
             fprintf(f, "%d-", 1900 + ltm->tm_year);
@@ -169,6 +176,7 @@ void Solver::SaveResults(Sol &s) {
             fprintf(f, "%s;", _data->problem_name.c_str());
             fprintf(f, "%s;", _data->instance_name.c_str());
             fprintf(f, "%s;", s.GetLastCost().str().c_str());
+            fprintf(f, "%d;", s.GetDepotCount());
             fprintf(f, "%ld\n", Parameters::GetElapsedTime());
             fclose(f);
             printf("Saved to %s\n", _data->result_file.c_str());
@@ -176,27 +184,29 @@ void Solver::SaveResults(Sol &s) {
     }
 }
 
-void Solver::Test() {
+void Solver::Test()
+{
     Sol s(_data);
     InsRmvBuilder3 builder3(*_data);
     Parameters::SORT_TYPE = Parameters::SORT::FIVE;
     CustInsertion custIns(*_data, builder3);
-//    CDPSolver::SolveInstance(s,*_data,100);
+    //    CDPSolver::SolveInstance(s,*_data,100);
     s.keyCustomers = {59};
     custIns.Insert(s);
-//    s.ShowSchedule();
+    //    s.ShowSchedule();
     s.ShowCustomer();
     cout << s.GetLastCost() << endl;
     s.exportCSVFormat("s.csv");
     Parameters::ShowTime();
 }
 
-void Solver::TestTimeSlot() {
+void Solver::TestTimeSlot()
+{
 
     auto a = TimeSlot(0, 3);
     auto b = TimeSlot(4, 5);
 
-    std::set < TimeSlot > ab;
+    std::set<TimeSlot> ab;
     ab.insert(a);
     ab.insert(b);
     Prompt::print(ab);
@@ -204,25 +214,30 @@ void Solver::TestTimeSlot() {
     exit(1);
 }
 
-void Solver::Test(Sol &s) {
+void Solver::Test(Sol &s)
+{
     vector<Customer *> listCust = _data->GetCustomers();
 
     SortNode<Customer, Driver>::radixSortEarlyTW(listCust, s.GetData()->maxEarlyTW);
 
-    for (auto c: listCust) {
-        if (s.isSatisfied(c)) {
+    for (auto c : listCust)
+    {
+        if (s.isSatisfied(c))
+        {
             int nbMin = ceil(double(c->demand) / s.GetData()->maxDriverCap);
-            if (s.OrderVisitCount[c->custID] == nbMin) {
+            if (s.OrderVisitCount[c->custID] == nbMin)
+            {
                 continue;
             }
             Delivery *del = s.GetDeliveries(c)[0];
             Driver *d = s.GetDriverAssignedTo(del);
             s.ShowSchedule(c);
-            for (int k = 0; k < s.GetDriverCount(); k++) {
+            for (int k = 0; k < s.GetDriverCount(); k++)
+            {
                 Driver *dk = s.GetDriver(k);
                 if (dk->capacity <= d->capacity)
                     continue;
-//                s.ShowSlot(dk);
+                //                s.ShowSlot(dk);
                 set<int> driverUsed = s.clientDriverUsed[c->custID];
                 driverUsed.erase(d->id);
                 driverUsed.insert(dk->id);
@@ -231,13 +246,16 @@ void Solver::Test(Sol &s) {
                 cur.availableDrivers = driverUsed;
                 cur.keyCustomers = {c->custID};
                 CDPSolver::BuildOnSolution(cur, *s.GetData(), 1);
-                if (cur.isSatisfied(c)) {
-//                    s = cur;
+                if (cur.isSatisfied(c))
+                {
+                    //                    s = cur;
                     cur.ShowSchedule(c);
-//                    break;
+                    //                    break;
                 }
             }
-        } else {
+        }
+        else
+        {
             cout << c->custID << " is not scheduled\n";
         }
     }

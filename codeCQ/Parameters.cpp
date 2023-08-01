@@ -29,15 +29,16 @@ double Parameters::MAX_TRAVEL_TIME = 120;
 
 int Parameters::ADJUSTMENT_DURATION = 10;
 int Parameters::CLEANING_DURATION = 10;
-int Parameters::BACKTRACK_DEPTH = 100;
+int Parameters::BACKTRACK_DEPTH = 200;
 
 int Parameters::UNDELIVERY_PENALTY = 1;
 int Parameters::FIRST_DEL_PENALTY = 1;//;1000;
 int Parameters::UNDERWORK_PENALTY = 1;//;100;
 int Parameters::OVERTIME_PENALTY = 1;//200;
 int Parameters::LATE_ARRIVAL_PENALTY = 10;
-int Parameters::FIRST_DEL_MAX_ARRIVAL = 200;
+int Parameters::FIRST_DEL_MAX_ARRIVAL = 150;
 
 int Parameters::LOAD_INSERTION = Parameters::DEPOTINSERTION::FORWARD;
 
 bool Parameters::LOCAL_SEARCH = true;
+int Parameters::ITERATION = 100;
