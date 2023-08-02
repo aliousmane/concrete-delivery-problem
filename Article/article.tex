@@ -154,12 +154,12 @@ label/.style   = {base,font=\ttfamily\normalsize, text width = 8em,
 \begin{document}
 \maketitle
 \begin{abstract}
-   The concrete delivery problem (CDP) is a combinatorial optimization problem that involves scheduling the delivery of ready-mixed concrete to construction sites while balancing the conflicting goals of minimizing transportation costs and maximizing customer satisfaction. This paper proposes an exact formulation and a heuristic approach based on the Greedy Randomized Adaptive Search Procedure (GRASP) to tackle a new variant of the CDP that incorporates realistic side constraints, such as drivers' working shifts, minimum working time for each driver, and overtime penalties. Additionally, the problem also considers the possibility of customers requiring multiple types of concrete to be delivered within the same time window. The performance of the proposed heuristic is evaluated on real-world and generated CDP instances, and it is compared to another variant to demonstrate its effectiveness.
-    
+    The concrete delivery problem (CDP) is a combinatorial optimization problem that involves scheduling the delivery of ready-mixed concrete to construction sites while balancing the conflicting goals of minimizing transportation costs and maximizing customer satisfaction. This paper proposes an exact formulation and a heuristic approach based on the Greedy Randomized Adaptive Search Procedure (GRASP) to tackle a new variant of the CDP that incorporates realistic side constraints, such as drivers' working shifts, minimum working time for each driver, and overtime penalties. Additionally, the problem also considers the possibility of customers requiring multiple types of concrete to be delivered within the same time window. The performance of the proposed heuristic is evaluated on real-world instances, and it is compared to another variant to demonstrate its effectiveness.
+
 \end{abstract}
 
 % \begin{keywords}
-\noindent{\textbf{Keywords:} Vehicle scheduling;  concrete delivery; GRASP; ready-mixed concrete } 
+\noindent{\textbf{Keywords:} Vehicle scheduling;  concrete delivery; GRASP; ready-mixed concrete }
 % \end{keywords}
 
 %\end{frontmatter}
@@ -168,62 +168,60 @@ label/.style   = {base,font=\ttfamily\normalsize, text width = 8em,
 \label{sec:intro}
 Concrete is a widely used building material in construction projects. Its perishable nature is affected by many factors that impact its quality \citep{sinha_quality_2021}, which is crucial for the durability and strength of the final construction. Concrete comes in two types: ready-mixed concrete (RMC) and site-mixed concrete (SMC). RMC is manufactured in a batch plant and delivered to the construction site, while SMC is produced on-site using raw materials stored on the construction site. Using SMC can avoid delays caused by road traffic, but it has a slower and more difficult production process, requires storage for mixing materials and equipment, and is suitable for low amounts of concrete. On the other hand, RMC has better quality and benefits from lower production costs \citep{muresan_comparing}. However, to take advantage of these benefits, the batch plant manager must ensure efficient and prompt delivery on the construction site, which may require a fleet of high-cost revolving drum trucks (concrete mixers) to dispatch the RMC.
 
-Concrete delivery under the form of RMC is subject to many operational constraints that make the Concrete Delivery Problem (CDP) very challenging. In this paper, we study a variant of the CDP to schedule the daily production and dispatching of RMC for a company located in the province of Quebec, Canada. This company operates multiple batching plants with varying production rates, using a fleet of concrete mixers of different capacities. Each plant has its own fleet of trucks; however, under certain conditions, the trucks can move between plants if necessary. The trucks must return to their home plant at the end of the day. The company owns two types of trucks with different capacities and can call on an external fleet when needed. They serve construction sites from any of their plants, with the first delivery starting at the time specified by the customer. The loading and unloading of a concrete mixer depend on the truck capacity, the loading rate at the plant, and the unloading rate at the construction site. Drivers are allocated based on their daily work schedules. A customer may request several types of concrete to be delivered within the same time window, with no required sequence for the orders, but an order can only start after the completion of the previous order. This constraint generalizes the linked order constraints of \cite{durbin2008or} where some customers place two orders for the same day and request that they are linked (the second order begins only after the first order is completed). The setting of our study is similar to a variant of the CDP previously studied in \cite{schmid2009hybrid, schmid2010hybridization}. However, we include the plant's production rate and driver shift schedule. The company uses a centralized dispatcher system to schedule all daily orders, but this system has issues satisfying all daily demands without using an external fleet.
+Concrete delivery under the form of RMC is subject to many operational constraints that make the Concrete Delivery Problem (CDP) very challenging. In this paper, we study a variant of the CDP to schedule the daily production and dispatching of RMC for a company located in the province of Quebec, Canada. This company operates multiple batch plants with varying production rates, using a fleet of concrete mixers of different capacities. Each plant has its own fleet of trucks; however, under certain conditions, the trucks can move between plants if necessary. The trucks must return to their home plant at the end of the day. The company owns two types of trucks with different capacities and can call on an external fleet when needed. They serve construction sites from any of their plants, with the first delivery starting at the time specified by the customer. The loading and unloading of a concrete mixer depend on the truck capacity, the loading rate at the plant, and the unloading rate at the construction site. Drivers are allocated based on their daily work schedules. A customer may request several types of concrete to be delivered within the same time window, with no required sequence for the orders, but an order can only start after the completion of the previous order. This constraint generalizes the linked order constraints of \cite{durbin2008or} where some customers place two orders for the same day and request that they are linked (the second order begins only after the first order is completed). The setting of our study is similar to a variant of the CDP previously studied in \cite{schmid2009hybrid, schmid2010hybridization}. However, we include the plant's production rate and driver shift schedule. The company uses a centralized dispatcher system to schedule all daily orders, but this system has issues satisfying all daily demands without using an external fleet.
 % Also, as per union rules, they assign a truck driver to a delivery task based on his seniority.
 
-According to \cite{blazewicz2019handbook}, the CDP combines vehicle routing with scheduling issues to plan routes to deliver concrete from batch plants (depots) to customers' construction sites. RMC is an on-demand product with a short life cycle from production through end use. It cannot be stored and cannot stay too long on a truck, or it will harden. Hence, concrete mixers must deliver RMC at the planned construction site shortly after its production. \cite{tommelein1999just} describes RMC production and delivery as an example of a just-in-time (JIT) production system in construction. A customer quantity requirement is often greater than the truck size and must be fulfilled by multiple deliveries. In that sense, CDP is similar to the vehicle routing problem with split delivery \citep{archetti2008split}, except that the same truck may visit a customer more than once. Concrete hardens quickly, so multiple deliveries must be done back-to-back or at least close in time to avoid the problem of cold joint, which can reduce the strength and durability of the concrete. Customers request to be served within a specific time window, which can complicate truck-loading schedules when a plant can only load one truck at a time. Similarly, only one truck can unload at a time at a customer location, sometimes leading to concrete mixers queuing and waiting their turn to deliver. Furthermore, with trucks of varied sizes, loading, travel, and unloading times that may be uncertain, the CDP is a complex and challenging problem. 
+According to \cite{blazewicz2019handbook}, the CDP combines vehicle routing with scheduling issues to plan routes to deliver concrete from batch plants (depots) to customers' construction sites. RMC is an on-demand product with a short life cycle from production through end use. It cannot be stored and cannot stay too long on a truck, or it will harden. Hence, concrete mixers must deliver RMC at the planned construction site shortly after its production. \cite{tommelein1999just} describes RMC production and delivery as an example of a just-in-time (JIT) production system in construction. A customer quantity requirement is often greater than the truck size and must be fulfilled by multiple deliveries. In that sense, CDP is similar to the vehicle routing problem with split delivery \citep{archetti2008split}, except that the same truck may visit a customer more than once. Concrete hardens quickly, so multiple deliveries must be done back-to-back or at least close in time to avoid the problem of cold joint, which can reduce the strength and durability of the concrete. Customers request to be served within a specific time window, which can complicate truck-loading schedules when a plant can only load one truck at a time. Similarly, only one truck can unload at a time at a customer location, sometimes leading to concrete mixers queuing and waiting their turn to deliver. Furthermore, with trucks of varied sizes, loading, travel, and unloading times that may be uncertain, the CDP is a complex and challenging problem.
 
 In this paper, we propose a mathematical model and a Greedy Randomized Search Procedure (GRASP) heuristic solution to solve a new variant of the CDP. Our model takes into consideration the working shifts of the drivers and the scheduling of multiple orders within the same time window at a construction site. To the best of our knowledge, this paper is the first that deals with these specific constraints in the context of the CDP.
 
-The rest of the paper is structured as follows: Section \ref{lit_review} provides a literature review of previous work related to the CDP. Section \ref{desc_form} provides a formal description and mathematical model of the problem. In Section \ref{grasp_method}, we describe the GRASP algorithm and the constructive heuristics developed to solve this variant of the CDP. Section \ref{comp_exp}  presents computational experiments to evaluate the proposed approach, and finally, the conclusions are presented in Section \ref{concl}.
+The rest of the paper is structured as follows: Section \ref{lit_review} provides a literature review of previous work related to the CDP. Section \ref{desc_form} provides a formal description and mathematical model of the problem. In Section \ref{grasp_method}, we describe the GRASP algorithm and the constructive heuristics developed to solve this variant of the CDP. Section \ref{comp_exp} presents computational experiments to evaluate the proposed approach, and finally, the conclusions are presented in Section \ref{concl}.
 
 \section{Literature review}
 \label{lit_review}
 
-Academic Research on concrete batching and delivery began in the late 1990s. \cite{tommelein1999just} described RMC as a prototypical example of a JIT production system in construction and identified two practices for delivering it. One approach is for the customer to haul the product from the batch plant with their concrete mixer, while the other is for the batch plant to deliver the concrete directly to the customer's location. This latter approach is the one that has been studied in all related papers found in the literature. Several works to schedule and dispatch concrete production and delivery have mainly focused on simulation-related methods. These methods can be standalone, such as those used by \cite{zayed2001simulation, wang2001scheduling, tian_simulation_based_2010, panas_simulation_based_2013} and \cite{galic2016simulation}, among others. Alternatively, these methods can be hybridized with optimization techniques, such as those used by \cite{feng2004optimizing, lu2005optimized}, and \cite{feng_integrating_2006}. \cite{wang2001scheduling} developed a simulation model to reveal the effect and value of the concrete mixers' inter-arrival time on the productivity of hired unloading equipment on site. \cite{feng2004optimizing} used a combination of genetic algorithm (GA) and simulation process to minimize the total waiting time for trucks at a customer site. The study focused on loading trucks with identical capacities at the same batch plant, with fixed loading and unloading durations. The GA was used to find the best loading sequence of RMC trucks to be assigned to different construction sites. The simulation process determined the loading, arrival, departure, and waiting time of trucks and thus evaluated the cost of each dispatching sequence. They evaluated their method using data from a batch plant in Taiwan with up to nine customers served. \cite{mayteekrieangkrai2015optimized} addressed the same problem with the same data using a bee algorithm (BA) and found better solutions than the GA. \cite{lu2005optimized} used the same combination of GA and simulation to determine the optimal number of concrete mixers to be deployed and an optimal schedule for batching and delivering concrete. Their objective was to minimize the idle time of the site crew due to late concrete deliveries and truck queuing time. In this setting, it was also necessary to deliver a batch of mortar on-site to lubricate the unloading pump before the concrete delivery. As such, the simulation model also included the batching and delivery of mortar. Finding the best RMC fleet size was also the purpose of the discrete-event simulation model proposed by \cite{panas_simulation_based_2013}.
+Academic Research on concrete batch and delivery began in the late 1990s. \cite{tommelein1999just} described RMC as a prototypical example of a JIT production system in construction and identified two practices for delivering it. One approach is for the customer to haul the product from the batch plant with their concrete mixer, while the other is for the batch plant to deliver the concrete directly to the customer's location. This latter approach is the one that has been studied in all related papers found in the literature. Several works to schedule and dispatch concrete production and delivery have mainly focused on simulation-related methods. These methods can be standalone, such as those used by \cite{zayed2001simulation, wang2001scheduling, tian_simulation_based_2010, panas_simulation_based_2013} and \cite{galic2016simulation}, among others. Alternatively, these methods can be hybridized with optimization techniques, such as those used by \cite{feng2004optimizing, lu2005optimized}, and \cite{feng_integrating_2006}. \cite{wang2001scheduling} developed a simulation model to reveal the effect and value of the concrete mixers' inter-arrival time on the productivity of hired unloading equipment on site. \cite{feng2004optimizing} used a combination of genetic algorithm (GA) and simulation process to minimize the total waiting time for trucks at a customer site. The study focused on loading trucks with identical capacities at the same batch plant, with fixed loading and unloading durations. The GA was used to find the best loading sequence of RMC trucks to be assigned to different construction sites. The simulation process determined the loading, arrival, departure, and waiting time of trucks and thus evaluated the cost of each dispatching sequence. They evaluated their method using data from a batch plant in Taiwan with up to nine customers served. \cite{mayteekrieangkrai2015optimized} addressed the same problem with the same data using a bee algorithm (BA) and found better solutions than the GA. \cite{lu2005optimized} used the same combination of GA and simulation to determine the optimal number of concrete mixers to be deployed and an optimal schedule for batch and delivering concrete. Their objective was to minimize the idle time of the site crew due to late concrete deliveries and truck queuing time. In this setting, it was also necessary to deliver a batch of mortar on-site to lubricate the unloading pump before the concrete delivery. As such, the simulation model also included the batch and delivery of mortar. Finding the best RMC fleet size was also the purpose of the discrete-event simulation model proposed by \cite{panas_simulation_based_2013}.
 
-In addition to simulation-based methods, several other approaches have been used in the literature to solve the CDP. These include metaheuristics \citep{faria2006distributed, misir2011selection, maghrebi2016sequential, yang2022concrete}, exact methods \citep{yan2007optimal, asbach2009analysis, kinable2014concrete}, matheuristics \citep{schmid2009hybrid, schmid2010hybridization}, Benders Decomposition \citep{maghrebi2014benders}, column generation (CG) \citep{maghrebi2014solving, maghrebi2016column}, Lagrangian relaxation \citep{narayanan2015using}, and machine learning approaches such as those used by \cite{graham2006modeling, maghrebi2014exploring, maghrebi2016matching}. \cite{matsatsinis2004towards} designed a decision support system (DSS) for the dynamic routing of both concrete and pumps that may be necessary for some construction sites to aid in the unloading of concrete. The DSS considered the availability of three plants but stipulated that vehicles fulfilling the same order must all load at the same plant. Orders that could not be executed immediately could be postponed for the next day. The routing of the pumps was modeled as a multi-depot vehicle routing problem with time windows. \cite{naso2007genetic} proposed a sequential GA method combined with constructive heuristics to solve another variant of the CDP. In this problem, the plant's production schedule must account for orders for concrete to be delivered to a customer site and orders that customers must pick up themselves. The algorithm first schedules the plant loading operations before scheduling truck deliveries. The authors also developed a non-linear model that minimizes transportation costs, waiting times, outsourced costs, and overtime work. They ran experiments using real-world instances of a concrete supply chain in the Netherlands and found a reduction in the number of outsourced requests. \cite{yan2007optimal} also considered overtime considerations in their paper, which focused on scheduling RMC for one batching plant with two loading docks. The study took into account that overtime wages are paid for factory and construction site operations after 4 PM. They developed a mixed-integer programming (MIP) model on a time-space network to minimize travel times and operating costs at both normal and overtime working hours at the plant and the construction sites. They tested the model using real data consisting of three days of operation using a two-stage algorithm. First, they solved the MIP relaxation with CPLEX. Then, they simplified the original model by fixing some decision variables before solving it. The algorithm was found to improve the actual plant operation by 10\%. A time-space network is the key component of the real-time DSS developed by \cite{durbin2008or} to solve a dynamic CDP every five minutes. The DSS is able to receive new orders, schedule them on the fly, and handle unexpected events such as plant closures, truck breakdowns, and delays in transportation times. The authors combined the DSS with a tabu search (TS) heuristic to warm start CPLEX, which made the model performant enough to solve instances with up to 1,500 loads per day with up to 250 trucks. The DSS also considers the case of a customer who places two orders, with the first being completed before the second starts. Further insights on the real-time planning and monitoring of CDP are available in \cite{garza2021dynamic}. Another variant of the CDP is modeled by \cite{schmid2009hybrid} as an integer multicommodity network flow (MCNF) problem on a time-space network. In this paper, concrete is delivered using a heterogeneous fleet of vehicles, and each plant can load an unlimited number of trucks simultaneously. Some of the trucks have specialized equipment and must arrive first at certain construction sites to assist in unloading the concrete. The objective is to fulfill all orders, minimize the travel cost, and avoid delays between two consecutive unloading operations for an order. The model is typically solved using a matheuristic algorithm that combines the MCNF with a variable neighborhood search (VNS) heuristic. The method can quickly solve large problem instances with more than 60 orders per day without encountering any memory issues. The same problem is addressed by \cite{schmid2010hybridization}, who proposed a MIP model combined with a VNS and a very large neighborhood search (VLNS) to develop two matheuristics approaches. Comparisons between both matheuristics and a standalone VNS show that the former methods are much better and suitable for solving larger problem instances. These methods also provide better solutions for small to medium instances than the matheuristic used in \cite{schmid2009hybrid}. A pure VNS approach with the same problem but without the use of instrumentation has been applied by \cite{payr2009optimizing}.
+In addition to simulation-based methods, several other approaches have been used in the literature to solve the CDP. These include metaheuristics \citep{faria2006distributed, misir2011selection, maghrebi2016sequential, yang2022concrete}, exact methods \citep{yan2007optimal, asbach2009analysis, kinable2014concrete}, matheuristics \citep{schmid2009hybrid, schmid2010hybridization}, Benders Decomposition \citep{maghrebi2014benders}, column generation (CG) \citep{maghrebi2014solving, maghrebi2016column}, Lagrangian relaxation \citep{narayanan2015using}, and machine learning approaches such as those used by \cite{graham2006modeling, maghrebi2014exploring, maghrebi2016matching}. \cite{matsatsinis2004towards} designed a decision support system (DSS) for the dynamic routing of both concrete and pumps that may be necessary for some construction sites to aid in the unloading of concrete. The DSS considered the availability of three plants but stipulated that vehicles fulfilling the same order must all load at the same plant. Orders that could not be executed immediately could be postponed for the next day. The routing of the pumps was modeled as a multi-depot vehicle routing problem with time windows. \cite{naso2007genetic} proposed a sequential GA method combined with constructive heuristics to solve another variant of the CDP. In this problem, the plant's production schedule must account for orders for concrete to be delivered to a customer site and orders that customers must pick up themselves. The algorithm first schedules the plant loading operations before scheduling truck deliveries. The authors also developed a non-linear model that minimizes transportation costs, waiting times, outsourced costs, and overtime work. They ran experiments using real-world instances of a concrete supply chain in the Netherlands and found a reduction in the number of outsourced requests. \cite{yan2007optimal} also considered overtime considerations in their paper, which focused on scheduling RMC for one batch plant with two loading docks. The study took into account that overtime wages are paid for factory and construction site operations after 4 PM. They developed a mixed-integer programming (MIP) model on a time-space network to minimize travel times and operating costs at both normal and overtime working hours at the plant and the construction sites. They tested the model using real data consisting of three days of operation using a two-stage algorithm. First, they solved the MIP relaxation with CPLEX. Then, they simplified the original model by fixing some decision variables before solving it. The algorithm was found to improve the actual plant operation by 10\%. A time-space network is the key component of the real-time DSS developed by \cite{durbin2008or} to solve a dynamic CDP every five minutes. The DSS is able to receive new orders, schedule them on the fly, and handle unexpected events such as plant closures, truck breakdowns, and delays in transportation times. The authors combined the DSS with a tabu search (TS) heuristic to warm start CPLEX, which made the model performant enough to solve instances with up to 1,500 loads per day with up to 250 trucks. The DSS also considers the case of a customer who places two orders, with the first being completed before the second starts. Further insights on the real-time planning and monitoring of CDP are available in \cite{garza2021dynamic}. Another variant of the CDP is modeled by \cite{schmid2009hybrid} as an integer multicommodity network flow (MCNF) problem on a time-space network. In this paper, concrete is delivered using a heterogeneous fleet of vehicles, and each plant can load an unlimited number of trucks simultaneously. Some of the trucks have specialized equipment and must arrive first at certain construction sites to assist in unloading the concrete. The objective is to fulfill all orders, minimize the travel cost, and avoid delays between two consecutive unloading operations for an order. The model is typically solved using a matheuristic algorithm that combines the MCNF with a variable neighborhood search (VNS) heuristic. The method can quickly solve large problem instances with more than 60 orders per day without encountering any memory issues. The same problem is addressed by \cite{schmid2010hybridization}, who proposed a MIP model combined with a VNS and a very large neighborhood search (VLNS) to develop two matheuristics approaches. Comparisons between both matheuristics and a standalone VNS show that the former methods are much better and suitable for solving larger problem instances. These methods also provide better solutions for small to medium instances than the matheuristic used in \cite{schmid2009hybrid}. A pure VNS approach with the same problem but without the use of instrumentation has been applied by \cite{payr2009optimizing}.
 
-Regarding objectives, most authors have focused on minimizing travel time and delays between consecutive deliveries. However, some authors have been more interested in maximizing customer satisfaction alone. We find these situations in the works of \cite{durbin2008or, kinable2014concrete, kinable2014logic, sulaman2017simulated}. \cite{kinable2014concrete} introduce a general MIP and constraint programming (CP) models of the CDP reflecting the main constraints commonly found in all CDP works: time lag and no overlapping between consecutive deliveries, covering of all customers' demands, delivery time window, and heterogeneous fleet. However, the model did not include constraints limiting the time that concrete may reside in a truck. The authors propose a constructive heuristic that schedules the visits to the customers one by one according to the start time of the visit and the truck capacity. The procedure is invoked multiple times for different permutations of the customer's order which is determined using the steepest descent (SD) local search procedure. One of the paper's main contributions is the creation of the first public test instances for the CDP with up to 50 customers, four batching plants, and 20 concrete mixers. They found the CP model to be highly effective in finding high-quality solutions in a relatively short time or improving existing schedules, while the MIP model can be used to compute bounds, as it seems ineffective in solving large problem instances. Finally, the heuristic often yields good solutions in less than a second. A detailed analysis of the MIP model presented in \cite{kinable2014concrete} and of two more compact models can be found in the thesis of \cite{hernandez_lopez_study_2020}. In \cite{kinable2014logic}, we found an attempt to solve the previous problem with a logic-based Benders' approach. \cite{sulaman2017simulated} expand upon the SD heuristic proposed in \cite{kinable2014concrete}, proposing a simulated annealing (SA) combined with a time-slot Heuristic (SATH). This method looks for a slot between existing visits of a truck to schedule a new delivery instead of assigning it to the time slot strictly after the truck's latest assigned delivery. The goal is to reduce the large time gaps that can be present in a schedule created with SD due to ignoring the intermediate available time slots. Experimental results indicated that SATH outperforms SD in speed and solution quality. A generalization of the MIP model of \cite{kinable2014concrete} is addressed in \cite{asbach2009analysis}. This model simultaneously minimizes the total sum of travel costs and the penalty costs for customers with unfulfilled demand. A customer can request that all concrete deliveries come from the same plant or a subset of plants and that a delivery truck belongs to a subset of the vehicle fleet. The MIP model is used in a local search scheme as a black-box solver to reoptimize an incumbent solution in which a neighborhood operator has unfixed some variables. \cite{tzanetos2023systematic} provide an overview of the various methods used in the literature to address the CDP and categorizes the problem formulations based on the different concepts used in the literature. They also discussed the consistency between industry needs and existing constraints and provided insights into the datasets corresponding to real-world cases, identifying the necessary data for practitioners. 
+Regarding objectives, most authors have focused on minimizing travel time and delays between consecutive deliveries. However, some authors have been more interested in maximizing customer satisfaction alone. We find these situations in the works of \cite{durbin2008or, kinable2014concrete, kinable2014logic, sulaman2017simulated}. \cite{kinable2014concrete} introduce a general MIP and constraint programming (CP) models of the CDP reflecting the main constraints commonly found in all CDP works: time lag and no overlapping between consecutive deliveries, covering of all customers' demands, delivery time window, and heterogeneous fleet. However, the model did not include constraints limiting the time that concrete may reside in a truck. The authors propose a constructive heuristic that schedules the visits to the customers one by one according to the start time of the visit and the truck capacity. The procedure is invoked multiple times for different permutations of the customer's order which is determined using the steepest descent (SD) local search procedure. One of the paper's main contributions is the creation of the first public test instances for the CDP with up to 50 customers, four batch plants, and 20 concrete mixers. They found the CP model to be highly effective in finding high-quality solutions in a relatively short time or improving existing schedules, while the MIP model can be used to compute bounds, as it seems ineffective in solving large problem instances. Finally, the heuristic often yields good solutions in less than a second. A detailed analysis of the MIP model presented in \cite{kinable2014concrete} and of two more compact models can be found in the thesis of \cite{hernandez_lopez_study_2020}. In \cite{kinable2014logic}, we found an attempt to solve the previous problem with a logic-based Benders' approach. \cite{sulaman2017simulated} expand upon the SD heuristic proposed in \cite{kinable2014concrete}, proposing a simulated annealing (SA) combined with a time-slot Heuristic (SATH). This method looks for a slot between existing visits of a truck to schedule a new delivery instead of assigning it to the time slot strictly after the truck's latest assigned delivery. The goal is to reduce the large time gaps that can be present in a schedule created with SD due to ignoring the intermediate available time slots. Experimental results indicated that SATH outperforms SD in speed and solution quality. A generalization of the MIP model of \cite{kinable2014concrete} is addressed in \cite{asbach2009analysis}. This model simultaneously minimizes the total sum of travel costs and the penalty costs for customers with unfulfilled demand. A customer can request that all concrete deliveries come from the same plant or a subset of plants and that a delivery truck belongs to a subset of the vehicle fleet. The MIP model is used in a local search scheme as a black-box solver to reoptimize an incumbent solution in which a neighborhood operator has unfixed some variables. \cite{tzanetos2023systematic} provide an overview of the various methods used in the literature to address the CDP and categorizes the problem formulations based on the different concepts used in the literature. They also discussed the consistency between industry needs and existing constraints and provided insights into the datasets corresponding to real-world cases, identifying the necessary data for practitioners.
 
 \section{Problem description}
 \label{desc_form}
-The focus of this paper is on the distribution of RMC from a Canadian company that operates in the greater Montreal area. When a customer places an order, it is received at a control center and assigned to one of the company's batching plants. These plants produce the concrete and then deliver it to the customer. The problem we are examining involves a set of customer orders, a set of concrete-mixer drivers, and a set of batching plants.
+The focus of this paper is on the distribution of RMC from a Canadian company that operates in the greater Montreal area. When a customer places an order, it is received at a control center and immediately assigned to one of the company's batch plants. These plants produce the concrete and then deliver it to the customer. The problem we are examining involves a set of customer orders, a set of concrete-mixer drivers, and a set of batch plants.
 
 % \subsection*{Customer orders}
 
-A customer $i$ requests one or more types of concrete to be delivered to their  construction site on a particular day, starting at time $a_i$.  We call an order $o$ a request for a specific type of concrete.  $q_i$ is the sum of the demands $q_o$ of each order $o$ placed, $a_i$ is the desired arrival time of the first concrete mixer, and $\tau^u_i$ is the unloading rate for customer $i$. If the order requires more concrete than a single truck can carry, multiple deliveries are scheduled.
+A customer $i$ requests one or more types of concrete to be delivered to their construction site on a specific day, with the delivery service starting at the due time $a_i$.  We call an order $o$ a request for a specific type of concrete. $q_i$ is the sum of the demands $q_o$ of each order $o$ placed, $a_i$ is the desired arrival time of the first concrete mixer, and $\tau^u_i$ is the unloading rate for customer $i$. If the order requires more concrete than a single truck can carry, multiple deliveries are scheduled.
 
-Let $O_i$ be the set of all orders requested by customer $i$. Each element of $O_i$ must be fully delivered before moving on to another order. Exactly one order $o$ of $O_i$ must have its first delivery start at $a_i$, while the others can start at any time after $o$ is completed. Once a plant is selected to produce a customer's first delivery, it must be the supplier of all subsequent deliveries from that customer. To avoid cold joint problems with the concrete, the subsequent deliveries must be made in close succession. We define a maximum time delay $\gamma_i$ after which no more deliveries are allowed. The customer unloading rate and the quantity to be unloaded give the time required to unload a truckload. Let $\mathcal{C}$ be the set of construction sites (customers) with a planned delivery for the day, and $\mathcal{O}=\{{O_i, i \in \mathcal{C}}\}$ be the set of all requested orders for all customers. 
+Let $O_i$ be the set of all orders requested by customer $i$. Each element of $O_i$ must be fully delivered before moving on to another order. Exactly one order $o \in O_i$ must have its first delivery start at $a_i$, while the others can start at most $\gamma^2$ time after $o$ is completed. %Once a plant is selected to produce a customer's first delivery, it must be the supplier of all subsequent deliveries from that customer. 
+To avoid cold joint problems with the concrete, subsequent deliveries of the same order must be made in close succession. We define a maximum time delay $\gamma^1$ after which no more deliveries are allowed. The customer unloading rate and the quantity to be unloaded give the time required to unload a truckload. Let $\mathcal{C}$ be the set of construction sites (customers) with a planned delivery for the day, and $\mathcal{O}=\{{O_i, i \in \mathcal{C}}\}$ be the set of all requested orders for all customers.
 
 % \subsection*{Drivers}
 
-The company has two types of concrete mixer trucks with capacities of 8 and 12 cubic meters. Each driver $k$ is assigned to a particular batch plant and is responsible for driving a truck with capacity $Q_k$. The set of drivers is represented by $K =\cup_{b \in \mathcal{B}}K_b $, where $K_b$ is the set of drivers scheduled to start their shift at batch plant $b$. $t_{ij}$ is the known time to travel between any two locations $i$ and $j$.
-A scheduled driver $k$ is required to start his shift at $H_k$, work a minimum of $M_T$ hours and a maximum of $N_T$ hours during regular working hours, with the possibility of overtime of up to $O_T$ hours. $\beta_3$ and $\beta_4$ are the penalties incurred if a driver works less than $M_t$ and more than $N_t$.
+The company has two types of concrete mixer trucks with capacities of 8 and 12 cubic meters. Each driver $k$ is assigned to a particular batch plant and is responsible for driving a truck with capacity $Q_k$. The set of drivers is represented by $K =\cup_{b \in \mathcal{B}}K_b $, where $K_b$ is the set of drivers scheduled to start their shift at batch plant $b$. $t_{ij}$ is the known time to travel between any two locations $i$ and $j$. A scheduled driver $k$ is required to start his shift at $H_k$, work a minimum of $M_T$ hours and a maximum of $N_T$ hours during regular working hours, with the possibility of overtime of up to $O_T$ hours. $\beta_3$ and $\beta_4$ are the penalties for a driver working less than $M_T$ and more than $N_T$.
 
 A driver typically loads RMC at his assigned batch plant but may be required to drive to and load at other plants if needed. The batch plant produces concrete on demand using recipes specific to each order. This means that a truck can only haul RMC for one order, even if there is spare capacity.  After unloading the RMC,  driver $k$ takes $Ct_k$ minutes to clean the concrete mixer before proceeding. %When assigning drivers to deliveries, the company prioritizes employees with the highest seniority.
 
-Let $n_o$ be the number of deliveries needed to fulfill the order $o$. $n_o$ is not known in advance because we use a fleet of trucks with different capacities. However, we can compute its lower ($n_o^{min}$) and upper ($n_o^{max}$) bounds using the capacities of the largest ($Q_{max}$) and smallest ($Q_{min}$) available trucks. 
+Let $n_o$ be the number of deliveries needed to fulfill the order $o$. $n_o$ is not known in advance because we use a fleet of trucks with different capacities. However, we can compute its lower ($n_o^{min}$) and upper ($n_o^{max}$) bounds using the capacities of the largest ($Q_{max}$) and smallest ($Q_{min}$) available trucks.
 \begin{alignat}{3}
     \label{mod:c0}
-       n_o^{min} = \left\lceil \frac{q_o}{Q_{max}} \right\rceil \leq n_o \leq n_o^{max} = \left\lceil \frac{q_o}{Q_{min}} \right\rceil  & \text{ } & 
- \forall  o \in \mathcal{O}.
+    n_o^{min} = \left\lceil \frac{q_o}{Q_{max}} \right\rceil \leq n_o \leq n_o^{max} = \left\lceil \frac{q_o}{Q_{min}} \right\rceil & \text{ } &
+    \forall  o \in \mathcal{O}.
 \end{alignat}
 
 Let $d^j_{o}$ be the $j^{th}$ visit with load $q^j_{o}$ for order $o$. We represent the fulfillment of order $o$ by the visits to the ordered set of delivery nodes $\mathcal{D}_o= \left(d^0_{o},d^1_{o},\cdots, d^{n_o}_{o}\right)$. The deliveries of customer $i$ are the ordered set $\mathcal{D}_i= (\mathcal{D}_{o_1}, \mathcal{D}_{o_2},\cdots,\mathcal{D}_{o_{|O_i|}})$, where $o_r$ is the $r^{th}$ delivered order. We will refer to $d \in \mathcal{D}_i$ ($d \in \mathcal{D}_o$) as the $d^{th}$ potential delivery of customer $i$ (order $o$). $\mathcal{D}=\bigcup_{i\in \mathcal{C}} \mathcal{D}_i$ is the union of all delivery nodes.
 
 % \subsection*{Batching plants}
 
-The company owns a total of eight batching plants. Each plant has a loading dock that can accommodate only one truck at a time, which leads to trucks lining up. Let $\mathcal{B}$ be the set of batching plants. The plants are heterogeneous, as each plant $b$ has its own hourly loading rate, represented by $\tau^l_b$, which affects the duration of the loading process. After loading the concrete, the driver spends $\alpha_b$ minutes adjusting the concrete in the truck before heading to the customer site. Each plant has its own assigned fleet of trucks, but it can borrow trucks from other plants. % or hire external vehicles if necessary. 
- A batching plant can serve a construction site as long as the travel time between the two is less than the concrete's lifespan, which is represented by $\Delta$. Let $l_{bj}$ be the loading dock node associated with delivery node $j$ at plant $b$.
-We represent each plant $b$ by the set $\mathcal{L}_b = \{l_{bj}, t_{bj}\leq  \Delta, j \in \mathcal{D} \}$  of loading docks nodes. $\mathcal{L}=\bigcup_{b\in B} \mathcal{L}_b$ is the union of all loading docks. 
+Each of the company's plants has a single loading dock that can accommodate only one truck at a time. As a result, trucks often form a queue while waiting for their turn at the loading dock. Let $\mathcal{B}$ be the set of batch plants. The plants are heterogeneous, as each plant $b$ has its own hourly loading rate, represented by $\tau^l_b$, which affects the duration of the loading process. After loading the concrete, the driver spends $\alpha_b$ minutes adjusting the concrete in the truck before heading to the customer site. Each plant has its own assigned fleet of trucks, but it can borrow trucks from other plants. Let $l_{j}$ be the loading dock node associated with delivery node $j$. After loading RMC at $l_j$, it must be fully delivered to $j$ at most before $\Delta$ time, which is the concrete lifetime. We denote $\mathcal{L}_b$ as the set of loading dock nodes of plant $b$ and $\mathcal{L}$ as the set of all loading docks.
 
 % \subsection*{Model}
-A solution to the problem involves decisions about truck loading schedules, driver assignments to different deliveries, and truck arrival times at construction sites for unloading. For a batching plant, the decision involves choosing which driver to \textcolor{red}{load}, when to load them, and which construction site they should deliver to. For a driver, the decision involves determining the sequence of loading depots and delivery sites. And for a construction site, the decision involves determining the arrival times of all scheduled deliveries for the day.
+A solution to the problem involves decisions about truck loading schedules, driver assignments to different deliveries, and truck arrival times at construction sites for unloading. For a batch plant, the decision involves choosing which driver to load, when to load them, how much to load, and which construction site to deliver. For a driver, the decision is to determine the sequence of loading depots and delivery sites. And for a construction site, the decision involves determining the arrival times of all scheduled deliveries for the day.
 
 Each driver leaves and returns to their home plant every day. We represent the home plant of a driver $k$ with a starting depot $s_k$ and an ending depot $e_k$. $S$ and $E$ are the sets of starting and ending depots, respectively.
 
-We define our problem on a complete directed graph where $V=\{ S \cup \mathcal{L} \cup \mathcal{D} \cup E\}$ is the set of nodes. The arc sets are $A =  \{(i,j,k) \hspace*{1mm} \vert \hspace*{1mm} i, j \in V \hspace{1mm} k\in K \}$, $A^D = \{(i,j) \hspace*{1mm} \vert \hspace*{1mm} i, j \in \mathcal{D} \hspace{1mm} \}$, and $A^L = \{(i,j) \hspace*{1mm} \vert \hspace*{1mm} i, j \in \mathcal{L} \hspace{1mm} \}$. 
+We define our problem on a complete directed graph where $V=\{ S \cup \mathcal{L} \cup \mathcal{D} \cup E\}$ is the set of nodes. The arc sets are $A =  \{(i,j,k) \hspace*{1mm} \vert \hspace*{1mm} i, j \in V \hspace{1mm} k\in K \}$, $A^D = \{(i,j) \hspace*{1mm} \vert \hspace*{1mm} i, j \in \mathcal{D} \hspace{1mm} \}$, and $A^L = \{(i,j) \hspace*{1mm} \vert \hspace*{1mm} i, j \in \mathcal{L} \hspace{1mm} \}$.
 $A$ corresponds to allowed movements of drivers from node $i$ to node $j$. For each driver $k$, the allowed movements are the following:
 
 \begin{itemize}
@@ -232,11 +230,12 @@ $A$ corresponds to allowed movements of drivers from node $i$ to node $j$. For e
     \item From a delivery node  $d \in \mathcal{D}$ to a loading dock $l \in \mathcal{L}$ or to the ending depot $e_k$.
 \end{itemize}
 
-For a customer $c$, arcs in $A^D$ link consecutive delivery nodes of the same order   $\lbrace (i,j)\in \mathcal{D}_o, o \in \mathcal{O}_c, i < j  \rbrace$, and pair of delivery nodes of two different orders $ \lbrace (i,d^{0}_{o_2}),  i \in \mathcal{D}_{o_1}, i \geq n^{min}_{o_1}, o_1, o_2 \in \mathcal{O}_c, o_1 \neq o_2 \rbrace $. Arcs in $A^L$ link all pairs of loading docks of the same batching plant.
+For a customer $c$, arcs in $A^D$ link consecutive delivery nodes of the same order   $\lbrace (i,j)\in \mathcal{D}_o, o \in \mathcal{O}_c, i < j  \rbrace$, and pair of delivery nodes of two different orders $ \lbrace (i,d^{0}_{o_2}),  i \in \mathcal{D}_{o_1}, i \geq n^{min}_{o_1}, o_1, o_2 \in \mathcal{O}_c, o_1 \neq o_2 \rbrace $. Arcs in $A^L$ link all pairs of loading docks of the same batch plant.
 
 We define $\delta^{+}(i) = \{(i, j,k) \in A \}$ and $\delta^{-}(i) = \{(j, i,k) \in A \}$ as the outcoming and incoming arc sets of node $i \in V$; $\delta^{+}_D(i) = \{(i, j)  \in A^D\}$ and $\delta^{-}_D(i) = \{(j, i) \in A^D \}$ are the outcoming and incoming arc sets of delivery node $i \in \mathcal{D}$.  Similarly, $\delta^{+}_L(i) = \{(i, j)  \in A^L\}$ and $\delta^{-}_L(i) = \{(j, i) \in A^L \}$ are the outcoming and incoming arc sets of loading node $i \in \mathcal{L}$.
 
-Let the binary variable $x^{k}_{ij}$ be $1$ if driver $k$ travels from node $i$ to $j$. Binary variable $y_o$ is $1$ when order $o$ is completely served; $v_i$ and $w_i$ are the start and end of the loading (unloading) operation at node $i \in \mathcal{L} \cup \mathcal{D}$. The binary variable $u_{ij}$ is $1$ if node $j$ is served just after $i$, the service being either an unloading or a loading operation. Binary variable $\sigma_{ib}$ is equal to 1 if the orders of customer $i$ are loaded by plant $b$. Variable $q^k_j$ is the quantity to be loaded towards $j$ with vehicle $k$. Let $w^1_k$ be a continuous variable indicating the difference between the driver's work time and the minimum number of hours to be worked in a day, and $w^2_k$ indicating the difference between the driver's work time and the normal work time. Let $g_i$ be the time between due date and first service start for customer $i$.
+Let the binary variable $x^{k}_{ij}$ be $1$ if driver $k$ travels from node $i$ to $j$. Binary variable $y_o$ is $1$ when order $o$ is completely served; $v_i$ and $w_i$ are the start and end of the loading (unloading) operation at node $i \in \mathcal{L}\cup \mathcal{D}$. Binary variable $u_{ij}$ is $1$ if node $j$ is served just after $i$, the service being either an unloading or a loading operation. % Binary variable $\sigma_{ib}$ is equal to 1 if the orders of customer $i$ are loaded by plant $b$. 
+Variable $q^k_j$ is the quantity to be loaded towards $j$ with vehicle $k$. Let $w^1_k$ be a continuous variable indicating the difference between the driver's work time and the minimum number of hours to be worked in a day, and $w^2_k$ indicating the difference between the driver's work time and the normal work time. Let $g_i$ be the time between due date and first service start for customer $i$.
 % Binary variable $u_{o_{1},o_{2}}$ equals $1$ if order $o_{2}$ is served directly after order $o_{1}$. Binary variables $z_{o,d}$ ($z_{i,d}$) indicates whether or not delivery $d \in  \mathcal{D}_o$ ($d \in  \mathcal{D}_i$) is supposed to be executed. $w_i$ is the end of the loading (unloading) operation at node $i \in L\cup D$. 
 
 The objective function minimizes the travel cost, the penalty costs incurred when customer demands are not fully met, the lateness of each customer's first delivery, the cost of drivers working less than the minimum hours, and the total overtime cost of drivers working beyond their scheduled hours. The mathematical model of this variant of the CDP is as follows:
@@ -244,143 +243,147 @@ The objective function minimizes the travel cost, the penalty costs incurred whe
 %The objective function (\ref{mod:obj}) is designed to minimize multiple factors that impact the overall cost and efficiency of the concrete delivery process. These factors include: The total traveled distance, which represents the fuel consumption and wear and tear on the delivery vehicles. The penalty costs $\beta_1$, which are incurred when customers' demands are not fully satisfied.The lateness of each customer's first delivery, which can impact customer satisfaction and lead to additional penalty costs.The number of drivers who work under the minimum working time, which can lead to increased labor costs and decreased productivity.The total overtime cost, which is incurred when drivers work beyond their scheduled hours.All these factors are taken into consideration in the objective function to minimize the cost and maximize the satisfaction of the customers.
 
 \begin{alignat}{3}
-\label{mod:obj}   \min &  \smashoperator{ \sum_{ \substack{(i,j,k) \in A} }} {t_{ij}x^{k}_{ij}} + \beta_1\smashoperator{\sum_{ o \in \mathcal{O}}}{  \left(1-y_o\right)} \hspace{-0mm}  + \beta_2 \smashoperator{ \sum_{i \in \mathcal{C} } } { g_i  } +  \sum_{k \in K}{\beta_3 w^{1}_k } + \beta_4 { w^{2}_k }&\\
-    \label{mod:c1} &\sum_{j \in \delta^{+}(s_k) }{x^k_{s_kj}} = 1   &  \forall k \in K  \\
-    \label{mod:c2} &\sum_{j \in \delta^{-}(e_k)}{x^k_{je_k}} = 1   &  \forall k \in K\\
-    \label{mod:c3} & v_j \geq  w_i + \alpha_{i} + t_{ij} - M\left(1-x^{k}_{ij}\right)  & \hspace{-20mm} \forall i \in \mathcal{L}, j \in \delta^{+}(i),  k \in K \\
-    \label{mod:c4}  & v_j \geq  w_i + Ct_{k} + t_{ij} - M\left(1-x^{k}_{ij}\right) & \hspace{-20mm} \forall i \in \mathcal{D}, j \in \delta^{+}(i), k \in K \\
-    \label{mod:c5} & w_{i} \geq v_{i}  + \frac{q^k_j}{\tau^l_b} -M\left(1- x^{k}_{ij}\right) &  \hspace{-20mm} \forall  b \in \mathcal{B},  i \in \mathcal{L}_{b},  j \in \delta^{+}(i), k \in K \\
-    \label{mod:c6} &          w_{j} \geq v_{j}  + {  \frac{q^k_j}{\tau^u_c} -M\left(1- x^{k}_{ij}\right) } & \hspace{-20mm}  \forall c \in  \mathcal{C}, j \in \mathcal{D}_{c}, i \in \delta^{-}(j),  k \in K \\
-    \label{mod:c7} &         w_{j} \leq v_{i}  + \Delta + M\left(1- x^{k}_{ij}\right) & \hspace{-20mm}   j \in \mathcal{D},  i \in \delta^{-}(j),  k \in K \\
-    \label{mod:c8}  &  v_{d^0_{o}} \geq a_i  & \hspace{-20mm} \forall  i \in \mathcal{C}, \forall o \in \mathcal{O}_i\\
-    \label{mod:c9} & g_{i} \geq v_{d^0_{o_1}} - a_i - M\left(  \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})  }{u_{j,d^0_{o_1}}}\right)  & \hspace{-20mm}  \forall  i \in \mathcal{C}, \forall o_1 \in \mathcal{O}_i, d=d^0_{o_1} \\
-     \label{mod:c101} & v_{d^0_{o_1}} \geq w_j - M\left(1- u_{j,d^0_{o_1}}\right)  & \hspace{-40mm}    \forall o_1 \in \mathcal{O}_i,  j \in \delta_{D}^{-}(d^0_{o_1})  \\
-  \label{mod:c10} &  v_{d^0_{o_1}}  \leq  w_j + \gamma_i + M\left(1- u_{j,d^0_{o_1}}\right) &  \hspace{-20mm}  \forall  o_1 \in \mathcal{O},  j \in \delta_{D}^{-}(d^0_{o_1}) \\
-    \label{mod:c11} &  \sum_{ \substack{o_1 \in \mathcal{O}_i }}{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } = |\mathcal{O}_i|-1 & \hspace{-20mm} \forall  i \in \mathcal{C},|\mathcal{O}_i| > 1 \\
-    \label{mod:c12}&   \sum_{ \substack{o_1 \in \mathcal{O}_i }}\sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}{u_{d^0_{o_1},j } } = |\mathcal{O}_i|-1 & \hspace{-40mm} \forall  i \in \mathcal{C}, |\mathcal{O}_i| > 1 \\
-    \label{mod:c13} & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } \leq 1 & \hspace{-20mm}  \forall o_1 \in \mathcal{O} \\
-    \label{mod:c14} & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \leq 1 & \hspace{-20mm} \forall o_1 \in \mathcal{O} \\
-    \label{mod:c15} & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } +\smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \geq 1         & \hspace{-20mm} \forall o_1 \in \mathcal{O} \\
-    \label{mod:c16} & v_{j} \geq w_{j-1} - M\left(1- u_{j-1,j}\right) & \hspace{-20mm}  \forall o \in \mathcal{O}, j \in \mathcal{D}_{o}, j \geq 1 \\
-  \label{mod:c17} &  v_{j}  \leq  w_{j-1} + \gamma_i + M\left(1- u_{j-1,j}\right) & \hspace{-20mm} \forall i \in \mathcal{C}, \forall o \in O_i, j \in \mathcal{D}_{o}, j \geq 1 \\
-   \label{mod:c18}   &   u_{j-1,j} \geq u_{j,j+1} & \hspace{-35mm} \forall o_1 \in\mathcal{O},  j \in \mathcal{D}_{o_1}, 1 \leq j \leq n_{o_{1}}-1\\
-  \label{mod:c19} &  u_{j-1,j} \geq \sum_{l \in \mathcal{L}}{x_{lj}} &\hspace{-20mm}  \forall o_1 \in \mathcal{O}, j \in \mathcal{D}_{o_1}, j \geq 1 \\
-    \label{mod:c20} & v_{j} \geq w_{i} - M\left(1- u_{i,j}\right) & \hspace{-20mm}  \forall i \in \mathcal{L}, j \in \delta^{+}_{L}(i) \\
-   \label{mod:c21} & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{L}(i)}}{u_{i,j } } \leq 1 & \hspace{-20mm}  \forall i \in \mathcal{L} \\
-    \label{mod:c22} & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } \leq 1 & \hspace{-20mm} \forall i \in \mathcal{L} \\
-    \label{mod:c23} & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } + \smashoperator{ \sum_{ j \in \delta^{+}_{L}(i)}}{u_{i,j } } \geq \sum_{k \in K}\sum_{j \in  \delta^{-}(i) }{x^k_{ji}} & \hspace{-20mm} \forall i \in \mathcal{L} \\
-    \label{mod:c24} & \sum_{k \in K}\sum_{j \in \mathcal{D}_o}{q^k_j} = q_o & \hspace{-20mm}  \forall o \in \mathcal{O} \\
-    \label{mod:c25} &  \sum_{k \in K}\sum_{j \in \delta^{+}(i)}{x^{k}_{ij} \leq 1} &  i \in \mathcal{L} \cup \mathcal{D} \\
-  \label{mod:c26}  &  \sum_{k \in K}\sum_{j \in \delta^{+}(i)} {x^{k}_{ij} } =  \sum_{k \in K}\sum_{j \in \delta^{-}(i)}{x^{k}_{ji} } &  i \in \mathcal{L} \cup \mathcal{D} \\
-  \label{mod:c27} & \sum_{k \in K}  \sum_{i \in \mathcal{D}_c} \sum_{j \in \delta^{-}(i) }  {x^k_{ji}} \leq M\sigma_{c, b} & \forall c \in \mathcal{C}, b \in \mathcal{B} \\
-    \label{mod:c28} & \sum_{b \in \mathcal{B}} \sigma_{c, b} \leq 1 & \hspace{-20mm}\forall c \in \mathcal{C}, b \in \mathcal{B} \\
-    \label{mod:c29} & w^1_k \geq  M_T + H_k - v_{e_k}  & \hspace{-20mm} \forall k \in K \\
-    \label{mod:c30} & w^2_k \geq (v_{e_k} - H_k) - N_T & \hspace{-20mm} \forall k \in K \\
-    \label{mod:c31}  & w_{e_k} \leq H_k + O_T  & \hspace{-00mm}  k \in K \hspace{0mm} \\
-    \label{mod:c32} &  0 \leq q^k_j \leq Q^k  & \hspace{-20mm}  j \in \mathcal{D}, k \in K \\
-    \label{mod:c33} &  x^k_{ij} \in \{0,1\} & \hspace{-20mm}  (i,j) \in A , k \in K  \hspace{0mm} \\
-    \label{mod:c34} &  u_{ij} \in \{0,1\} & \hspace{-20mm}  (i,j) \in A^D , k \in K  \hspace{0mm} \\
-    \label{mod:c35} &  \sigma_{ib} \in \{0,1\} & \hspace{-20mm}  i \in \mathcal{C}, b \in \mathcal{B} \\
-    \label{mod:c36} &  y_o \in \{0,1\} & \hspace{-20mm}  o \in \mathcal{O} \\
-    \label{mod:c37} &  v_i \geq 0,  w_i \geq 0 & \hspace{-20mm}  i \in V \\\
-    \label{mod:c38} &  w^1_{k} \geq 0,  w^2_k \geq 0  & \hspace{-20mm}  i \in V \\
-    \label{mod:cend} &  g_i \geq 0   & \hspace{-20mm}  i \in \mathcal{C}.
+    \label{mod:obj}   \min & \smashoperator{ \sum_{ \substack{(i,j,k) \in A} }} {t_{ij}x^{k}_{ij}} + \beta_1\smashoperator{\sum_{ o \in \mathcal{O}}}{  \left(1-y_o\right)} \hspace{-0mm}  + \beta_2 \smashoperator{ \sum_{i \in \mathcal{C} } } { g_i  } +  \sum_{k \in K}{\beta_3 w^{1}_k } + \beta_4 { w^{2}_k } &                                                                                                  \\
+    \label{mod:c1}         & \sum_{j \in \delta^{+}(i) }{x^k_{ij}} =1                                                                                                                                                                                                                                               & \forall i \in S, k \in K                                                                         \\
+    \label{mod:c2}         & \sum_{j \in \delta^{-}(i)}{x^k_{ji}} = 1                                                                                                                                                                                                                                               & \forall i \in E, k \in K                                                                         \\
+    \label{mod:c03}        & v_j \geq  w_i  - M\left(1-x^{k}_{ij}\right)                                                                                                                                                                                                                                            & \hspace{-20mm}  i \in S, j \in \delta^{+}(i),  k \in K                                           \\
+    \label{mod:c3}         & v_j \geq  w_i + \alpha_{b} + t_{ij} - M\left(1-x^{k}_{ij}\right)                                                                                                                                                                                                                       & \hspace{-20mm} \forall b \in \mathcal{B}, i \in \mathcal{L}_b, j \in \delta^{+}(i),  k \in K     \\
+    \label{mod:c4}         & v_j \geq  w_i + Ct_{k} + t_{ij} - M\left(1-x^{k}_{ij}\right)                                                                                                                                                                                                                           & \hspace{-20mm} \forall i \in \mathcal{D}  , j \in \delta^{+}(i), k \in K                         \\
+    \label{mod:c5}         & w_{i} \geq v_{i}  + \frac{q^k_j}{\tau^l_b} -M\left(1- x^{k}_{ij}\right)                                                                                                                                                                                                                & \hspace{-20mm} \forall  b \in \mathcal{B},  i \in \mathcal{L}_{b},  j \in \delta^{+}(i), k \in K \\
+    \label{mod:c6}         & w_{j} \geq v_{j}  + {  \frac{q^k_j}{\tau^u_c} -M\left(1- x^{k}_{ij}\right) }                                                                                                                                                                                                           & \hspace{-20mm}  \forall c \in  \mathcal{C}, j \in \mathcal{D}_{c}, i \in \delta^{-}(j),  k \in K \\
+    \label{mod:c7}         & w_{j} \leq v_{i}  + \Delta + M\left(1- x^{k}_{ij}\right)                                                                                                                                                                                                                               & \hspace{-20mm}   j \in \mathcal{D},  i \in \delta^{-}(j),  k \in K                               \\
+    \label{mod:c8}         & v_{d^0_{o}} \geq a_i                                                                                                                                                                                                                                                                   & \hspace{-20mm} \forall  i \in \mathcal{C}, \forall o \in \mathcal{O}_i                           \\
+    \label{mod:c9}         & g_{i} \geq v_{d^0_{o_1}} - a_i - M\left(  \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})  }{u_{jd^0_{o_1}}}\right)                                                                                                                                                                             & \hspace{-20mm}  \forall  i \in \mathcal{C}, \forall o_1 \in \mathcal{O}_i                        \\
+    \label{mod:c101}       & v_{d^0_{o_1}} \geq w_j - M\left(1- u_{jd^0_{o_1}}\right)                                                                                                                                                                                                                               & \hspace{-40mm}    \forall o_1 \in \mathcal{O}_i,  j \in \delta_{D}^{-}(d^0_{o_1})                \\
+    \label{mod:c10}        & v_{d^0_{o_1}}  \leq  w_j + \gamma^2 + M\left(1- u_{j,d^0_{o_1}}\right)                                                                                                                                                                                                                 & \hspace{-20mm}  \forall  o_1 \in \mathcal{O},  j \in \delta_{D}^{-}(d^0_{o_1})                   \\
+    \label{mod:c11}        & \sum_{ \substack{o_1 \in \mathcal{O}_i }}{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } = |\mathcal{O}_i|-1                                                                                                                                                             & \hspace{-20mm} \forall  i \in \mathcal{C},|\mathcal{O}_i| > 1                                    \\
+    \label{mod:c12}        & \sum_{ \substack{o_1 \in \mathcal{O}_i }}\sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}{u_{d^0_{o_1},j } } = |\mathcal{O}_i|-1                                                                                                                                                                & \hspace{-40mm} \forall  i \in \mathcal{C}, |\mathcal{O}_i| > 1                                   \\
+    \label{mod:c13}        & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } \leq 1                                                                                                                                                                                        & \hspace{-20mm}  \forall o_1 \in \mathcal{O}                                                      \\
+    \label{mod:c14}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \leq 1                                                                                                                                                                                        & \hspace{-20mm} \forall o_1 \in \mathcal{O}                                                       \\
+    \label{mod:c15}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } +\smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \geq 1                                                                                                           & \hspace{-20mm} \forall o_1 \in \mathcal{O}                                                       \\
+    \label{mod:c16}        & v_{j} \geq w_{j-1} - M\left(1- u_{j-1,j}\right)                                                                                                                                                                                                                                        & \hspace{-20mm}  \forall o \in \mathcal{O}, j \in \mathcal{D}_{o}, j \geq 1                       \\
+    \label{mod:c17}        & v_{j}  \leq  w_{j-1} + \gamma^1 + M\left(1- u_{j-1,j}\right)                                                                                                                                                                                                                           & \hspace{-20mm} \forall i \in \mathcal{C}, \forall o \in O_i, j \in \mathcal{D}_{o}, j \geq 1     \\
+    \label{mod:c18}        & u_{j-1,j} \geq u_{j,j+1}                                                                                                                                                                                                                                                               & \hspace{-35mm} \forall o_1 \in\mathcal{O},  j \in \mathcal{D}_{o_1}, 1 \leq j \leq n_{o_{1}}-1   \\
+    \label{mod:c19}        & u_{j-1,j} \geq \sum_{l \in \mathcal{L}}{x_{lj}}                                                                                                                                                                                                                                        & \hspace{-20mm}  \forall o_1 \in \mathcal{O}, j \in \mathcal{D}_{o_1}, j \geq 1                   \\
+    \label{mod:c20}        & v_{j} \geq w_{i} - M\left(1- u_{i,j}\right)                                                                                                                                                                                                                                            & \hspace{-20mm}  \forall i \in \mathcal{L}, j \in \delta^{+}_{L}(i)                               \\
+    \label{mod:c21}        & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{L}(i)}}{u_{i,j } } \leq 1                                                                                                                                                                                                        & \hspace{-20mm}  \forall i \in \mathcal{L}                                                        \\
+    \label{mod:c22}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } \leq 1                                                                                                                                                                                                        & \hspace{-20mm} \forall i \in \mathcal{L}                                                         \\
+    \label{mod:c230}       & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } }  \geq \sum_{k \in K}\sum_{j \in  \delta^{-}(i) }{x^k_{ji}}                                                                                                                                                    & \hspace{-20mm} \forall i \in \mathcal{L}                                                         \\
+    \label{mod:c231}       & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } \geq \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i+1)}}{u_{j,i+1 } }                                                                                                                                          & \hspace{-20mm} \forall i \in \mathcal{L}                                                         \\
+    \label{mod:c23}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } + \smashoperator{ \sum_{ j \in \delta^{+}_{L}(i)}}{u_{i,j } } \geq \sum_{k \in K}\sum_{j \in  \delta^{-}(i) }{x^k_{ji}}                                                                                       & \hspace{-20mm} \forall i \in \mathcal{L}                                                         \\
+    \label{mod:c24}        & \sum_{k \in K}\sum_{j \in \mathcal{D}_o}{q^k_j} = q_o                                                                                                                                                                                                                                  & \hspace{-20mm}  \forall o \in \mathcal{O}                                                        \\
+    \label{mod:c240}       & q^k_j \leq \sum_{i \in  \delta^{-}(j)}{Q^k x^k_{ij}}                                                                                                                                                                                                                                   & \hspace{-20mm}  \forall j \in \mathcal{D}, k \in K                                               \\
+    \label{mod:c25}        & \sum_{k \in K}\sum_{j \in \delta^{+}(i)}{x^{k}_{ij} \leq 1}                                                                                                                                                                                                                            & i \in \mathcal{L} \cup \mathcal{D}                                                               \\
+    \label{mod:c26}        & \sum_{k \in K}\sum_{j \in \delta^{+}(i)} {x^{k}_{ij} } =  \sum_{k \in K}\sum_{j \in \delta^{-}(i)}{x^{k}_{ji} }                                                                                                                                                                        & i \in \mathcal{L} \cup \mathcal{D}                                                               \\
+    % \label{mod:c27}        & \sum_{k \in K}  \sum_{i \in \mathcal{D}_c} \sum_{j \in \delta^{-}(i) }  {x^k_{ji}} \leq M\sigma_{c, b}     & \forall c \in \mathcal{C}, b \in \mathcal{B}                                                     \\
+    % \label{mod:c28}        & \sum_{b \in \mathcal{B}} \sigma_{c, b} \leq 1    & \hspace{-20mm}\forall c \in \mathcal{C}, b \in \mathcal{B}                                       \\
+    \label{mod:c29}        & w^1_k \geq  M_T + H_k - v_{e_k}                                                                                                                                                                                                                                                        & \hspace{-20mm} \forall k \in K                                                                   \\
+    \label{mod:c30}        & w^2_k \geq (v_{e_k} - H_k) - N_T                                                                                                                                                                                                                                                       & \hspace{-20mm} \forall k \in K                                                                   \\
+    \label{mod:c31}        & w_{e_k} \leq H_k + O_T                                                                                                                                                                                                                                                                 & \hspace{-00mm}  k \in K \hspace{0mm}                                                             \\
+    \label{mod:c32}        & 0 \leq q^k_j \leq Q^k                                                                                                                                                                                                                                                                  & \hspace{-20mm}  j \in \mathcal{D}, k \in K                                                       \\
+    \label{mod:c33}        & x^k_{ij} \in \{0,1\}                                                                                                                                                                                                                                                                   & \hspace{-20mm}  (i,j) \in A , k \in K  \hspace{0mm}                                              \\
+    \label{mod:c34}        & u_{ij} \in \{0,1\}                                                                                                                                                                                                                                                                     & \hspace{-20mm}  (i,j) \in A^D , k \in K  \hspace{0mm}                                            \\
+    % \label{mod:c35}        & \sigma_{ib} \in \{0,1\}    & \hspace{-20mm}  i \in \mathcal{C}, b \in \mathcal{B}                                             \\
+    \label{mod:c36}        & y_o \in \{0,1\}                                                                                                                                                                                                                                                                        & \hspace{-20mm}  o \in \mathcal{O}                                                                \\
+    \label{mod:c37}        & v_i \geq 0,  w_i \geq 0                                                                                                                                                                                                                                                                & \hspace{-20mm}  i \in V                                                                          \\
+    \label{mod:c38}        & w^1_{k} \geq 0,  w^2_k \geq 0                                                                                                                                                                                                                                                          & \hspace{-20mm}  i \in V                                                                          \\
+    \label{mod:cend}       & g_i \geq 0                                                                                                                                                                                                                                                                             & \hspace{-20mm}  i \in \mathcal{C}.
 \end{alignat}
 
-$\beta_1$ to $\beta_4$ are the penalty coefficients of each component of the objective function (\ref{mod:obj}). Constraints (\ref{mod:c1}) and (\ref{mod:c2}) state that driver $k$ leaves his start node exactly once a day and returns to his end node after completing his last unloading operation of the day. Constraints (\ref{mod:c3}) and (\ref{mod:c4}) set a driver to take some time after loading or unloading to adjust the concrete or clean the truck before moving on to the next node. The duration of the loading operation depends on the plant's loading rate and the amount $q^k_j$ of RMC loaded (\ref{mod:c5}). Similarly, the unloading service depends on the site's rate and $q^k_j$ (\ref{mod:c6}). Unloading operations must end at most $\Delta$ minutes after loading begins (\ref{mod:c7}). 
+$\beta_1$ to $\beta_4$ are the penalty coefficients of each component of the objective function (\ref{mod:obj}). Constraints (\ref{mod:c1}) and (\ref{mod:c2}) state that driver $k$ leaves his start node exactly once a day and returns to his end node. A driver cannot serve a node before the start of his shift with constraints (\ref{mod:c03}). Constraints (\ref{mod:c3}) and (\ref{mod:c4}) set a driver to take some time after loading or unloading to adjust the concrete or clean the truck before moving on to the next node. The duration of the loading operation depends on the plant's loading rate and the amount $q^k_j$ of RMC loaded (\ref{mod:c5}). Similarly, the unloading service depends on the site's rate and $q^k_j$ (\ref{mod:c6}). Unloading operations must end at most $\Delta$ minutes after loading begins (\ref{mod:c7}).
 
 Constraints (\ref{mod:c8}) - - (\ref{mod:c10}) ensure that the first service of any customer $i$ must start at the due time $a_i$. This first service may be performed at the first delivery node of any order $\in O_i$, and one order must be completed before another is started. It also enforces the precedence constraints between the last delivery of an order and the first delivery of the following order.
-Constraints (\ref{mod:c11}) - - (\ref{mod:c15}) find the delivery sequence of all orders $\in \mathcal{O}_i$. Constraints (\ref{mod:c16}) - - (\ref{mod:c19}) prohibit two trucks serving consecutive deliveries of the same order from unloading at the same time and enforce a maximum time delay between them. Similarly, constraints (\ref{mod:c20}) - - (\ref{mod:c23}) ensure that two trucks cannot be loaded at the same time at a plant. Constraints (\ref{mod:c24}) require that the cumulative load of all concrete mixers serving an order must equal the required quantities. Constraints (\ref{mod:c25}) require that a driver can only visit a loading/delivery node once. Constraints (\ref{mod:c26}) are degree constraints. Constraints (\ref{mod:c27}) and (\ref{mod:c28}) require that all orders from customer $i$ must be loaded from the same plant. Constraints (\ref{mod:c29}--\ref{mod:c30}) calculate the difference between a driver's hours of service and the minimum and normal hours of service. Finally, constraints (\ref{mod:c31}) -- (\ref{mod:cend}) define the nature and bounds of the variables.
- 
+Constraints (\ref{mod:c11}) - - (\ref{mod:c15}) find the delivery sequence of all orders $\in \mathcal{O}_i$. Constraints (\ref{mod:c16}) - - (\ref{mod:c19}) prohibit two trucks serving consecutive deliveries of the same order from unloading at the same time and enforce a maximum time delay between them. Similarly, constraints (\ref{mod:c20}) - - (\ref{mod:c23}) ensure that two trucks cannot be loaded at the same time at a plant. Constraints (\ref{mod:c24}) require that the cumulative load of all concrete mixers serving an order must equal the required quantities, and (\ref{mod:c240}) bound a driver load.  Constraints (\ref{mod:c25}) require that a driver can only visit a loading/delivery node once. Constraints (\ref{mod:c26}) are degree constraints. Constraints (\ref{mod:c29}) - - (\ref{mod:c30}) calculate the difference between a driver's hours of service and the minimum and normal hours of service. Finally, constraints (\ref{mod:c31}) - - (\ref{mod:cend}) define the nature and bounds of the variables.
+
 % \paragraph*{}
-Let us consider the solution of a small instance of our problem shown in Figures~\ref{fig_Example} and \ref{fig:ganttExample}. Two batching plants $B_1$ and $B_2$ with three drivers serve two construction sites. Customer $C_1$ requests one order of $q^1_1=12$ m$^3$. Customer $C_2$ requests three orders of $q^1_2=3$, $q^2_2=11$, and $q^3_2=1$ m$^3$ of three different types of concrete. $B_1$ has two drivers ($D_1$, $D_2$) using concrete mixers of capacity 8 m$^3$, and $B_2$ has $D_3$ with a capacity 12 m$^3$. Figure~\ref{fig_Example} shows the flow of concrete mixers flow in the network. We schedule $D_1$ and $D_2$ to deliver 8 and 4 m$^3$ to $C_1$, respectively. We select $o^2_2$ as the first order of $C_2$. $D_3$ travels to $B_1$ to load $q^2_2$, then visits $C_2$ before returning to his home plant. Meanwhile, after their first trip,  $D_1$ and $D_2$ deliver the remaining orders of $C_2$.
+Let us consider the solution of a small instance of our problem shown in Figures~\ref{fig_Example} and \ref{fig:ganttExample}. Two batch plants $B_1$ and $B_2$ with three drivers serve two construction sites. Customer $C_1$ requests one order of $q^1_1=12$ m$^3$. Customer $C_2$ requests three orders of $q^1_2=3$, $q^2_2=11$, and $q^3_2=1$ m$^3$ of three different types of concrete. $B_1$ has two drivers ($D_1$, $D_2$) using concrete mixers of capacity 8 m$^3$, and $B_2$ has $D_3$ with a capacity 12 m$^3$. Figure~\ref{fig_Example} shows the flow of concrete mixers flow in the network. We schedule $D_1$ and $D_2$ to deliver 8 and 4 m$^3$ to $C_1$, respectively. We select $o^2_2$ as the first order of $C_2$. $D_3$ travels to $B_1$ to load $q^2_2$, then visits $C_2$ before returning to his home plant. Meanwhile, after their first trip,  $D_1$ and $D_2$ deliver the remaining orders of $C_2$.
 
 Figure~\ref{fig:ganttExample} shows the sequence of loading and unloading operations. The first deliveries of $C_1$ and $C_2$ are timely and there is no gap between the two deliveries received by $C_1$. There is a delay between the end of the first delivery and the start of the second delivery of $C_2$, however, it is less than the maximal time delay of 20 minutes defined for this example.
 
 
-\begin{figure}[!ht]
+\begin{figure}[H]
     % \caption{Solution of an instance with two plants, two construction sites, four orders, and three drivers.}
     \vspace*{-10mm}
 
     \centering
     \begin{adjustbox}{max width=0.85\textwidth}
-      
-  \begin{tikzpicture}
-    \SetUpEdge[lw = 1.2pt,
-        labelcolor = white,
-        % labelstyle = {draw}
-    ]
-    \tikzstyle{LabelStyle}=[fill=white]
 
-    \SetGraphUnit{5}
-    \GraphInit[vstyle=Normal]
-    \tikzset{VertexStyle/.style = {shape = circle,text = black,minimum size = 24 pt,draw = black}}
-    \Vertex[L={$B_1$}]{D1}
-    \tikzset{VertexStyle/.style = {shape = circle,text = black,minimum size = 10 pt,draw = blue}}
-    \tikzset{VertexStyle/.style = {shape = rectangle,text = black,minimum size = 10 pt,draw = blue}}
-    \Vertex[x=2,y=5,L={11 m$^3$}]{C21}
-    \EA[unit=2.0,L={3 m$^3$}](C21){C22}
-    \EA[unit=2.0,L={1 m$^3$}](C22){C23}
-    \tikzset{VertexStyle/.style = {shape = rectangle,text = black,minimum size = 10 pt,draw = blue}}
-    \SOEA[L={$12m^3$}](D1){C1}
-    \tikzset{VertexStyle/.style = {shape = circle,text = black,minimum size = 24 pt,draw = black}}
-    \SOEA[L={$B_2$}](C23){D2}
-    % %  \SetVertexArt
-    \tikzset{VertexStyle/.style = {shape = circle,text = black,minimum size = 10 pt}}
-    \SO[unit=0.8,L={$\tau^u_1=$30 $m^3/h$, 07:00 AM}](C1){tau1}
-    \SO[unit=0.5,L={\textbf{$C_1$} }](tau1){o1}
-    
-    \NO[unit=0.9,L={\textbf{$C_2$}}](C22){C2}
-    \SOEA[unit=0.4,L={\textcolor{white}{  } $\tau^u_2=30$ $m^3/h$, 07:25 AM}](C2){tau2}
+        \begin{tikzpicture}
+            \SetUpEdge[lw = 1.2pt,
+                labelcolor = white,
+                % labelstyle = {draw}
+            ]
+            \tikzstyle{LabelStyle}=[fill=white]
 
-    \tikzset{VertexStyle/.style = {shape = rectangle,text = black,minimum size = 10 pt}}
-    \SOWE[unit=1.,L={$\tau^l_1=$ 70 $m^3/h$}](D1){cap1}
-    \SO[unit=0.5,L={\textbf{\textcolor{brown}{D1: 8 m$^3$}}}](cap1){driver11}
-    \SO[unit=0.5,L={\textbf{\textcolor{orange}{D2: 8 m$^3$}}}](driver11){driver12}
-    \SO[unit=1,L={$\tau^l_2= 87$ $m^3/h$}](D2){cap2}
-    \SO[unit=0.5,L={\textbf{\textcolor{blue}{D3: 12 m$^3$}}}](cap2){driver2}
-    %%%%%%% Edge
-    \tikzset{EdgeStyle/.style={->}}
-    \Edge[](C21)(C22)
-    \Edge[](C22)(C23)
-    \tikzset{EdgeStyle/.style={<->,bend left=0}}
-    \Edge[label=$22$](D1)(C1)
-    \tikzset{EdgeStyle/.style={<->}}
-    \Edge[label=$19$](D2)(C23)
-    \Edge[label=$34$](D2)(C1)
-    \tikzset{EdgeStyle/.style={->}}
-    \tikzset{EdgeStyle/.append style = {bend left = 8}}
-    \Edge[label=$17$](D1)(D2)
-    \Edge[label=$18$](D2)(D1)
-    \tikzset{EdgeStyle/.append style = {bend left = 65}}
-    \Edge[label=$6$](D1)(C21)
-    \tikzset{EdgeStyle/.append style = {bend right = 50}}
-    \Edge[label=$5$](C21)(D1)
-    \tikzset{EdgeStyle/.style = {->,bend left = 20,draw=brown}}
-    \Edge[label=$D1$](D1)(C1)
-    \Edge[label=$D1$](C1)(D1)
-    \tikzset{EdgeStyle/.style = {->,bend left = 37,draw=orange}}
-    \Edge[label=$D2$](C1)(D1)
-    \Edge[label=$D2$](D1)(C1)
+            \SetGraphUnit{5}
+            \GraphInit[vstyle=Normal]
+            \tikzset{VertexStyle/.style = {shape = circle,text = black,minimum size = 24 pt,draw = black}}
+            \Vertex[L={$B_1$}]{D1}
+            \tikzset{VertexStyle/.style = {shape = circle,text = black,minimum size = 10 pt,draw = blue}}
+            \tikzset{VertexStyle/.style = {shape = rectangle,text = black,minimum size = 10 pt,draw = blue}}
+            \Vertex[x=2,y=5,L={11 m$^3$}]{C21}
+            \EA[unit=2.0,L={3 m$^3$}](C21){C22}
+            \EA[unit=2.0,L={1 m$^3$}](C22){C23}
+            \tikzset{VertexStyle/.style = {shape = rectangle,text = black,minimum size = 10 pt,draw = blue}}
+            \SOEA[L={$12m^3$}](D1){C1}
+            \tikzset{VertexStyle/.style = {shape = circle,text = black,minimum size = 24 pt,draw = black}}
+            \SOEA[L={$B_2$}](C23){D2}
+            % %  \SetVertexArt
+            \tikzset{VertexStyle/.style = {shape = circle,text = black,minimum size = 10 pt}}
+            \SO[unit=0.8,L={$\tau^u_1=$30 $m^3/h$, 07:00 AM}](C1){tau1}
+            \SO[unit=0.5,L={\textbf{$C_1$} }](tau1){o1}
 
-    \tikzset{EdgeStyle/.style = {->,bend left= 20,draw=brown}}
-    \Edge[label=$D1$](D1)(C22)
-    \tikzset{EdgeStyle/.style = {->,bend left= 0,draw=brown}}
-    \Edge[label=$D1$](C22)(D1)
-    
-    \tikzset{EdgeStyle/.style = {->,bend left = 0,draw=orange}}
-    \Edge[label=$D2$](C23)(D1)
-    \tikzset{EdgeStyle/.style = {->,bend left = -15,draw=orange}}
-    \Edge[label=$D2$](D1)(C23)
-    
+            \NO[unit=0.9,L={\textbf{$C_2$}}](C22){C2}
+            \SOEA[unit=0.4,L={\textcolor{white}{  } $\tau^u_2=30$ $m^3/h$, 07:25 AM}](C2){tau2}
 
-    \tikzset{EdgeStyle/.style = {->,,draw=blue}}
-    \Edge[label=$D3$](D2)(D1)
-    \tikzset{EdgeStyle/.style = {->,bend left = 15,draw=blue}}
-    \Edge[label=$D3$](D1)(C21)
-    \tikzset{EdgeStyle/.style = {->,bend left = 80,draw=blue}}
-    \Edge[label=$D3$](C21)(D2)
-    \end{tikzpicture}
+            \tikzset{VertexStyle/.style = {shape = rectangle,text = black,minimum size = 10 pt}}
+            \SOWE[unit=1.,L={$\tau^l_1=$ 70 $m^3/h$}](D1){cap1}
+            \SO[unit=0.5,L={\textbf{\textcolor{brown}{D1: 8 m$^3$}}}](cap1){driver11}
+            \SO[unit=0.5,L={\textbf{\textcolor{orange}{D2: 8 m$^3$}}}](driver11){driver12}
+            \SO[unit=1,L={$\tau^l_2= 87$ $m^3/h$}](D2){cap2}
+            \SO[unit=0.5,L={\textbf{\textcolor{blue}{D3: 12 m$^3$}}}](cap2){driver2}
+            %%%%%%% Edge
+            \tikzset{EdgeStyle/.style={->}}
+            \Edge[](C21)(C22)
+            \Edge[](C22)(C23)
+            \tikzset{EdgeStyle/.style={<->,bend left=0}}
+            \Edge[label=$22$](D1)(C1)
+            \tikzset{EdgeStyle/.style={<->}}
+            \Edge[label=$19$](D2)(C23)
+            \Edge[label=$34$](D2)(C1)
+            \tikzset{EdgeStyle/.style={->}}
+            \tikzset{EdgeStyle/.append style = {bend left = 8}}
+            \Edge[label=$17$](D1)(D2)
+            \Edge[label=$18$](D2)(D1)
+            \tikzset{EdgeStyle/.append style = {bend left = 65}}
+            \Edge[label=$6$](D1)(C21)
+            \tikzset{EdgeStyle/.append style = {bend right = 50}}
+            \Edge[label=$5$](C21)(D1)
+            \tikzset{EdgeStyle/.style = {->,bend left = 20,draw=brown}}
+            \Edge[label=$D1$](D1)(C1)
+            \Edge[label=$D1$](C1)(D1)
+            \tikzset{EdgeStyle/.style = {->,bend left = 37,draw=orange}}
+            \Edge[label=$D2$](C1)(D1)
+            \Edge[label=$D2$](D1)(C1)
+
+            \tikzset{EdgeStyle/.style = {->,bend left= 20,draw=brown}}
+            \Edge[label=$D1$](D1)(C22)
+            \tikzset{EdgeStyle/.style = {->,bend left= 0,draw=brown}}
+            \Edge[label=$D1$](C22)(D1)
+
+            \tikzset{EdgeStyle/.style = {->,bend left = 0,draw=orange}}
+            \Edge[label=$D2$](C23)(D1)
+            \tikzset{EdgeStyle/.style = {->,bend left = -15,draw=orange}}
+            \Edge[label=$D2$](D1)(C23)
+
+
+            \tikzset{EdgeStyle/.style = {->,,draw=blue}}
+            \Edge[label=$D3$](D2)(D1)
+            \tikzset{EdgeStyle/.style = {->,bend left = 15,draw=blue}}
+            \Edge[label=$D3$](D1)(C21)
+            \tikzset{EdgeStyle/.style = {->,bend left = 80,draw=blue}}
+            \Edge[label=$D3$](C21)(D2)
+        \end{tikzpicture}
     \end{adjustbox}
     \vspace*{-10mm}
     % }
@@ -389,9 +392,9 @@ Figure~\ref{fig:ganttExample} shows the sequence of loading and unloading operat
 
 \end{figure}
 
-\begin{figure}[!htb]
+\begin{figure}[H]
     \centering
-    
+
     \vspace*{-0mm}
     \begin{adjustbox}{max width=0.85\textwidth}
         \begin{tikzpicture}[-latex]
@@ -501,232 +504,305 @@ Figure~\ref{fig:ganttExample} shows the sequence of loading and unloading operat
 \section{Constructive heuristics and GRASP}
 \label{grasp_method}
 
-We now present the heuristic approach we implement to solve this variant of the Concrete Delivery Problem. Our method consists of constructing feasible solutions to the CDP with randomized heuristics and iteratively invoking these heuristics in the GRASP metaheuristic.
-
-In this section, we represent the scheduling of a delivery node $d$ as a pair of loading ($L_{d}$) and unloading ($U_{d}$) tasks. $L_{d} = \left(b,k,q_d,v_b\right) $ indicates that driver $k$ starts loading $q_d$ $m^3$ of RMC at plant $b$ at time $v_b$. $U_{d} = \left(k,v_d, w_d\right)$ indicates that driver $k$ is serving $d$ between $v_d$ and $w_d$. We then call a solution $ S =\left\lbrace \cup _{1 \leq j \leq n_o} (L_{d^j_{o}}, U_{d^j_{o}}), \forall o \in \mathcal{O} \right\rbrace$ the set of all loading and unloading tasks performed on a given day.
+In this section, we present the heuristic approach we implement to solve this variant of the Concrete Delivery Problem. Our method consists of constructing feasible solutions to the CDP with randomized greedy heuristics and iteratively invoking these heuristics in the GRASP metaheuristic. From now on, we represent the scheduling of a delivery node $d$ as the pair  ($L^k_{d}$,$U^k_{d}$) of loading  and unloading  tasks. $L^k_{d} = \left(b,q_d,v_b,w_b\right)$ indicates that driver $k$ starts loading $q_d$ $m^3$ of RMC at plant $b$ between $\left[v_b,w_b\right]$. $U^k_{d} = \left(k,v_d, w_d\right)$ indicates that driver $k$ serves $d$ between $v_d$ and $w_d$. We then call a solution $ S =\left\lbrace \cup _{1 \leq j \leq |\mathcal{D}|} (L^k_{j}, U^k_{j}), k \in K \right\rbrace$ the set of all loading and unloading tasks performed on a given day.
 
 \subsection{GRASP algorithm }
 
-The GRASP algorithm is an iterative suite of constructive and local search algorithms introduced by \cite{feo1995greedy}. A feasible solution $S$ is constructed using a greedy randomized algorithm at each iteration. Then a local search algorithm explores the neighborhood of $S$ to find a local optimum. The pseudocode of the algorithm~\ref{alg_grasp} shows that the procedure returns the best overall solution (for a minimization problem) after some stopping conditions (time limit or a maximum number of iterations) are met. In our implementation, we introduce at line 13 an additional local search step using the solutions found by all heuristics in the current iteration.
+The GRASP algorithm, proposed by \cite{feo1989probabilistic}, is a two-phase iterative suite consisting of constructive and local search algorithms. In the construction phase, a feasible solution $S$ is generated using a greedy randomized algorithm. Then, a local search algorithm explores the neighborhood of $S$ to identify a local optimum. Algorithm~\ref{alg_grasp} outlines the pseudocode of the GRASP algorithm. To avoid redundant computations, a hash table $H$ is used to ensure that the local search is not applied multiple times to the same solution.  The procedure stops and returns the best overall solution when certain stopping conditions, such as reaching a time limit or a maximum number of iterations, are met. In our implementation, we also add a path relinking procedure that uses information about previous solutions to improve the search process.
 
-{\setstretch{1.0}
-    {\small
-        \begin{algorithm}[hpt]
-            \caption{Pseudo-code of the GRASP algorithm }
-            \label{alg_grasp}
+    {\setstretch{1.0}
+        {\small
+            \begin{algorithm}[hpt]
+                \caption{Pseudo-code of the GRASP algorithm }
+                \label{alg_grasp}
+                \DontPrintSemicolon
+                \LinesNumbered
+                \setcounter{AlgoLine}{0}
+                % \KwIn{ \textit{H}: List of constructive greedy randomized heuristics }
+                \KwIn{ $\phi$: number of iterations before path relinking }
+                $S^* \leftarrow \emptyset$    \hspace{2mm} $T \leftarrow \emptyset$       $Cost(S^*) \leftarrow \infty$
+
+                Initialize an empty hash table $H$
+
+                $counter \leftarrow  0$
+
+                \While{Conditions not met}{
+
+                    $S \leftarrow GreedyRandomizedHeuristic()$
+
+                    \uIf{ $S \notin H$}{
+                        $S \leftarrow LocalSearch(S)$
+
+                        Add $S$ to $H$
+                    }
+
+                    $T \leftarrow T \cup \{S\}$
+
+
+                    \uIf{$Cost(S)< Cost(S^*)$}{
+                        $S^* \leftarrow S$
+                    }
+
+                    \uIf{$counter \text{ } mod \text{ } \phi == 0$}{
+                        $S^* \leftarrow PathRelinking(T)$
+
+                        $T \leftarrow \emptyset$
+                    }
+
+                    $counter \leftarrow counter + 1$
+
+                }
+
+                \KwRet{$S^{*}$}
+            \end{algorithm}}
+    }
+
+For the construction phase, we have developed two greedy randomized heuristics. The first heuristic, called customer-based insertion, schedules customers one at a time. On the other hand, the second heuristic, called delivery-based insertion, does not necessarily complete the scheduling of one customer before starting to plan another customer's schedule.
+% The greedy aspect of GRASP is the creation of the set $RCL$, the probabilistic aspect is the random selection in $RCL$, and the adaptive aspect is the updating of $CL$ and the re-evaluation of the incremental costs.
+
+\subsection{Customer-based insertion heuristic}
+
+The customer-based insertion heuristic builds a solution from scratch by scheduling all of a customer's orders one at a time. As shown in Algorithm~\ref{alg:greedyCustIns}, for each customer, we randomly select the first order to schedule. To schedule an order, we iterate over each of its delivery nodes, find a feasible pair of task, and add it to the current solution. For a delivery node $d$, we check if the list of operations $M[d]$ is empty. If it is, for each available driver $k$ we simulate the loading and unloading operations $(L^k_d,U^k_d)$ with the procedure $SimulateVisit$, and if $k$ can serve $d$, we add $k$ to a candidate list $CL$ and $(L^k_d,U^k_d)$ to $M[d]$.
+
+The procedure $SimulateVisit$ takes as parameters a partial solution, a delivery node $d$, a driver $k$, and a numeric value $\lambda$. Its goal is to find the earliest time at which the delivery must start at $d$ and the best position within the route of $k$. When planning the visit of customer $i$ to node $d$ of order $o$ with driver $k$, we first compute his expected delivery time $v_d$ as follows:
+
+$ v_d = \left\{
+    \begin{array}{rl}
+        a_i + \lambda                                                   & \text{for the first visited node} \\
+        w_j + rand(\lambda, \gamma^1), j \in \mathcal{D}_o,  u_{jd}=1   &                                   \\
+        w_j + rand(\lambda, \gamma^2), j \notin \mathcal{D}_o, u_{jd}=1 &
+    \end{array}
+    \right.$
+
+Then we determine the start loading time $v_l$ of the corresponding dock node $l$ by subtracting the travel time, adjustment time, and loading duration from $v_d$. Starting from $v_l$ we check when $k$ will be available at an idle loading bay and adjust $w_l$ accordingly. Changing $w_l$ can cause the cold-joint constraints to be violated, especially for a customer's subsequent deliveries, and thus make the schedule infeasible. Once we have $v_l$, we can check for the best position to insert the visit of $d$ into the route of $k$.
+
+We extract from $CL$ the restricted candidate list ($RCL$) of drivers for whom the cost of visiting $d$ falls within a specified range based on the parameter $\theta$. If $RCL$ is empty and a visit to $d$ cannot be scheduled due to cold-joint constraints, we use the $DelayPreviousDelivery$ procedure to determine if there is a previous delivery of the same order that we can delay the start of service to make a visit to $d$ feasible. This procedure returns the index of the node and $\lambda$, which is the value of the delay. $\lambda$ is also the same parameter given to $SimulateVisit$. If there is such a previous node, we backtrack to it and restart the scheduling.
+
+If $RCL$ is not empty, we select a random driver from it, insert its corresponding load and unload tasks into $S$, and update the remaining quantities for the order and customer demands. The algorithm returns at the end the constructed solution $S$.
+
+
+    {\setstretch{1}
+        %  {\small
+        \begin{algorithm}[htbp]
+            \caption{Customer-Based insertion algorithm }
+            \label{alg:greedyCustIns}
             \DontPrintSemicolon
             \LinesNumbered
             \setcounter{AlgoLine}{0}
-            \KwIn{ \textit{H}: List of constructive randomized heuristics }
-            $S^* \leftarrow \emptyset$    \hspace{2mm} $T \leftarrow \emptyset$       $Cost(S^*) \leftarrow \infty$
+            \KwIn{  $S$: empty solution $S$, $K$: vehicles set \hspace{15mm} \\$\Pi$: custom sorted customers list }
 
-            \While{Conditions not met}{
-                $Cost(S') \leftarrow \infty$
-                
-                $T \leftarrow \emptyset$ 
-                
-                \ForEach { $h \in H$ }{
+            $M \leftarrow \emptyset $ \tcp{List of pair of loading and unloading tasks for all delivery nodes}
+            $CL \leftarrow \emptyset$ \tcp{Candidate driver list all delivery nodes}
 
-                    $S \leftarrow h(S)$
+            \ForEach(customer $i \in \Pi$){}{
 
-                    $S \leftarrow LocalSearch(S)$
-                    
-                    $T \leftarrow T \cup \{S\}$
+            Shuffle $ \mathcal{O}_i$
 
-                    \uIf{$Cost(S)< Cost(S')$}{
-                        $S' \leftarrow S$
+            \ForEach{order $o_1 \in \mathcal{O}_i$}{
 
-                        \uIf{$Cost(S')< Cost(S^*)$}{
-                            $S^* \leftarrow S'$
-                        }
-                    }
-                    
-                }
-                $S^* \leftarrow LocalSearch(T)$
+            $delay \leftarrow 0$
+
+            \For{ $j=0$ \KwTo $n^{max}_{o_1}-1$    }{
+
+            Delivery $d =\mathcal{D}^j_{o_1}$
+
+            \uIf{$M[d] == \emptyset $}{
+
+            \ForEach{ $k \in K$  }{
+
+            $(L^k_{d}$, $U^k_{d})$ $\leftarrow $ SimulateVisit($S$,$d$,$k$,$\lambda$)
+
+            $Cost(d,k)$ $\leftarrow $ Cost of ($L^k_{d}$, $U^k_{d}$)
+
+            Add $(L^k_{d}, U^k_{d}$) to $M[d]$
+
+            $CL[d] \leftarrow \{k\}$
+            }
             }
 
-            \KwRet{$S^{*}$}
-        \end{algorithm}}
-}
- 
-\subsection{Greedy randomized insertion algorithm}
+            $C_{min} \leftarrow min\left\lbrace C(x), \text{ } x \in M[d] \right\rbrace $, $C_{max} \leftarrow max\left\lbrace C(x), \text{ } x \in M[d] \right\rbrace $
 
-As mentioned in \cite{resende2019greedy}, the general outline of a greedy randomized algorithm used in the GRASP framework works as described in Algorithm~\ref{alg:greedyIns}. Let's consider the set $CL$ of candidate delivery nodes that have not yet been scheduled. We first initialize $CL$ with the first delivery node of a randomly selected order, for each customer.
+            $RCL \leftarrow \left\lbrace k \in CL[d], \text{ } C(d,k) \leq C_{min} + \theta (C_{max}-C_{min}) \right\rbrace $
 
-At each iteration, we create the set $CL'$ with elements of $CL$ from a given neighborhood. We then evaluate the increase in the cost function of incorporating each $d \in CL'$ into the incumbent solution $S$ and construct a restricted candidate list $RCL$ consisting of nodes whose incremental cost is less than a given threshold. From $RCL$, we randomly select the next delivery node to be incorporated into the incumbent solution and determine its loading and unloading schedule using the procedure described in Algorithm~\ref{alg_ScheduleTask}. Next, we update $S$ and the remaining order and customer quantities. Then we add the next candidate delivery node to $CL$. If an order $o$ is not yet fulfilled after visiting $d^j_{o}$, the candidate is the next delivery node $d^{j+1}_{o}$. Otherwise, if the customer has remaining orders, the candidate is the first delivery node $d^{0}_{o'}$ of another randomly selected order $o'$. Note that for our problem, not all unscheduled delivery nodes are candidates at each iteration, since deliveries of the same order are ordered, any order of a customer can be chosen and must be satisfied before switching to another order, and the number of visits to a customer is not known in advance. 
 
-Consider two customers whose services are required to start at the same time or in the same time slot. We could either finish scheduling one before the other, or schedule both at the same time. Obviously, each of these choices would result in a different solution. Similarly, in some cases, it would be better to schedule a customer that has a high demand and therefore requires more resources first. That's why we added the filtering part to impose some criteria on the algorithm. We can limit $CL'$ to delivery nodes with the same demand, the same due date, or from the same customer. We can also decide if we want to schedule customers with the highest (or lowest) demand or the earliest (latest) due time first. In fact, this helps us to intensify the search in specific neighborhoods of the solution. To diversify the search, we simply remove the filter component. The greedy aspect of GRASP is the creation of the set $RCL$, the probabilistic aspect is the random selection in $RCL$, and the adaptive aspect is the updating of $CL$ and the re-evaluation of the incremental costs. 
+            \uIf{$RCL == \emptyset $}{
 
-%Also, using $CL'$ helps reduce the complexity of the algorithm by reducing the number of nodes to evaluate.  %We thus obtain four greedy randomized insertion heuristics for our GRASP framework.
+                $(ind,delay)$ = $DelayPreviousDelivery$($S$,$d$)
 
- {\setstretch{1}
-%  {\small
-     \begin{algorithm}[hbt]         
-         \caption{Greedy randomized insertion algorithm }
-         \label{alg:greedyIns}
-         \DontPrintSemicolon
-         \LinesNumbered
-         \setcounter{AlgoLine}{0}
-         \KwIn{  $S$: empty solution $S$}
+                \uIf{j is none}{
 
-         $CL \leftarrow \emptyset$
+                    break \tcp{continue with next customer}
+                }
+                $j \leftarrow ind$, $\lambda \leftarrow delay$
 
-         \ForEach(customer i){}{
-                Select a random order $o_1 \in \mathcal{O}_i$
+                continue \tcp{backtrack to $ind$ position }
 
-                $CL \leftarrow CL \cup \{d^0_{o_1}\}$
-        }
+            }
+            Select from $RCL$ a random driver $k$ to visit $d$ with load $q^k_d$
 
-        
-         \While{$CL \neq \emptyset$}{
+            $M[d]\leftarrow M[d] \backslash (L^k_{d}, U^k_{d})$, $CL[d]\leftarrow CL[d] \backslash \{k\} $
+
+            $S \leftarrow S \cup (L^k_{d}$, $U^k_{d})  $
+
+            $q_i \leftarrow q_i-q^k_{d}$;  $q_{o_1} \leftarrow q_{o_1}-q^k_{d}$
+
+            $\lambda \leftarrow 0$
+
+            \uIf {$q_{o_1} \neq 0$ }{
+                continue
+
+            }
+            \uElseIf{ $q_i \neq 0$}{
+                break
+
+            }
+            }
+            }
+            }
+
+            \KwRet{$S$}
+        \end{algorithm}
+        %  }
+    }
+
+Consider the scenario where two customers require their services to start at the same time or within the same time window. In this case, we can either finish scheduling one customer before the other, or schedule both simultaneously.  If there are sufficient resources available, either option would be feasible. However, when resources are limited, the customer-based insertion heuristic may leave some customers unscheduled. To address this limitation, we introduce the delivery-based insertion heuristic.
+
+\subsection{Delivery-based insertion heuristic}
+
+The delivery-based insertion heuristic constructs a feasible solution from scratch by scheduling a delivery node one at a time. The pseudocode for this heuristic is outlined in Algorithm~\ref{alg:delbasedIns}. It starts with an empty solution $S$ and initially fills $CL$ with the first delivery of a randomly selected order for each customer. Within each iteration of the $while$ loop, we filter $CL$ to obtain a reduced candidate list $CL'$ of deliveries from a given neighborhood. With this filtering, we can force the algorithm to schedule nodes with certain criteria first, which could be nodes from customers with the same demand, due date, or geographic area. We can also decide whether to schedule customers with the highest (or lowest) demand or the earliest (latest) due date first.
+
+For each delivery $d$ in $CL'$, the algorithm determines the best available driver $k$ and adds the corresponding loading and unloading task $(L^k_d, U^k_d)$ to a list of tasks. This is done using the $SimulateVisit$ procedure described earlier. Next, the algorithm constructs a $RCL$ from the list of tasks. If it is empty, the algorithm proceeds to the next iteration. Otherwise, it randomly selects a pair of tasks from the RCL, inserts them into $S$, and updates the remaining order and customer quantities. If an order $o$ is not fulfilled after visiting $d^j_{o}$, we add its next delivery node $d^{j+1}_{o}$ to $CL$.  Otherwise, if the customer has remaining orders, we select the first delivery node $d^{0}_{o'}$ of another randomly selected order $o'$ and add it to $CL$.
+
+    % The greedy aspect of GRASP is the creation of the set $RCL$, the probabilistic aspect is the random selection in $RCL$, and the adaptive aspect is the updating of $CL$ and the re-evaluation of the incremental costs.
+
+    {\setstretch{1}
+        %  {\small
+        \begin{algorithm}[H]
+            \caption{Delivery-based insertion algorithm }
+            \label{alg:delbasedIns}
+            \DontPrintSemicolon
+            \LinesNumbered
+            \setcounter{AlgoLine}{0}
+            \KwIn{  $S$: empty solution $S$}
+
+            $CL \leftarrow \emptyset$
+
+            \ForEach(customer i){}{
+
+            Select a random order $o_1 \in \mathcal{O}_i$
+
+            $CL \leftarrow CL \cup \{d^0_{o_1}\}$
+            }
+
+            \While{$CL \neq \emptyset$}{
 
             $CL' \leftarrow \text{Filter (CL)} $
 
+            $Tasks \leftarrow \emptyset $ \tcp{List of loading and unloading tasks}
+
             \ForEach( $d \in CL'$){}{
-            
-            $C(d) \leftarrow$ incremental cost of inserting $d$
+
+                % $C(d) \leftarrow$ incremental cost of inserting $d$
+
+                $Tasks \leftarrow (L^k_d,U^k_d)$ \tcp{$k$ is the best available driver to visit $d$}
 
             }
-            $C_{min} \leftarrow min\left\lbrace C(d), \text{ } d \in CL' \right\rbrace $, $C_{max} \leftarrow max\left\lbrace C(d), \text{ } d \in CL' \right\rbrace $
-            
-            $RCL \leftarrow \left\lbrace d \in CL', \text{ } C(d) \leq C_{min} + \alpha (C_{max}-C_{min}) \right\rbrace $
+            $C_{min} \leftarrow \min\left\lbrace Cost(x), \text{ } x \in Tasks \right\rbrace $, $C_{max} \leftarrow \max\left\lbrace Cost(x), \text{ } x \in Tasks \right\rbrace $
 
-            Select random delivery node $d^j_o$ of customer $i$ from $RCL$
+            $RCL \leftarrow \left\lbrace x \in Tasks, \text{ } Cost(x) \leq C_{min} + \theta (C_{max}-C_{min}) \right\rbrace $
 
-            $L_{d^j_o}$, $U_{d^j_o}$ = ScheduleTasks($d^j_o,S$)
 
-            $S \leftarrow S \cup (L_{d^j_o}$, $U_{d^j_o})  $
+            \uIf{$RCL \leftarrow \emptyset$}{
+                continue
+            }
 
-            $q_i \leftarrow q_i-q_{d^j_o}$;  $q_{o} \leftarrow q_{o}-q_{d^j_o}$
+            Select random operations $(L^k_{d^{j}_o},U^k_{d^{j}_o})$ of customer $i$ (order $o$) from $RCL$
+
+            $ S \leftarrow S \cup (L^k_{{d^{j}_o}}, U^k_{{d^{j}_o}})$
+
+
+            $q_i \leftarrow q_i-q^k_{d^{j}_o}$;  $q_{o} \leftarrow q_{o}-q^k_{d^{j}_o}$
 
             \uIf {$q_{o} \neq 0$ }{
 
-            $CL \leftarrow CL \cup \{d^{j+1}_{o}\}$ 
+                $CL \leftarrow CL \cup \{d^{j+1}_{o}\}$
 
             }
             \uElseIf{ $q_i \neq 0$}{
 
-            Select another order $o' \in \mathcal{O}_i$
+                Select another order $o' \in \mathcal{O}_i$
 
-            $CL \leftarrow CL \cup \{d^{0}_{o'}\} $
+                $CL \leftarrow CL \cup \{d^{0}_{o'}\} $
 
             }
 
             Update $CL$
-         }
-        \KwRet{$S$}
-     \end{algorithm}
-%  }
- }
-
- Algorithm~\ref{alg_ScheduleTask} takes as parameters a delivery node $d^j_{o}$ of the customer $i$ and a partial solution and looks for a plant and a driver available for loading and unloading operations. For each driver $k$ and plant $b$ we simulate the loading and unloading operations while checking the concrete lifespan and cold joint constraints, and the plant and driver availability. For each node, we first determine the start loading time $SLT$ by subtracting $t_{bi}$, $\alpha_b$, and the loading duration $LD^b_{d^j_{o}}$ to the expected delivery time $EDT$. $EDT$ is either the arrival time $a_i$ for the first delivery of a customer or the end of the unloading of the precedent delivery. At line $15$, we ensure with the procedure \textit{ FindDriverLoadingSlot} that the loading starts only if the driver is present at the depot. The presence of the driver does not guarantee that the loading dock is available, thus we use the procedure \textit{FindDepotLoadingSlot} at line $16$ to ensure that. Once we know $SLT$, we can easily deduce the arrival time ($AT$), start unloading time ($SUT$), driver waiting time ($W^k_{d^j_o}$), and client waiting time ($W_{d^j_o}$). We also keep track of the driver's work duration. The algorithm returns the best loading and unloading operations with the least cost.  
- We keep track of all timeslots for a plant when its loading dock is busy, and for a driver when he starts loading until the end of the unloading service. Within \textit{FindDepotLoadingSlot} (\textit{FindDriverLoadingSlot}), we iterate through the timeslots of a depot (driver) to schedule the current operation at a free timeslot. These allow us to insert the scheduling of a node between existing schedules.
- 
-{\setstretch{1}
-    {\small
-        % \vspace{-4mm}
-        \begin{algorithm}[H]
-            \caption{Schedule loading and unloading tasks }
-            \label{alg_ScheduleTask}
-            % \DontPrintSemicolon
-            \LinesNumbered
-            \setcounter{AlgoLine}{0}
-            \KwIn{Partial solution $S$, delivery node $d^j_{o}$}
-            
-            \SetKwFunction{FMain}{ScheduleTask}
-            \SetKwProg{Fn}{Function}{}{}
-            \Fn{\FMain{$d^j_{o},S$}}
-            {
-            % \SetNlSkip{2em}
-            % \SetAlgoNlRelativeSize{-1}
-            $n_i$: last node visited for the customer $i$ 
-
-            $\mathcal{LS}:$ Partial solutions list
-            
-            $bestSol$ Cost($bestSol)= +\infty$
-            
-            \ForEach(driver $k$){}
-            {
-                $n_k$: current location of $k$ (plant or delivery node)
-                
-                \ForEach(plant $b$){}
-                {
-                    
-                    \uIf(continue){$t_{bi} >= \delta $}{      }
-                    
-                    $EDT=SUT=a_i$
-
-                \uIf {$n_i \neq null$ }{
-
-                    $SUT= rand( EUt_{n_i}-\gamma/3,
-                        EUt_{n_i})$
-
-                    $EDT= EUT_{n_i}$
-
-                }
-
-            $q^j_{o}=min\{Q_k,q_o \}$ // $q_o$ \textit{remaining demand of order} $o$
-
-            $SLT$ = $EDT - t_{bi} - \alpha_b - LD^b_{d^j_{o}} $
-        
-            $SLT = FindDriverLoadingSlot(b, n_k, SLT, LD^b_{d^j_{o}})$
-                    
-            $SLT = FindDepotLoadingSlot(b, SLT, LD^b_{d^j_{o}})$
-
-            $AT =  SLT + LD^b_{d^j{o}} + \alpha_b + t_{bi}$
-
-            $SUT = max\{AT, EDT\}$
-
-            $W^k_{d^j_o}= max\{0,SUT - AT\}$
-
-            $W_{d^j_o}= max\{0,AT - EDT - \lambda_i\}$
-
-            $EUT = SUT + UD_{d^p_{ij}} $
-
-            $WT = WT_k + (EUT + \beta_k - SLT) + t_{n_kb} + t_{i,k}$
-
-            $TC = t_{n_k,b} + t_{b,i}$  %- t_{pos_k,k}$
-
-            \uIf{$Cost(bestSol) < Cost(S) + TC $}{
-                $bestSol = (j,b,k,SLT) \cup (j,b,k,SUT) $
-
-                $Cost(bestSol) = Cost(S) + TC$
             }
-            }
-            }
-            \KwRet{$bestSol$}
-            }
+            \KwRet{$S$}
         \end{algorithm}
+        %  }
     }
-}
-
 
 \subsection{ Local Search}
 
-    % We implement two local search operators for the CDP. The first one is the relocate move commonly used for vehicle routing problems. 
-    
-   % At the end of each iteration, we expect each customer to have a feasible schedule respecting all constraints. For each customer, we combine each scheduling in order to construct a new and possibly better solution.
-    
+We use four local search operators to improve the solution obtained after the construction phase.
+
+\subsubsection*{Swap load operator}
+
+The first operator exchanges loads between two deliveries of the same order. This move affects the loading operations and can potentially improve the number of scheduled orders.
+
+\subsubsection*{Swap driver operator}
+
+This operator investigates different driver assignments by swapping the drivers assigned to two delivery nodes in the current solution.
+
+\subsubsection*{Relocate load operator}
+
+This operator moves a delivery load that was originally split between two drivers to a single driver, if that driver's capacity allows.
+%   By consolidating the load into a single vehicle, we can potentially optimize the routing and reduce the total travel distance. This operator helps in better utilizing the available capacity of the vehicles and improving the overall efficiency of the solution.
+
+\subsubsection*{Remove and reschedule operator}
+
+This operator takes a customer $i$ not scheduled in the current solution. It then identifies a set $C$ of scheduled customer's with the same time slot as $i$. Elements of $C$ are removed and attempted to be rescheduled along with $i$.
+
+
+% The application of these local search operators is performed iteratively, allowing for multiple rounds of neighborhood exploration and solution refinement. Each operator is applied sequentially, and the resulting solution is evaluated to determine if an improvement has been achieved. The process continues until no further improvements can be made, indicating that a locally optimal solution has been reached.
+
+\subsection{Path relinking}
+
+After the construction and local search steps, it may happen that some customer orders cannot be scheduled within a solution. The goal of the path relinking procedure is to use each customer's scheduling information from existing solutions and combine them effectively to construct a solution that schedules all customers. This algorithm iterates through each element of a pool of solutions and attempts to insert the customer's deliveries into a newly constructed solution.
 
 \section{ Experimental results}
 \label{comp_exp}
 
-% In this section, we present and discuss the results obtained in the computational experiments of the GRASP heuristic described in Section~\ref{grasp_method}. The GRASP algorithm was coded in C++.
+In this section, we present and discuss the results obtained in the computational experiments of the GRASP heuristic described in Section~\ref{grasp_method}. The GRASP algorithm was coded in C++. We run our experiments on dataset extracted from data provid by our industrial partner.
 % and the branch-and-bound (B\&B) algorithm applied to the model described in Section~\ref{model}. The different algorithms were coded in C++ and run on a processor Intel $2.4$ GHz Gold $6148$ Skylake. For the exact method, we have used IBM Concert Technology and CPLEX $12.10$ as MIP solver. A single thread was used with a time limit of one hour.
 % No benchmark instances for the \dirp exist so we have generated the dataset for the experiments as follows.
 
 \subsection{Generation of instances}
-% Due to the lack of publicly available benchmark data for the CDP, two data sets are created. Both sets, as well as code to generate new instances, are available online at [17]. A summary of the instances is provided in Table 4.DataSetAcontains instances with 10–20 customers,and2–5 vehicles,whereasData Set B contains instances with up to 50 customers and 20 vehicles. The demands of customers are always divisible by 5 and are selected at random from the interval [10–75]. In a similar fashion, the capacities of the vehicles are selected between [10–25]. It is unrealistic to have a unique capacity for each vehicle, and therefore the number of different vehicles is bounded by the number of vehicle classes.Theprocessing time of a vehicle kAK is set proportional to its capacity, i.e. pk ¼qk for all kAK. The width of the time window of a customer i AC is computed by λiqi,whereλi is a scalar uniformly selected from the interval ½1:1; 2:1. Each instance has up to 4 production stations. The locations of the start and end depot, construction sites, and production depots, lay in the euclidean plane. The travel time between two locations equals the euclidean distance, rounded upwards. For simplicity, the start and end depot are the same. The distance between each station and the depot is uniformly selected from the interval [1–30]. Furthermore, for each customer, there exists a production station within a distance of [1–25].Finally,thetimelagγ is fixed to 5 for all deliveries.
-\subsection{Data sets}
+
+In order to evaluate the effectiveness and performance of our GRASP algorithm, we obtained a dataset from our partner that represents the delivery operations of 8 production centers for a period of 42 days.
+
+We generate 42 instances, each corresponding to a day operation. An instances has informations about the number of production centers, customers, orders, and drivers.
+For each depot, we have its ID and loading capacity. For a customer, we have the ID of the assigned depot, his demand, due time and number of orders. Then for each order we have his demand. For the driver, we have the capacity and shift start time.
+
+\begin{itemize}
+    \item   8 production centers located in greater Montreal
+    \item   42 days of delivery operations from Fall 2020
+    \item   From 7 to 139 orders each day
+    \item   Up to 137 drivers
+    \item   2 types of trucks of capacity 8 and 12 m$^3$
+\end{itemize}
 
 \subsubsection{ Results for the generated instances}
 
-
-
-\subsubsection{ Results for the real-world datasets}
 \subsubsection{ Results for the instances of \cite{kinable2014concrete}}
 
-We run our algorithm on the dataset provided in \cite{kinable2014concrete}.
+\cite{kinable2014concrete} provided a dataset for their variant of the $CDP$. as remainder, their objective is to maximize the total load served each day, and there is no time allocated for loading operations at a plant. While the original objective of the dataset may not align directly with our specific objective, we can still utilize it to analyze and compare the performance of our algorithm under different circumstances.
+
+The results are below.
+
+\subsubsection{Comparisons with the real operations}
+
 
 \section{Conclusion}
 \label{concl}
