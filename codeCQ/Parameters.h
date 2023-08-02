@@ -27,6 +27,7 @@ public:
     static int NORMAL_WORKING_TIME;
     static int ADJUSTMENT_DURATION;
     static int MAX_WORKING_TIME;
+    static int MAX_OVERTIME;
     static double UNLOADING_RATE;
     static std::mt19937 RANDOM_GEN;
     static int INTRA_ORDER_DELIVERY;

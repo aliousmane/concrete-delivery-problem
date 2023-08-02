@@ -58,8 +58,9 @@ bool RechercheLocale::RelocateStartLoad(Sol &s) {
         if (Parameters::GetElapsedTime() - runtime > 1000) break;
         for (int cID: s.lateCustomers) {
             Customer *c = s.GetCustomer(cID);
-            Depot *dep = s.GetDepot(c->depotID);
             auto *del = dynamic_cast<Delivery *>( s.CustomerNext[c->StartNodeID]);
+            Depot *dep = s.GetDepot(del->depotID);
+
             double start = s.nodeServiceIntervals[del->id].lower + s.WaitingTime[del->id];
             TimeSlot bestSlot = TimeSlot(start, start + Data::LoadingTime(dep, s.DeliveryLoad[del->delID]));
             auto it_load = s.depotLoadingIntervals[dep->depotID].find(bestSlot);

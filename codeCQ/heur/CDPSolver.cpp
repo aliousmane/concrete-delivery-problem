@@ -252,13 +252,11 @@ void CDPSolver::findCorrelation(Data &dat, std::vector<TimeSlot> const &listInt,
     for (int i = 0; i < listInt.size(); i++) {
         auto intv1 = listInt[i];
         Customer *c1 = dat.GetCustomer(intv1.nodeID);
-        Depot *dep1 = dat.GetDepot(c1->depotID);
         for (int j = 0; j < listInt.size(); j++) {
             if (i == j)
                 continue;
             auto intv2 = listInt[j];
             Customer *c2 = dat.GetCustomer(intv2.nodeID);
-            Depot *dep2 = dat.GetDepot(c2->depotID);
             if (intv1 == intv2) {
                 linkedClientSlot[intv1.nodeID].insert(intv2.nodeID);
                 linkedClients[intv1.nodeID].insert(intv2.nodeID);
