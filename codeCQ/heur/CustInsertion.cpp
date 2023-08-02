@@ -77,7 +77,7 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
     int depth = 0;
 //    if (c->custID == 86)
 //        Parameters::SHOW = true;
-    Prompt::log(s.depotLoadingIntervals[c->depotID]);
+    Prompt::log(s.depotLoadingIntervals[cur_order->depotID]);
     for (int j = 0; j < s.GetDeliveryCount(cur_order);) {
         Delivery *del = s.GetDelivery(cur_order, j);
         if (del == nullptr) break;

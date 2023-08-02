@@ -21,9 +21,9 @@ public:
             Delivery *del = s.GetDelivery(delID);
             assert(del != nullptr);
             for (Driver *d: driversList) {
-                if (std::find(Sol::TabuFleet[del->id].begin(), Sol::TabuFleet[del->id].end(), d->id) !=
-                    Sol::TabuFleet[del->id].end())
+                if(d->overTime >= Parameters::MAX_OVERTIME){
                     continue;
+                }
                 insrmv.cancel = false;
                 Move<Delivery, Driver, MoveVrp> m;
                 InsertCost(s, del, d, &l_moves);
@@ -40,11 +40,10 @@ public:
 
         for (int delID: listId) {
             Delivery *del = s.GetDelivery(delID);
-            assert(del != nullptr);
             for (Driver *d: driversList) {
-                if (std::find(Sol::TabuFleet[del->id].begin(), Sol::TabuFleet[del->id].end(), d->id) !=
-                    Sol::TabuFleet[del->id].end())
+                if(d->overTime >= Parameters::MAX_OVERTIME){
                     continue;
+                }
                 insrmv.cancel = false;
                 Move<Delivery, Driver, MoveVrp> m;
                 InsertCost(s, del, d, m);
@@ -68,10 +67,6 @@ public:
                     std::min(d->capacity, s.orderCapRestante[n->orderID]) : Sol::FixLoad[n->delID];
 
         if (mo.demand > d->capacity) return;
-        if (mo.demand <= 0) {
-            Prompt::print({std::to_string(Sol::FixLoad[n->delID]), std::to_string(mo.demand)});
-        }
-        assert(mo.demand > 0);
 
         Dock *dock = s.GetDock(n->dockID);
         Node *prev = s.CustomerPrev[n->EndNodeID];
@@ -102,11 +97,6 @@ public:
                     std::min(d->capacity, s.orderCapRestante[n->orderID]) : Sol::FixLoad[n->delID];
 
         if (mo.demand > d->capacity) return;
-        if (mo.demand <= 0) {
-            Prompt::print({std::to_string(Sol::FixLoad[n->delID]), std::to_string(mo.demand)
-                          });
-        }
-        assert(mo.demand > 0);
 
         Dock *dock = s.GetDock(n->dockID);
         Cost newcost(false);
@@ -138,13 +128,7 @@ public:
             insrmv.expected_del_time = s.EarlyTW(n);
             insrmv.real_del_time = s.EndServiceTime[prec_del_of_cust->id];
 
-//        insrmv.max_arrival_Time =s.LateTW(n) -(o->nbDelMax - n->rank) * s.GetData()->minDriverCap;
-//        if (insrmv.max_arrival_Time < insrmv.real_del_time) {
-//            insrmv.max_arrival_Time =s.LateTW(n) -std::max(o->nbDelMin - n->rank, 0) * s.GetData()->maxDriverCap;
-//        }
             insrmv.max_arrival_Time = insrmv.real_del_time + s.GetTimeBtwDel(n);
-
-//        insrmv.max_arrival_Time = std::max(insrmv.max_arrival_Time, insrmv.real_del_time);
 
             std::vector<std::pair<int, int>> _arrival;
             if (prec_del_of_cust->type != Parameters::DELIVERY) {
@@ -161,11 +145,10 @@ public:
                         std::min((double) Sol::StartBefore[n->id],
                                  s.EndServiceTime[prec_del_of_cust->id] + Sol::minDelay[n->id]);
 
-//            temps = std::max(temps,insrmv.max_arrival_Time);
                 _arrival.emplace_back(temps, temps);
 
             }
-            if (_arrival[0].first > _arrival[0].second)//TODO || insrmv.max_arrival_Time < _arrival[0].second )
+            if (_arrival[0].first > _arrival[0].second)
             {
                 insrmv.cancel = true;
                 return;
@@ -177,17 +160,12 @@ public:
                     insrmv.cancel = true;
                     return;
                 }
-
             }
-
-
             int id1 = mat_func_get_rand_int(0, (int) _arrival.size());
             insrmv.expected_del_time = (int) mat_func_get_rand_double_between(
                     _arrival[id1].first, _arrival[id1].second);
         }
-
 }
-
 };
 
 #endif

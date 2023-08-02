@@ -14,6 +14,9 @@ InsRmvMethodFast::GetBestInsertion(Sol &s, const std::vector<int> &listId, const
         Delivery *del = s.GetDelivery(delID);
         assert(del != nullptr);
         for (Driver *d: driversList) {
+            if(d->overTime >= Parameters::MAX_OVERTIME){
+                continue;
+            }
             cancel = false;
             Move<Delivery, Driver, MoveVrp> m;
             InsertCost(s, del, d, m);
@@ -92,7 +95,6 @@ void InsRmvMethodFast::InsertCost(Sol &s, Delivery *n, Driver *d,
     }
     mo = GetCost(s, n, d, newcost, mo.demand, temp_moves);
 }
-
 
 void InsRmvMethodFast::SetServiceParams(Sol &s, Delivery *n, Driver *d, double demand) {
     Depot *dep = s.GetDepot(n->depotID);
@@ -329,6 +331,13 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
             continue;
         }
         node_arr += UNLOADING_DURATION;
+        double overtime = Sol::GetOvertimeCost(node_arr + Parameters::CLEANING_DURATION + s.Travel(n->distID, d->distID)
+                                               - d->start_shift_time);
+        if ( overtime  > Parameters::MAX_OVERTIME )
+        {
+            prev = s.DriverNext[prev->id];
+            continue;
+        }
 
         if (node_arr > s.LateTW(n)) {
             if (prev->type == Parameters::DELIVERY) {
@@ -455,6 +464,8 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         newcost.overTimeCost =
                 newcost.overTimeCost - d->overTime + Sol::GetOvertimeCost(node_arr + s.Travel(n->distID, d->distID)
                                                                           - d->start_shift_time);
+
+
         newcost.undeliveredCost -= Parameters::UNDELIVERY_PENALTY * m.demand;
 
         if (Parameters::SHOW) {
