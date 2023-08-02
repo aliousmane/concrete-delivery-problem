@@ -159,13 +159,25 @@ public:
     }
 
     double Travel(Customer *from, Customer *to) {
-        Depot *dep_to = GetDepot(to->depotID);
-        return Travel(from, dep_to) + Travel(dep_to, to);
+        double _min = INFINI;
+        for (auto to_order: GetOrders(to)) {
+            Depot *to_dep = GetDepot(to_order->depotID);
+            if (_min > Travel(from->distID, to_dep->distID) + Travel(to_dep->distID, to->distID)) {
+                _min = Travel(from->distID, to_dep->distID) + Travel(to_dep->distID, to->distID);
+            }
+        }
+        return _min;
     }
 
     double Distance(Customer *from, Customer *to) {
-        Depot *dep_to = GetDepot(to->depotID);
-        return Distance(from, dep_to) + Distance(dep_to, to);
+        double _min = INFINI;
+        for (auto to_order: GetOrders(to)) {
+            Depot *to_dep = GetDepot(to_order->depotID);
+            if (_min > Distance(from->distID, to_dep->distID) + Distance(to_dep->distID, to->distID)) {
+                _min = Distance(from->distID, to_dep->distID) + Distance(to_dep->distID, to->distID);
+            }
+        }
+        return _min;
     }
 
     double Travel(int from, int to) {

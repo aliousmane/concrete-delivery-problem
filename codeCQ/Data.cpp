@@ -135,7 +135,6 @@ void Data::LoadInstance() {
                       d.capacity >> d.start_shift_time;
             d.id = i;
             if (d.rank == -1) d.rank = MAX_RANK;
-//            d.start_shift_time = 260;
             Depot *dep = GetDepot(d.depotID);
             d.distID = dep->distID;
 
@@ -178,7 +177,6 @@ void Data::LoadCQInstance() {
                       d.capacity >> d.start_shift_time;
             d.id = i;
             if (d.rank == -1) d.rank = MAX_RANK;
-            d.start_shift_time = 260;
             Node d1;
             d1.id = GetNodeCount();
             d1.no = d1.id + 1;
@@ -216,7 +214,7 @@ void Data::LoadCQInstance() {
         for (int i = 0; i < this->nbCustomers; ++i) {
             Customer n;
             n.c = 'C';
-            inputFile >> n.custID >> n.orderNbr >> dummy >> n.distID >> n.depotID >> n.early_tw >> n.demand
+            inputFile >> n.custID >> n.orderNbr >> dummy >> n.distID >> dummy >> n.early_tw >> n.demand
                       >> n.nbOrder;
             n.custID = i;
             n.constID = n.custID;
@@ -260,7 +258,7 @@ void Data::LoadCQInstance() {
 
         for (int i = 0; i < this->nbOrders; ++i) {
             Order o;
-            inputFile >> o.orderID >> o.custID >> o.demand >> dummy;
+            inputFile >> o.orderID >> o.custID >> o.demand >>  o.depotID;
             o.orderID = GetOrderCount();
             AddOrder(o);
         }
@@ -543,6 +541,10 @@ Depot *Data::GetDepot(int i) {
 }
 
 Depot *Data::GetDepot(Node *n) {
+    if(n->type == Parameters::CUSTOMER){
+        printf(" not defined for customer\n");
+        exit(1);
+    }
     return GetDepot(n->depotID);
 }
 
@@ -622,7 +624,7 @@ void Data::AddDeliveryNodes(Customer *c) {
 
 void Data::AddDeliveryNodes(Order *o, int nb) {
     Customer *c = GetCustomer(o->custID);
-    assert(c->depotID != -1);
+    assert(o->depotID != -1);
     for (int j = 0; j < nb; ++j) {
         Delivery del;
         del.id = GetNodeCount();
@@ -637,6 +639,7 @@ void Data::AddDeliveryNodes(Order *o, int nb) {
         del.distID = c->distID;
         del.early_tw = c->early_tw;
         del.late_tw = c->late_tw;
+        del.depotID = o->depotID;
         del.c = 'D';
         del.siteID = c->siteID;
         AddDelivery(del);
@@ -648,8 +651,7 @@ void Data::AddDockNodes() {
     for (int i = 0; i < GetDeliveryCount(); ++i) {
         Delivery *del = GetDelivery(i);
         Customer *c = GetCustomer(del->custID);
-        Depot *dep = GetDepot(c->depotID);
-        del->depotID = c->depotID;
+        Depot *dep = GetDepot(del->depotID);
         Dock d1;
         d1.id = GetNodeCount();
         d1.dockID = GetDockCount();

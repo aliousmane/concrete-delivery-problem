@@ -115,18 +115,19 @@ public:
     int service_duration;
     int nbDelMin, nbDelMax;
     int orderID;
+    int depotID;
     double demand;
     int early_tw, late_tw;
 
     Order() : orderID(-1), demand(0), custID(-1), nbDelMin(0), nbDelMax(0), service_duration(0),
-              early_tw(0), late_tw(0) {}
+              early_tw(0), late_tw(0),depotID(-1) {}
 
 public:
     friend std::ostream &operator<<(std::ostream &os, const Order &order) {
         os << "ooooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n";
         os << "Order: demand: " << order.demand << " custID: " << order.custID << " nbDelMin: " << order.nbDelMin
            << " nbDelMax: " << order.nbDelMax << " orderID: " << order.orderID << " [" << order.early_tw << "-"
-           << order.late_tw << "]  |\n";
+           << order.late_tw << "]  | depotID" <<order.depotID << "\n";
         os << "ooooooooooooooooooooooooooooooooooooooooooooooooooooooooo";
         return os;
     }
