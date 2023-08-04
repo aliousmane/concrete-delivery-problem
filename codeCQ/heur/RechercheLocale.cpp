@@ -19,8 +19,8 @@ void RechercheLocale::Run(Sol &s) {
         RunAllFeasible(s);
     }
     LoadBackward(s);
-//    return;
-//    RelocateStartLoad(s);
+    RelocateDriver(s);
+    RelocateStartLoad(s);
     cout << "End LS" << s.GetLastCost() << endl;
     s.keyCustomers = keyCustomer;
 }
@@ -208,9 +208,13 @@ bool RechercheLocale::RelocateDriver(Sol &s) {
     bool sortie = false;
     keyCustomer = s.keyCustomers;
     availableDriver = s.availableDrivers;
+    cout << "RelocateDriver" << endl;
+
     found = true;
+    runtime = Parameters::GetElapsedTime();
     while (found) {
         found = false;
+        if (Parameters::GetElapsedTime() - runtime > 1000) break;
         for (int i = 0; i < s.GetDriverCount(); i++) {
             Driver *di = s.GetDriver(i);
 //            double underwork = Sol::GetUnderWorkCost(s.shiftDuration[di->id]);
@@ -236,6 +240,7 @@ bool RechercheLocale::RelocateDriver(Sol &s) {
                         if (cur < s) {
                             found = true;
                             sortie = true;
+                            cout<<" found "<<cur.GetLastCost()<<endl;
                             s = cur;
                             s.keyCustomers = keyCustomer;
                             s.availableDrivers = availableDriver;
