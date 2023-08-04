@@ -124,6 +124,7 @@ public:
     Order *GetOrder(int index);
 
     Delivery *GetDelivery(Order *o, int index);
+    Delivery *GetDelivery(Node * n) { return  dynamic_cast<Delivery*>(n);  }
 
     Dock *GetDock(Order *o, int index);
 

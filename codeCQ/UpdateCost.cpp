@@ -127,13 +127,13 @@ void Sol::Update(Depot *dep, Dock *dock, Delivery *del) {
     clientDriverUsed[c->custID].insert(d->id);
     driverUsed.insert(d->id);
     updateCost.driverUsed = (int) driverUsed.size();
-    assert(DeliveryLoad[del->delID] > 0);
     updateCost.satisfiedCost += DeliveryLoad[del->delID];
+
     updateCost.waste += d->capacity;
     UpdateDemand(c, o, DeliveryLoad[del->delID]);
     orderLoads[o->orderID].insert(DeliveryLoad[del->delID]);
     if (isOrderSatisfied(o)) {
-        updateCost.undeliveredCost -= o->demand * Parameters::UNDELIVERY_PENALTY;
+//        updateCost.undeliveredCost -= o->demand * Parameters::UNDELIVERY_PENALTY;
     }
 
     if (isClientSatisfied(c)) {
@@ -169,7 +169,6 @@ void Sol::Update(Depot *dep, Dock *dock, Delivery *del) {
     updateCost.distanceCost += del->distance;
 
     StartServiceTime[dock->id] = ArrivalTime[dock->id];
-    double start1 = StartServiceTime[dock->id];
     Dock *prev_dock = dynamic_cast<Dock *>( DepotPrev[dock->id]);
     if (prev_dock != nullptr) {
         StartServiceTime[dock->id] =
@@ -178,8 +177,6 @@ void Sol::Update(Depot *dep, Dock *dock, Delivery *del) {
 
     TimeSlot loadSlot(StartServiceTime[dock->id], StartServiceTime[dock->id] + LOAD_DURATION,
                       'L', *dock);
-
-// !   Sol::FindEmptySlot(depotLoadingIntervals[dep->depotID], loadSlot, LOAD_DURATION);
 
     UpdateDepotLoadingSet(dep, dock, loadSlot);
 
@@ -199,8 +196,6 @@ void Sol::Update(Depot *dep, Dock *dock, Delivery *del) {
         if (WaitingTime[del->id] + this->GetTimeBtwDel(del) < 0) {
             WaitingTime[c->id] += WaitingTime[del->id] + this->GetTimeBtwDel(del);
         }
-        assert(GetDriverAssignedTo(prec_del) != nullptr);
-        assert(-WaitingTime[del->id] <= this->GetTimeBtwDel(del) + EPS);
     } else {
         if (WaitingTime[del->id] < 0) {
             lateCustomers.insert(c->custID);
@@ -290,15 +285,6 @@ Cost Sol::GetCost() {
     _last_cost.satisfiedCost = 0;
     _last_cost.undeliveredCost = 0;
     _last_cost.waste = 0;
-//    for (int i = 0; i < GetCustomerCount(); i++) {
-//        Customer *c = GetCustomer(i);
-//        _last_cost.undeliveredCost += !(isClientSatisfied(c)) * c->demand;
-//        _last_cost.satisfiedCost += (isClientSatisfied(c)) * c->demand;
-//        if (isClientSatisfied(c)) {
-//            _last_cost.waste += std::abs(clientCapRestante[c->custID]);
-//        }
-//    }
-
     for (int i = 0; i < GetOrderCount(); i++) {
         Order *o = GetOrder(i);
         _last_cost.undeliveredCost += !(isOrderSatisfied(o)) * o->demand * Parameters::UNDELIVERY_PENALTY;
@@ -307,8 +293,6 @@ Cost Sol::GetCost() {
             _last_cost.waste += std::abs(orderCapRestante[o->orderID]);
         }
     }
-
-
     _last_cost.driverUsed = 0;
     _last_cost.underWorkCost = 0;
     _last_cost.overTimeCost = 0;
@@ -357,11 +341,8 @@ void Sol::GetCost(Depot *dep, Cost &cur_cost) {
 void Sol::GetCost(Depot *dep, Dock *dock, Delivery *del, Cost &cur_cost) {
     VisitFlagCost[dock->id] = true;
     VisitFlagCost[del->id] = true;
-
     Driver *d = GetDriverAssignedTo(del);
-
     const int UNLOADING_DURATION = Data::UnloadingTime(del, del->demand, d);
-
     Node *prec_del = CustomerPrev[del->id];
     cur_cost.waste += d->capacity;
     double real_del_time = EndServiceTime[prec_del->id];
@@ -387,29 +368,21 @@ void Sol::GetCost(Depot *dep, Dock *dock, Delivery *del, Cost &cur_cost) {
     cur_cost.lateDeliveryCost += Sol::GetLateDeliveryCost(del, arr_node, LateTW(del));
     arr_node += Data::CleaningTime(del, d);
 
-
     shiftDurationCost[d->id] = arr_node + Travel(del->distID, d->distID) - d->start_shift_time;
     d->shiftDurationCost = shiftDurationCost[d->id];
     cur_cost.overTimeCost +=
             Parameters::OVERTIME_PENALTY *
             int(shiftDurationCost[d->id] > Parameters::NORMAL_WORKING_TIME);
     cur_cost.underWorkCost += Sol::GetUnderWorkCost(shiftDurationCost[d->id]);
-
-//            Parameters::UNDERWORK_PENALTY *
-//            int(shiftDurationCost[d->id] <  Parameters::MIN_WORKING_TIME);
-
     cur_cost.waitingCost = cur_cost.clientWaitingCost + cur_cost.truckWaitingCost;
 }
 
 
 Cost Sol::GetCost(Driver *d) {
-
     return {};
 }
 
-void Sol::Show() {
-
-}
+void Sol::Show() {}
 
 void Sol::ShowDrivers() {
     for (int i = 0; i < GetDriverCount(); i++) {

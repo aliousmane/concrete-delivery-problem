@@ -21,7 +21,7 @@ public:
             Delivery *del = s.GetDelivery(delID);
             assert(del != nullptr);
             for (Driver *d: driversList) {
-                if(d->overTime >= Parameters::MAX_OVERTIME){
+                if (d->overTime >= Parameters::MAX_OVERTIME) {
                     continue;
                 }
                 insrmv.cancel = false;
@@ -41,7 +41,7 @@ public:
         for (int delID: listId) {
             Delivery *del = s.GetDelivery(delID);
             for (Driver *d: driversList) {
-                if(d->overTime >= Parameters::MAX_OVERTIME){
+                if (d->overTime >= Parameters::MAX_OVERTIME) {
                     continue;
                 }
                 insrmv.cancel = false;
@@ -120,13 +120,12 @@ public:
         insrmv.UNLOADING_DURATION = Data::UnloadingTime(n, demand, d);
         insrmv.LOAD_DURATION = Data::LoadingTime(dep, demand);
         insrmv.ADJUSTMENT_DURATION = Parameters::ADJUSTMENT_DURATION;
-        if(Sol::FixStartLoad[n->delID]==-1)
-        {
+        Node *prec_del_of_cust = s.CustomerPrev[n->EndNodeID];
+        insrmv.real_del_time = s.EndServiceTime[prec_del_of_cust->id];
+        if (Sol::FixStartLoad[n->delID] == -1) {
             Order *o = s.GetOrder(n->orderID);
-            Node *prec_del_of_cust = s.CustomerPrev[n->EndNodeID];
 
             insrmv.expected_del_time = s.EarlyTW(n);
-            insrmv.real_del_time = s.EndServiceTime[prec_del_of_cust->id];
 
             insrmv.max_arrival_Time = insrmv.real_del_time + s.GetTimeBtwDel(n);
 
@@ -148,8 +147,7 @@ public:
                 _arrival.emplace_back(temps, temps);
 
             }
-            if (_arrival[0].first > _arrival[0].second)
-            {
+            if (_arrival[0].first > _arrival[0].second) {
                 insrmv.cancel = true;
                 return;
             }
@@ -165,7 +163,7 @@ public:
             insrmv.expected_del_time = (int) mat_func_get_rand_double_between(
                     _arrival[id1].first, _arrival[id1].second);
         }
-}
+    }
 };
 
 #endif

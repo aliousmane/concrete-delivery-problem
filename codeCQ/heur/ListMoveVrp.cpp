@@ -32,45 +32,19 @@ bool ListMoveVrpSorter::Sort1(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery
 }
 
 bool ListMoveVrpSorter::Sort2(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery, Driver, MoveVrp> &m2) {
-
-    if (m1.FailureCause != -1) return false;
-    if (m1.DeltaCost.lateDeliveryCost < m2.DeltaCost.lateDeliveryCost)
+    if (m1.DeltaCost.clientWaitingCost < m2.DeltaCost.clientWaitingCost) {
         return true;
-    if (m1.n == m2.n) {
-        if (m1.waste == 0) return true;
-        else if (m2.waste == 0) return false;
+    }
+    else if (m1.DeltaCost.clientWaitingCost == m2.DeltaCost.clientWaitingCost) {
 
-        if (m1.arrival_del < m2.arrival_del) {
+        if (m1.DeltaCost.undeliveredCost < m2.DeltaCost.undeliveredCost) {
             return true;
-        } else if (m1.arrival_del == m2.arrival_del) {
-
-            if (m1.allDriver < m2.allDriver)
-                return true;
-
-//            if(m1.DeltaCost.travelCost < m2.DeltaCost.travelCost) return true;
-
-            if (m1.waste * m2.waste == 0) {
-                if (m1.waste == 0)
-                    return true;
-                return false;
-            } else if (m1.waste * m2.waste < 0) {
-                if (m1.waste > 0) return true;
-            } else {
-                if (std::abs(m1.waste) < std::abs(m2.waste)) return true;
-                else if (m1.waste == m2.waste) {
-                    return (m1.to->capacity > m2.to->capacity);
-                }
-                return false;
-            }
-        } else {
-            if (m1.allDriver < m2.allDriver)
-                return true;
         }
-
-
-//          if(m1.waste < m2.waste)
-//              return true;
-        return false;
+        else if (m1.DeltaCost.undeliveredCost == m2.DeltaCost.undeliveredCost) {
+            if (std::abs( m1.DeltaCost.firstDeliveryCost) < std::abs(m2.DeltaCost.firstDeliveryCost)) {
+                return true;
+            }
+        }
     }
     return (m1 < m2);
 }
@@ -146,22 +120,18 @@ bool ListMoveVrpSorter::Sort5(Move<Delivery, Driver, MoveVrp> &m1, Move<Delivery
 
     if (m1.DeltaCost.undeliveredCost < m2.DeltaCost.undeliveredCost) {
         return true;
-    }
-    else if(m1.DeltaCost.undeliveredCost == m2.DeltaCost.undeliveredCost)
-    {
+    } else if (m1.DeltaCost.undeliveredCost == m2.DeltaCost.undeliveredCost) {
         if (m1.DeltaCost.lateDeliveryCost < m2.DeltaCost.lateDeliveryCost) {
             return true;
-        }
-        else if (m1.DeltaCost.lateDeliveryCost == m2.DeltaCost.lateDeliveryCost) {
+        } else if (m1.DeltaCost.lateDeliveryCost == m2.DeltaCost.lateDeliveryCost) {
 
-            if(m1.DeltaCost.travelCost < m2.DeltaCost.travelCost){
+            if (m1.DeltaCost.travelCost < m2.DeltaCost.travelCost) {
                 return true;
-            }
-            else if(m1.DeltaCost.travelCost == m2.DeltaCost.travelCost){
-                if(m1.DeltaCost.clientWaitingCost < m2.DeltaCost.clientWaitingCost){
+            } else if (m1.DeltaCost.travelCost == m2.DeltaCost.travelCost) {
+                if (m1.DeltaCost.clientWaitingCost < m2.DeltaCost.clientWaitingCost) {
                     return true;
                 }
-                if(m1.DeltaCost.overTimeCost < m2.DeltaCost.overTimeCost){
+                if (m1.DeltaCost.overTimeCost < m2.DeltaCost.overTimeCost) {
                     return true;
                 }
             }

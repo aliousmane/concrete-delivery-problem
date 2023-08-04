@@ -182,6 +182,7 @@ public:
     }
 
     Delivery *GetDelivery(int index) { return _data->GetDelivery(index); }
+    Delivery *GetDelivery(Node * n) { return _data->GetDelivery(n); }
 
     Depot *GetDepot(int index) { return _data->GetDepot(index); }
 
@@ -240,6 +241,7 @@ public:
     void RemoveFromCustomer(Delivery *del);
 
     void RemoveDelivery(Delivery *del);
+    void RemoveDelivery(Node *n){ RemoveDelivery(dynamic_cast<Delivery*>(n));}
 
     void RemoveDock(Dock *dock);
 
@@ -401,7 +403,7 @@ public:
     }
 
     void SetTimingCost(Delivery *del, double arrival,
-                       double expected_arrival, double earlytw, Cost &newcost) {
+                       double expected_arrival, double earlytw, Cost &newcost,bool time_btw=true) {
 
         if (CustomerNext[del->StartNodeID]->id == del->id ||
             CustomerNext[del->StartNodeID]->id == del->EndNodeID) {
@@ -418,7 +420,7 @@ public:
         }
         else {
             int time_btw_delivery =  GetTimeBtwDel(del);
-            assert(time_btw_delivery>=0);
+            if(!time_btw)  time_btw_delivery = 0;
             newcost.truckWaitingCost +=
                     Sol::GetTruckWaitingCost(del, arrival, expected_arrival);
 

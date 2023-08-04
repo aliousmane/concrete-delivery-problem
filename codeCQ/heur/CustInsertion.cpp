@@ -32,10 +32,7 @@ void CustInsertion::Insert(Sol &s) {
 }
 
 void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *> &list) {
-    if (list.size() > 1) {
-        Sort(s, list, CustInsertion::_k);
-    }
-//    Parameters::SHOW=true;
+    if (list.size() > 1) {Sort(s, list, CustInsertion::_k);}
     removedList.clear();
     removedList.shrink_to_fit();
     listMoves.clear();
@@ -46,7 +43,6 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *> &list) {
     set<int> UsedOrder;
     bool nextCustomer = false;
     for (int i = 0; i < list.size();) {
-//        Parameters::SHOW = false;
         if (nextCustomer) {
             if (i == list.size() - 1) break;
             i++;
@@ -54,18 +50,11 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *> &list) {
             UsedOrder.clear();
             nextCustomer = false;
         }
-//            cout << *c << "--" << std::endl;
         Order *cur_order = s.GetRandomOrder(c, UsedOrder);
         if (cur_order == nullptr) {
             nextCustomer = true;
             s.UnassignCustomer(c);
             continue;
-        }
-        if (Parameters::SHOW) {
-            cout << *c << "--" << std::endl;
-        }
-        if (Parameters::SHOW) {
-            cout << *cur_order << endl;
         }
         UsedOrder.insert(cur_order->orderID);
         nextCustomer = Insert(s, c, cur_order);
@@ -75,9 +64,8 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *> &list) {
 bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
     bool nextCustomer = false;
     int depth = 0;
-//    if (c->custID == 86)
+//    if (c->custID == 5)
 //        Parameters::SHOW = true;
-    Prompt::log(s.depotLoadingIntervals[cur_order->depotID]);
     for (int j = 0; j < s.GetDeliveryCount(cur_order);) {
         Delivery *del = s.GetDelivery(cur_order, j);
         if (del == nullptr) break;
@@ -92,6 +80,7 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
 
         if (depth++ > Parameters::BACKTRACK_DEPTH * s.GetDeliveryCount(cur_order)) {
             nextCustomer = true;
+            s.UnassignCustomer(c);
             break;
         }
         std::vector<int> listId{del->delID};
@@ -102,9 +91,7 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
                 }
                 ListMoveVrp temp_moves;
                 _insrmv.GetBestInsertion(s, listId, driversList, &temp_moves);
-                if (temp_moves.Count() > 0) {
-                    listMoves[del->delID].Insert(temp_moves);
-                }
+                if (temp_moves.Count() > 0) {listMoves[del->delID].Insert(temp_moves);}
                 Sol::minDelay[del->id] = 0;
             }
         } else if (listMoves[del->delID].Count() == 0) {
@@ -116,8 +103,8 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
         }
         if (Parameters::SHOW) {
             Prompt::print({to_string(listMoves[del->delID].Count()), "moves for del", to_string(del->id)});
-//            listMoves[del->delID].Show();
         }
+//            listMoves[del->delID].Show();
         Move<Delivery, Driver, MoveVrp> best;
         if (listMoves[del->delID].Count() > 0) { best = listMoves[del->delID].Extract(); }
         if (!best.IsFeasible) {
@@ -178,10 +165,6 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
                                            "with remaining moves", to_string(listMoves[prec_del->delID].Count())});
 
                         }
-                        if (prec_del->rank > 0) {
-                            assert(s.GetDriverAssignedTo(s.GetDelivery(cur_order, prec_del->rank - 1))
-                                   != nullptr);
-                        }
                         backtrackOrder = true;
                         break;
                     }
@@ -195,6 +178,7 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
             if (Parameters::SHOW) {
                 cout << cur_order->orderID << " is not scheduled\n";
                 Prompt::print(Sol::CustomerConflict[c->custID]);
+//                s.ShowSchedule(c);
             }
 //            s.UnassignOrder(cur_order);
             s.UnassignCustomer(c);
@@ -212,7 +196,7 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
                 listMoves[next_del->delID].Clear();
             }
             if (Parameters::SHOW) {
-                s.ShowSchedule(cur_order);
+                s.ShowSchedule(best.n);
             }
             j++;
         }
@@ -322,7 +306,6 @@ void CustInsertion::Insert(Sol &s, std::vector<int> const &list) {
             if (best.IsFeasible) {
                 _insrmv.ApplyInsertMove(s, best);
                 s.Update(best.move.depot, best.move.dock, best.n);
-                assert(Sol::FailureCount[del->id] == 0);
 //                s.ShowSchedule(cur_order);
                 j++;
             }

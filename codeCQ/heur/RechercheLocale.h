@@ -50,6 +50,9 @@ public:
     std::vector<std::set<int>> LinkedClientSlot;
 private:
     long runtime{0};
+    std::set<int> keyCustomer;
+    std::set<int> availableDriver;
+
 };
 
 #endif // !INCLUDE_RECHERCHELOCALE_H
