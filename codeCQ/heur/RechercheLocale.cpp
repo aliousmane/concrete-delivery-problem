@@ -5,23 +5,22 @@ using namespace std;
 void RechercheLocale::Run(Sol &s) {
     cout << "Start LS after " << s.heurName << s.GetLastCost() << endl;
     Prompt::print(s.unscheduledCustomers);
-    set<int> keyCustomer(s.keyCustomers);
+    keyCustomer = s.keyCustomers;
     bestCost = s.GetLastCost();
     RelocateStartLoad(s);
     if (!s.unscheduledCustomers.empty()) {
-//        ShiftLoading(s);
         UnscheduledFirst(s);
         RemoveAndReschedule(s);
     }
     LoadBackward(s);
+    RelocateDriver(s);
 //    if (s.unscheduledCustomers.empty())
     {
         RunAllFeasible(s);
     }
     LoadBackward(s);
-//    RelocateDriver(s);
 //    return;
-    RelocateStartLoad(s);
+//    RelocateStartLoad(s);
     cout << "End LS" << s.GetLastCost() << endl;
     s.keyCustomers = keyCustomer;
 }
@@ -30,7 +29,7 @@ bool RechercheLocale::UnscheduledFirst(Sol &s) {
     bool sortie = false;
     Sol cur(s.GetData());
     cout << "UnscheduledFirst" << endl;
-    std::set<int> keyCustomer = s.keyCustomers;
+    keyCustomer = s.keyCustomers;
     cur.keyCustomers = s.unscheduledCustomers;
     CDPSolver::SolveInstance(cur, *cur.GetData(), 1);
     cur.keyCustomers = s.satisfiedCustomers;
@@ -48,11 +47,11 @@ bool RechercheLocale::UnscheduledFirst(Sol &s) {
 
 bool RechercheLocale::RelocateStartLoad(Sol &s) {
     cout << "RelocateStartLoad" << s.GetLastCost() << endl;
-    const std::set<int> keyCustomer = s.keyCustomers;
+    keyCustomer = s.keyCustomers;
     runtime = Parameters::GetElapsedTime();
     bool sortie = false;
-    bool found1 = true;
-    while (found1) {
+    found = true;
+    while (found) {
         found = false;
         if (s.lateCustomers.empty()) break;
         if (Parameters::GetElapsedTime() - runtime > 1000) break;
@@ -88,7 +87,7 @@ bool RechercheLocale::RelocateStartLoad(Sol &s) {
                         if (cur < s) {
                             s = cur;
                             s.keyCustomers = keyCustomer;
-                            found1 = true;
+                            found = true;
                             sortie = true;
                             break;
                         }
@@ -165,7 +164,7 @@ void RechercheLocale::RemoveAndReschedule(Sol &s) {
     bool sortie = false;
     found = true;
     runtime = Parameters::GetElapsedTime();
-    std::set<int> keyCustomer = s.keyCustomers;
+    keyCustomer = s.keyCustomers;
     std::vector<int> seen(s.GetCustomerCount(), -1);
     CDPSolver::disjointClients.resize(s.GetCustomerCount());
     while (found) {
@@ -206,22 +205,52 @@ void RechercheLocale::RemoveAndReschedule(Sol &s) {
 }
 
 bool RechercheLocale::RelocateDriver(Sol &s) {
+    bool sortie = false;
+    keyCustomer = s.keyCustomers;
+    availableDriver = s.availableDrivers;
+    found = true;
+    while (found) {
+        found = false;
+        for (int i = 0; i < s.GetDriverCount(); i++) {
+            Driver *di = s.GetDriver(i);
+//            double underwork = Sol::GetUnderWorkCost(s.shiftDuration[di->id]);
+//            if (underwork < 0.1)continue;
+            double overtime1 = Sol::GetOvertimeCost(s.shiftDuration[di->id]);
+            if (overtime1 > 0.1)continue;
+//        cout << *di << " "<<underwork<< " "<<s.shiftDuration[di->id]<<endl;
+            for (int j = i + 1; j < s.GetDriverCount(); j++) {
+                Driver *dj = s.GetDriver(j);
+                double overtime = Sol::GetOvertimeCost(s.shiftDuration[dj->id]);
+                if (overtime < 0.1)continue;
+//            cout << "dj " << *dj << " "<< s.shiftDuration[dj->id]<< " "<<overtime<< endl;
+                Node *prev = s.DriverNext[dj->StartNodeID];
+                while (prev->type != Parameters::TypeNode::END_LINK) {
 
-    for (int i = 0; i < s.GetDriverCount(); i++) {
-        Driver *di = s.GetDriver(i);
-        if (Sol::GetUnderWorkCost(s.shiftDuration[di->id]) == 0)
-            continue;
-        cout << *di << endl;
-        for (int j = i + 1; j < s.GetDriverCount(); j++) {
-            Driver *dj = s.GetDriver(j);
-            if (Sol::GetOvertimeCost(s.shiftDuration[dj->id]) > 0)
-                continue;
-            cout << "dj " << *dj << endl;
-            // Relocate node of di inside node of dj
+                    if (prev->type == Parameters::TypeNode::DELIVERY) {
+                        Sol cur(s);
+                        Delivery *del = cur.GetDelivery(prev);
+                        cur.RemoveDelivery(del);
+                        cur.keyCustomers = {del->custID};
+                        cur.availableDrivers = {di->id};
+                        CDPSolver::BuildOnSolution(cur, *s.GetData(), 1);
+                        if (cur < s) {
+                            found = true;
+                            sortie = true;
+                            s = cur;
+                            s.keyCustomers = keyCustomer;
+                            s.availableDrivers = availableDriver;
+                            break;
+                        }
+                    }
+                    prev = s.DriverNext[prev->id];
+                }
+                if (found) {
+                    break;
+                }
+            }
         }
     }
-
-    exit(1);
+    return sortie;
 }
 
 bool RechercheLocale::UseSingleDriver(Sol &s, Order *o) {
@@ -247,7 +276,7 @@ bool RechercheLocale::UseSingleDriver(Sol &s, Order *o) {
 bool RechercheLocale::SwapLoad(Sol &s, Order *o) {
     bool sortie = false;
     Sol cur(s);
-    set<int> keyCustomer = s.keyCustomers;
+    keyCustomer = s.keyCustomers;
     std::vector<int> DeliveryList(s.GetDeliveryCount(o));
     int depth = 0;
     for (int i = 0; i < s.GetDeliveryCount(o); i++) {
@@ -405,7 +434,7 @@ bool RechercheLocale::Relocate2(Sol &s, Customer *c1, Customer *c2) {
     clients.insert(c1->custID);
     if (CDPSolver::ComputeCost(s, clients) < bestCost.satisfiedCost)
         return false;
-    set<int> keyCustomer = s.keyCustomers;
+    keyCustomer = s.keyCustomers;
     bool sortie = false;
 //    cout << " try to relocate2  " << c1->custID << " near " << c2->custID << endl;
     Sol cur = s;

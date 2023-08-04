@@ -130,7 +130,7 @@ public:
 
             std::vector<std::pair<double, double>> _arrival;
             if (prec_del_of_cust->type != Parameters::DELIVERY) {
-                insrmv.max_arrival_Time += 20;
+                insrmv.max_arrival_Time += 5;
                 _arrival.
                         emplace_back(s.EarlyTW(n) - s.GetTimeBtwDel(n) - 1,
                                      insrmv.max_arrival_Time - Sol::minDelay[n->id]);

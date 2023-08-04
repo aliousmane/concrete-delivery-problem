@@ -78,7 +78,7 @@ void CDPSolver::SolveCDP(Sol &s, Data &dat, int iter, bool restart) {
     vector<AllInsertionOperator> AllInsertionOp;
     AllInsertionOp.reserve(3 * (custInfo.size() + priorityInfo.size() + driverInfo.size()));
     for (const auto &val: custInfo) {
-        AllInsertionOp.emplace_back(&custIns1, val.first, "Builder 1 " + val.second);
+       AllInsertionOp.emplace_back(&custIns1, val.first, "Builder 1 " + val.second);
         AllInsertionOp.emplace_back(&custIns3, val.first, "Builder 3 " + val.second);
     }
     for (const auto &val: priorityInfo) {

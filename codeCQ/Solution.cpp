@@ -74,13 +74,6 @@ void Sol::InitCustomers() {
             InitCustomer(_data->GetCustomer(i));
         }
     }
-//    else
-//    {
-//        for (auto id: keyCustomers) {
-//            InitCustomer(_data->GetCustomer(id));
-//        }
-//    }
-
 }
 
 void Sol::InitCustomer(Customer *c) {
@@ -122,7 +115,6 @@ void Sol::InitDepots() {
 }
 
 void Sol::InitDepot(Depot *dep) {
-    assert(DepotSize[dep->depotID] == depotLoadingIntervals[dep->depotID].size());
     depotLoadingIntervals[dep->depotID].clear();
 }
 
@@ -247,6 +239,7 @@ void Sol::Remove(Node *n) {
 }
 
 void Sol::RemoveDelivery(Delivery *del) {
+    assert(del!= nullptr) ;
     if (VisitFlags[del->id]) {
         updateCost.lateDeliveryCost -=
                 std::max(0., (EndServiceTime[del->id] - LateTW(del))) *
@@ -379,8 +372,6 @@ void Sol::InsertAfterDepot(Node *n, Node *prev, Node *dep) {
 }
 
 void Sol::AssignDeliveryToCustomer(Delivery *n) {
-
-//    OrderVisitCount[n->custID]++;
     Node *end = GetNode(n->EndNodeID);
     Node *prev = CustomerPrev[n->EndNodeID];
     CustomerNext[prev->id] = n;
@@ -399,11 +390,11 @@ void Sol::ShowSchedule(Delivery *del) {
     // Wait  | Start | End   | To \n");
     Dock *dock = GetDock(del->dockID);
     if (d != nullptr) {
-        printf("%04d |%02d(%02d)|%02d(%02.0lf)| %02.1lf |%04d|%01.1lf|%04d|%04.0lf-%04.0lf|%01.1lf|%04.0lf "
+        printf("%3d %04d |%02d(%02d)|%02d(%02.0lf)| %02.1lf |%04d|%01.1lf|%04d|%04.0lf-%04.0lf|%01.1lf|%04.0lf "
                "  |%03.0lf "
                "|%04.0lf "
                "| %04.0lf |%04d|",
-               del->id, del->orderID, del->custID, d->id, d->capacity,
+               del->rank+1, del->id, del->orderID, del->custID, d->id, d->capacity,
                DeliveryLoad[del->delID], DriverPrev[dock->id]->id, Travel(DriverPrev[dock->id], dock), dock->id,
                StartServiceTime[dock->id], EndServiceTime[dock->id], Travel(dock, del),
                ArrivalTime[del->id], WaitingTime[del->id],
@@ -446,7 +437,7 @@ void Sol::ShowAllSchedule() {
     for (int i = 0; i < GetOrderCount(); i++) {
         Order *o = GetOrder(i);
         if (!isOrderSatisfied(o)) {
-            cout << "Incomplete schedule" << endl;
+            cout << "Incomplete schedule remaining " <<orderCapRestante[o->orderID]<< endl;
 //            continue;
         }
         ShowSchedule(o);

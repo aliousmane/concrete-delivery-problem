@@ -42,11 +42,11 @@ bool Cost::ObtainMinCDP(const Cost &rhs) const {
 }
 
 bool Cost::ObtainMinCQ(const Cost &rhs) const {
-
+    const double ALPHA = 0.001;
     if (this->undeliveredCost + EPS < rhs.undeliveredCost) {
         return true;
     }
-    if (std::abs(this->undeliveredCost - rhs.undeliveredCost) <= 0.001) {
+    if (std::abs(this->undeliveredCost - rhs.undeliveredCost) <= ALPHA) {
 
         if (this->firstDeliveryCost + EPS < rhs.firstDeliveryCost) {
             return true;
@@ -54,13 +54,13 @@ bool Cost::ObtainMinCQ(const Cost &rhs) const {
             if (true) {
                 if (this->travelCost + EPS < rhs.travelCost)
                     return true;
-                else if (this->travelCost == rhs.travelCost) {
+                else if (std::abs(this->travelCost - rhs.travelCost) <= ALPHA) {
                     if (this->waitingCost + EPS < rhs.waitingCost) {
                         return true;
-                    } else if (this->waitingCost == rhs.waitingCost) {
+                    } else if (std::abs(this->waitingCost - rhs.waitingCost) <= ALPHA) {
                         if (this->overTimeCost + EPS < rhs.overTimeCost) {
                             return true;
-                        } else if (this->overTimeCost == rhs.overTimeCost) {
+                        } else if (std::abs(this->overTimeCost - rhs.overTimeCost) <= ALPHA) {
                             return (this->underWorkCost < rhs.underWorkCost);
                         }
                     }
