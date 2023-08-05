@@ -112,28 +112,28 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
     AllInsertionOperator d2(&driverIns3, driverInfo[2].first, "Builder 3 " + driverInfo[2].second);
 
 
-    grasp.AddInsertOperatorVrp(&c0_1);
+    // grasp.AddInsertOperatorVrp(&c0_1);
     grasp.AddInsertOperatorVrp(&c0_3);
-    grasp.AddInsertOperatorVrp(&c1_1);
-    grasp.AddInsertOperatorVrp(&c1_3);
-    grasp.AddInsertOperatorVrp(&c2_1);
-    grasp.AddInsertOperatorVrp(&c2_3);
-    grasp.AddInsertOperatorVrp(&c3_1);
-    grasp.AddInsertOperatorVrp(&c3_3);
-    grasp.AddInsertOperatorVrp(&c4_1);
-    grasp.AddInsertOperatorVrp(&c4_3);
-    grasp.AddInsertOperatorVrp(&c5_1);
-    grasp.AddInsertOperatorVrp(&c5_3);
+    // grasp.AddInsertOperatorVrp(&c1_1);
+    // grasp.AddInsertOperatorVrp(&c1_3);
+    // grasp.AddInsertOperatorVrp(&c2_1);
+    // grasp.AddInsertOperatorVrp(&c2_3);
+    // grasp.AddInsertOperatorVrp(&c3_1);
+    // grasp.AddInsertOperatorVrp(&c3_3);
+    // grasp.AddInsertOperatorVrp(&c4_1);
+    // grasp.AddInsertOperatorVrp(&c4_3);
+    // grasp.AddInsertOperatorVrp(&c5_1);
+    // grasp.AddInsertOperatorVrp(&c5_3);
 //    grasp.AddInsertOperatorVrp(&cFixed);
 
-    grasp.AddInsertOperatorVrp(&p01);
-    grasp.AddInsertOperatorVrp(&p03);
-    grasp.AddInsertOperatorVrp(&p11);
-    grasp.AddInsertOperatorVrp(&p13);
-    grasp.AddInsertOperatorVrp(&p23);
-    grasp.AddInsertOperatorVrp(&p33);
-    grasp.AddInsertOperatorVrp(&p43);
-    grasp.AddInsertOperatorVrp(&p53);
+    // grasp.AddInsertOperatorVrp(&p01);
+    // grasp.AddInsertOperatorVrp(&p03);
+    // grasp.AddInsertOperatorVrp(&p11);
+    // grasp.AddInsertOperatorVrp(&p13);
+    // grasp.AddInsertOperatorVrp(&p23);
+    // grasp.AddInsertOperatorVrp(&p33);
+    // grasp.AddInsertOperatorVrp(&p43);
+    // grasp.AddInsertOperatorVrp(&p53);
 
 //    grasp.AddInsertOperatorVrp(&d0);
 //    grasp.AddInsertOperatorVrp(&d1);
