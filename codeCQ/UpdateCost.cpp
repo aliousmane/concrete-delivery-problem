@@ -553,7 +553,7 @@ bool Sol::FindBackwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, co
                     break;
                 }
             }
-            if (cur_dock->early_tw + 60 < dock->early_tw) {
+            if (cur_dock->early_tw + 120 < dock->early_tw) {
                 find = false;
                 abort = true;
                 break;
@@ -590,9 +590,7 @@ bool Sol::FindBackwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, co
             cout << "End " << slot << endl;
             Prompt::print(SlotSet);
             exit(1);
-
         }
-
     }
     return find;
 }

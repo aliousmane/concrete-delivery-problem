@@ -21,7 +21,7 @@ public:
 
     void RunAllFeasible(Sol &s);
 
-    void RemoveAndReschedule(Sol &s);
+    bool RemoveAndReschedule(Sol &s);
 
     bool SwapLoad(Sol &s, Order *o);
     bool RelocateStartLoad(Sol &s);

@@ -34,7 +34,7 @@ void Solver::run() {
     s.keyCustomers = feasibleClients;
     SolveGrasp(s, dat, linkedClientSlot, Parameters::ITERATION);
     SaveResults(s);
-    s.exportCSVFormat("s1.csv");
+    s.exportCSVFormat(dat.sol_output);
     cout << s.GetLastCost() << endl;
     Prompt::print(s.unscheduledCustomers);
 }
@@ -112,28 +112,28 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
     AllInsertionOperator d2(&driverIns3, driverInfo[2].first, "Builder 3 " + driverInfo[2].second);
 
 
-    // grasp.AddInsertOperatorVrp(&c0_1);
+    grasp.AddInsertOperatorVrp(&c0_1);
     grasp.AddInsertOperatorVrp(&c0_3);
-    // grasp.AddInsertOperatorVrp(&c1_1);
-    // grasp.AddInsertOperatorVrp(&c1_3);
-    // grasp.AddInsertOperatorVrp(&c2_1);
-    // grasp.AddInsertOperatorVrp(&c2_3);
-    // grasp.AddInsertOperatorVrp(&c3_1);
-    // grasp.AddInsertOperatorVrp(&c3_3);
-    // grasp.AddInsertOperatorVrp(&c4_1);
-    // grasp.AddInsertOperatorVrp(&c4_3);
-    // grasp.AddInsertOperatorVrp(&c5_1);
-    // grasp.AddInsertOperatorVrp(&c5_3);
+    grasp.AddInsertOperatorVrp(&c1_1);
+    grasp.AddInsertOperatorVrp(&c1_3);
+    grasp.AddInsertOperatorVrp(&c2_1);
+    grasp.AddInsertOperatorVrp(&c2_3);
+    grasp.AddInsertOperatorVrp(&c3_1);
+    grasp.AddInsertOperatorVrp(&c3_3);
+    grasp.AddInsertOperatorVrp(&c4_1);
+    grasp.AddInsertOperatorVrp(&c4_3);
+    grasp.AddInsertOperatorVrp(&c5_1);
+    grasp.AddInsertOperatorVrp(&c5_3);
 //    grasp.AddInsertOperatorVrp(&cFixed);
 
-    // grasp.AddInsertOperatorVrp(&p01);
-    // grasp.AddInsertOperatorVrp(&p03);
-    // grasp.AddInsertOperatorVrp(&p11);
-    // grasp.AddInsertOperatorVrp(&p13);
-    // grasp.AddInsertOperatorVrp(&p23);
-    // grasp.AddInsertOperatorVrp(&p33);
-    // grasp.AddInsertOperatorVrp(&p43);
-    // grasp.AddInsertOperatorVrp(&p53);
+    grasp.AddInsertOperatorVrp(&p01);
+    grasp.AddInsertOperatorVrp(&p03);
+    grasp.AddInsertOperatorVrp(&p11);
+    grasp.AddInsertOperatorVrp(&p13);
+    grasp.AddInsertOperatorVrp(&p23);
+    grasp.AddInsertOperatorVrp(&p33);
+    grasp.AddInsertOperatorVrp(&p43);
+    grasp.AddInsertOperatorVrp(&p53);
 
 //    grasp.AddInsertOperatorVrp(&d0);
 //    grasp.AddInsertOperatorVrp(&d1);
@@ -169,7 +169,11 @@ void Solver::SaveResults(Sol &s) {
             fprintf(f, "%s;", _data->instance_name.c_str());
             fprintf(f, "%s;", s.GetLastCost().str().c_str());
             fprintf(f, "%d;", s.GetDepotCount());
-            fprintf(f, "%ld\n", Parameters::GetElapsedTime());
+            fprintf(f, "%ld;", Parameters::GetElapsedTime());
+            fprintf(f, "%d;", Parameters::MAX_OVERTIME );
+            fprintf(f, "%d;", Parameters::INTRA_ORDER_DELIVERY);
+            fprintf(f, "%d;", Parameters::INTER_ORDER_DELIVERY);
+            fprintf(f, "%d\n", Parameters::FIRST_DEL_MAX_ARRIVAL);
             fclose(f);
             printf("Saved to %s\n", _data->result_file.c_str());
         }

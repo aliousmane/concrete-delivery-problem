@@ -8,7 +8,6 @@ int Parameters::TW_WIDTH = 60;
 int Parameters::MAX_WORKING_TIME = 600;
 int Parameters::MAX_OVERTIME = 120;
 
-
 double Parameters::UNLOADING_RATE = 30; //30 m3/h
 
 std::mt19937 Parameters::RANDOM_GEN =
@@ -22,7 +21,7 @@ int Parameters::SORT_TYPE = Parameters::SORT::TWO;
 std::chrono::time_point<std::chrono::steady_clock> Parameters::START_TIME = std::chrono::steady_clock::now();
 
 
-int Parameters::INTRA_ORDER_DELIVERY = 20;
+int Parameters::INTRA_ORDER_DELIVERY = 10;
 int Parameters::INTER_ORDER_DELIVERY = 25;
 int Parameters::MIN_WORKING_TIME = 180;
 int Parameters::NORMAL_WORKING_TIME = 480;
@@ -37,7 +36,7 @@ int Parameters::FIRST_DEL_PENALTY = 1;//;1000;
 int Parameters::UNDERWORK_PENALTY = 1;//;100;
 int Parameters::OVERTIME_PENALTY = 1;//200;
 int Parameters::LATE_ARRIVAL_PENALTY = 10;
-int Parameters::FIRST_DEL_MAX_ARRIVAL = 120;
+int Parameters::FIRST_DEL_MAX_ARRIVAL = 20;
 
 int Parameters::LOAD_INSERTION = Parameters::DEPOTINSERTION::FORWARD;
 
