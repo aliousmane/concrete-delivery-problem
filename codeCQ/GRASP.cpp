@@ -36,7 +36,7 @@ void GRASP<NodeT, DriverT>::Optimize(
     }
     //TODO SortNode<Node, Driver>::radixSortGreatDemand(list_cust, s.GetData()->GetMaxDemand());
     std::vector<int> SORT_TYPE_VEC{
-            Parameters::SORT::ONE,
+            // Parameters::SORT::ONE,
                             Parameters::SORT::TWO,
 //            Parameters::SORT::THREE,
 //                            Parameters::SORT::FOUR,
