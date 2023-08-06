@@ -14,7 +14,7 @@ void CustInsertion::Insert(Sol &s) {
     assert(!customersList.empty());
     const int insertion_type = Parameters::LOAD_INSERTION;
     InsertWithBactrack(s, customersList);
-    bool beginLoop = true;
+    bool beginLoop = false;
     while (!removedList.empty() && beginLoop) {
         double demand = s.updateCost.satisfiedCost;
         customersList =   std::vector<Customer*>(removedList.begin(),removedList.end());

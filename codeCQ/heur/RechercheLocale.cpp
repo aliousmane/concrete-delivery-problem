@@ -18,16 +18,16 @@ void RechercheLocale::Run(Sol &s)
         {
             entree = false;
 			if(s.unscheduledCustomers.empty()) break;
-            if (Parameters::GetElapsedTime() - elapsed > 5000) break;
-            
+            Parameters::ShowTime();
             if(UnscheduledFirst(s)){
                 entree = true;
                 continue;
             }
-            if(RemoveAndReschedule(s)){    
+            if(RemoveAndReschedule(s)){
                 entree = true;
                 continue;
             }
+            if (Parameters::GetElapsedTime() - elapsed > 2000) break;
         }
     }
     RunAllFeasible(s);
@@ -82,10 +82,6 @@ bool RechercheLocale::UnscheduledFirst(Sol &s)
         s = cur;
         s.keyCustomers = keyCustomer;
         sortie = true;
-    }
-    if (sortie)
-    {
-        //        cout << "improves" << s.GetLastCost() << endl;
     }
     return sortie;
 }
