@@ -17,6 +17,7 @@ void RechercheLocale::Run(Sol &s)
         while (entree)
         {
             entree = false;
+			if(s.unscheduledCustomers.empty()) break;
             if (Parameters::GetElapsedTime() - elapsed > 5000) break;
             
             if(UnscheduledFirst(s)){
