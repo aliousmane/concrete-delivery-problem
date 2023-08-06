@@ -133,7 +133,7 @@ void Sol::Update(Depot *dep, Dock *dock, Delivery *del) {
     UpdateDemand(c, o, DeliveryLoad[del->delID]);
     orderLoads[o->orderID].insert(DeliveryLoad[del->delID]);
     if (isOrderSatisfied(o)) {
-//        updateCost.undeliveredCost -= o->demand * Parameters::UNDELIVERY_PENALTY;
+        updateCost.undeliveredCost -= o->demand * Parameters::UNDELIVERY_PENALTY;
     }
 
     if (isClientSatisfied(c)) {
@@ -521,6 +521,14 @@ bool Sol::FindForwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, con
                 break;
             }
             cur_it = next_it;
+        }
+    }
+    if (find) {
+        if (SlotSet.find(slot) != SlotSet.end()) {
+            cout << "End forward " << slot << endl;
+            Prompt::print(SlotSet);
+            exit(1);
+
         }
     }
     return find;

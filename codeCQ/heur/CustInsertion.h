@@ -14,10 +14,10 @@ class CustInsertion : public InsertOperator<Customer, Driver> {
 public:
     CustInsertion(Data &prob, InsRmvBuilder &insrmv)
             : _data(prob), _insrmv(insrmv),
-              customersList(0), _k(0), removedList(0),
+              customersList(0), _k(0),
               name("CustInsertion"), listMoves(0) {
         customersList = std::vector<Customer *>();
-        removedList = std::vector<Customer *>();
+        removedList = std::set<Customer *>();
         listMoves = std::vector<ListMoveVrp>();
         Init();
     }
@@ -56,7 +56,7 @@ private:
     std::vector<Depot *> depotList;
     std::vector<Driver *> driversList;
     std::vector<Customer *> customersList;
-    std::vector<Customer *> removedList;
+    std::set<Customer *> removedList;
 };
 
 
