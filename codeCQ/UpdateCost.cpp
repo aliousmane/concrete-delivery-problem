@@ -91,7 +91,7 @@ void Sol::UpdateForward(Depot *dep) {
                 auto *dock = dynamic_cast<Dock *>(prev);
 //                cout << " Update " << dock->id << " V "<<VisitFlags[dock->id]<<" |";
                 auto *prec_del = dynamic_cast<Delivery *>(DriverPrev[dock->id]);
-                if (prec_del != nullptr) {
+				if (prec_del != nullptr) {
                     Depot *prec_dep = GetDepotAssignedTo(DriverPrev[prec_del->id]);
                     if (!VisitFlags[prec_del->id] and dep != prec_dep) {
 //                        cout << "Update at first " << DriverPrev[prec_del->id]->id << " of depot " << prec_dep->depotID
