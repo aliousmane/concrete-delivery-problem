@@ -21,6 +21,13 @@ public:
             Delivery *del = s.GetDelivery(delID);
             assert(del != nullptr);
             for (Driver *d: driversList) {
+
+				if(Sol::FixDriver[del->delID]!=-1){
+					if(Sol::FixDriver[del->delID]!=d->id){
+						continue;
+					}
+				}
+
                 if (d->overTime >= Parameters::MAX_OVERTIME) {
                     continue;
                 }
@@ -44,6 +51,11 @@ public:
                 if (d->overTime >= Parameters::MAX_OVERTIME) {
                     continue;
                 }
+	            if(Sol::FixDriver[del->delID]!=-1){
+		            if(Sol::FixDriver[del->delID]!=d->id){
+			            continue;
+		            }
+	            }
                 insrmv.cancel = false;
                 Move<Delivery, Driver, MoveVrp> m;
                 InsertCost(s, del, d, m);

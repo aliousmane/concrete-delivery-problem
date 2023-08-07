@@ -6,7 +6,7 @@ long Parameters::RUNTIME = 300;
 int Parameters::MAX_LATE_TW = 1600;//1440;
 int Parameters::TW_WIDTH = 60;
 int Parameters::MAX_WORKING_TIME = 600;
-int Parameters::MAX_OVERTIME = 120;
+int Parameters::MAX_OVERTIME = 120;//120;
 
 double Parameters::UNLOADING_RATE = 30; //30 m3/h
 

@@ -93,6 +93,7 @@ public:
     static std::vector<double> pushVisit;
     static std::vector<double> StartBefore;
     static std::vector<double> FixLoad;
+    static std::vector<int> FixDriver;
     static std::vector<double> FixStartLoad;
     static std::vector<double> FixCustomerStartLoad;
     static std::map<std::tuple<int, int>, double> nodeMaxStartService;
@@ -538,6 +539,7 @@ public:
     static void InitStructure(Data *dat) {
 
         Sol::FixLoad.resize(dat->GetDeliveryCount(), -1);
+        Sol::FixDriver.resize(dat->GetDeliveryCount(), -1);
         Sol::FixStartLoad.resize(dat->GetDeliveryCount(), -1);
         Sol::FixCustomerStartLoad.resize(dat->GetCustomerCount(), -1);
         Sol::CustomerConflict.clear();

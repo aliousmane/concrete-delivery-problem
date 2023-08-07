@@ -24,6 +24,11 @@ public:
                 if(d->overTime >= Parameters::MAX_OVERTIME){
                     continue;
                 }
+	            if(Sol::FixDriver[del->delID]!=-1){
+		            if(Sol::FixDriver[del->delID]!=d->id){
+			            continue;
+		            }
+	            }
                 insrmv.cancel = false;
                 Move<Delivery, Driver, MoveVrp> m;
                 InsertCost(s, del, d, m);
@@ -74,6 +79,11 @@ public:
                 if(d->overTime >= Parameters::MAX_OVERTIME){
                     continue;
                 }
+	            if(Sol::FixDriver[del->delID]!=-1){
+		            if(Sol::FixDriver[del->delID]!=d->id){
+			            continue;
+		            }
+	            }
                 insrmv.cancel = false;
                 Move<Delivery, Driver, MoveVrp> m;
                 InsertCost(s, del, d, list_moves);
