@@ -37,7 +37,7 @@ void InsRmvMethodFast::InsertCost(Sol &s, Delivery *n, Driver *d,
     mo.n = n;
     mo.to = d;
     mo.demand = (Sol::FixLoad[n->delID] == -1) ?
-                std::min(d->capacity, s.orderCapRestante[n->orderID]) : Sol::FixLoad[n->delID];
+                std::min(d->capacity, s.orderCapRestante[n->orderID]) : std::min(s.orderCapRestante[n->orderID],Sol::FixLoad[n->delID]);
 
     if (mo.demand > d->capacity) return;
     if (mo.demand <= 0) {
@@ -71,13 +71,10 @@ void InsRmvMethodFast::InsertCost(Sol &s, Delivery *n, Driver *d,
     mo.n = n;
     mo.to = d;
     mo.demand = (Sol::FixLoad[n->delID] == -1) ?
-                std::min(d->capacity, s.orderCapRestante[n->orderID]) : Sol::FixLoad[n->delID];
+                std::min(d->capacity, s.orderCapRestante[n->orderID]) : std::min(s.orderCapRestante[n->orderID],Sol::FixLoad[n->delID]);
 
     if (mo.demand > d->capacity) return;
-    if (mo.demand <= 0) {
-        Prompt::print({std::to_string(Sol::FixLoad[n->delID]), std::to_string(mo.demand)
-                      });
-    }
+
     assert(mo.demand > 0);
 
     Dock *dock = s.GetDock(n->dockID);

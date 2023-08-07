@@ -121,6 +121,7 @@ void CDPSolver::SolveInstance(Sol &s, Data &dat, int iter) {
 }
 
 void CDPSolver::BuildOnSolution(Sol &s, Data &dat, int iter) {
+    s.isUpdated = true;
     CDPSolver::SolveCDP(s, dat, iter, false);
 }
 

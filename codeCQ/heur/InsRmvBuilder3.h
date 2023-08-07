@@ -76,7 +76,7 @@ public:
         mo.n = n;
         mo.to = d;
         mo.demand = (Sol::FixLoad[n->delID] == -1) ?
-                    std::min(d->capacity, s.orderCapRestante[n->orderID]) : Sol::FixLoad[n->delID];
+                    std::min(d->capacity, s.orderCapRestante[n->orderID]) : std::min(s.orderCapRestante[n->orderID],Sol::FixLoad[n->delID]);
 
         if (mo.demand > d->capacity) return;
 
@@ -106,7 +106,7 @@ public:
         mo.n = n;
         mo.to = d;
         mo.demand = (Sol::FixLoad[n->delID] == -1) ?
-                    std::min(d->capacity, s.orderCapRestante[n->orderID]) : Sol::FixLoad[n->delID];
+                    std::min(d->capacity, s.orderCapRestante[n->orderID]) : std::min(s.orderCapRestante[n->orderID],Sol::FixLoad[n->delID]);
 
         if (mo.demand > d->capacity) return;
 

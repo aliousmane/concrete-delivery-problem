@@ -182,7 +182,9 @@ void Sol::UnassignCustomer(Customer *c) {
     std::vector<Order *> orders = GetOrders(c);
     for (auto o1: orders) {
         UnassignOrder(o1);
+        orderCapRestante[o1->orderID]=o1->demand;
     }
+    clientCapRestante[c->custID] = c->demand;
 }
 
 void Sol::UnassignOrder(Order *o) {

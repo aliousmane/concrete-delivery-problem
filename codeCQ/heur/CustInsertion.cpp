@@ -9,7 +9,10 @@ using namespace std;
 void CustInsertion::Insert(Sol &s) {
     Sol::InitStructure(s.GetData());
     removedList.clear();
-    s.Update();
+    if(!s.isUpdated){
+        s.Update();
+    }
+    s.isUpdated = false;
     _insrmv.FillStructures(s, customersList, driversList);
     assert(!customersList.empty());
     const int insertion_type = Parameters::LOAD_INSERTION;
