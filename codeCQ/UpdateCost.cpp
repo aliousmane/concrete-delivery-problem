@@ -199,6 +199,7 @@ void Sol::Update(Depot *dep, Dock *dock, Delivery *del) {
     } else {
         if (WaitingTime[del->id] < 0) {
             lateCustomers.insert(c->custID);
+            updateCost.maxLateness = std::max(-WaitingTime[del->id] ,updateCost.maxLateness );
         }
     }
 
@@ -359,13 +360,17 @@ void Sol::GetCost(Depot *dep, Dock *dock, Delivery *del, Cost &cur_cost) {
 
     double arr_node = ArrivalTime[del->id];
 
+    double lateness = cur_cost.firstDeliveryCost;
     Sol::SetTimingCost(del, arr_node, real_del_time, EarlyTW(del),
                        cur_cost);
-
+    lateness = cur_cost.firstDeliveryCost - lateness;
+    if(CustomerPrev[del->id]->type != Parameters::TypeNode::DELIVERY){
+        cur_cost.maxLateness = std::max(lateness,cur_cost.maxLateness);
+    }
     arr_node = StartServiceTime[del->id];
     arr_node += UNLOADING_DURATION;
 
-    cur_cost.lateDeliveryCost += Sol::GetLateDeliveryCost(del, arr_node, LateTW(del));
+    cur_cost.lateDeliveryCost += Sol::GetLateDeliveryCost(del, arr_node, LateTW(del));;
     arr_node += Data::CleaningTime(del, d);
 
     shiftDurationCost[d->id] = arr_node + Travel(del->distID, d->distID) - d->start_shift_time;
