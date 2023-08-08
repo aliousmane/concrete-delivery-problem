@@ -566,7 +566,7 @@ For the construction phase, we have developed two greedy randomized heuristics. 
 
 The customer-based insertion heuristic builds a solution from scratch by scheduling all of a customer's orders one at a time. As shown in Algorithm~\ref{alg:greedyCustIns}, for each customer, we randomly select the first order to schedule. To schedule an order, we iterate over each of its delivery nodes, find a feasible pair of task, and add it to the current solution. For a delivery node $d$, we check if the list of operations $M[d]$ is empty. If it is, for each available driver $k$ we simulate the loading and unloading operations $(L^k_d,U^k_d)$ with the procedure $SimulateVisit$, and if $k$ can serve $d$, we add $k$ to a candidate list $CL$ and $(L^k_d,U^k_d)$ to $M[d]$.
 
-The procedure $SimulateVisit$ takes as parameters a partial solution, a delivery node $d$, a driver $k$, and a numeric value $\lambda$. Its goal is to find the earliest time at which the delivery must start at $d$ and the best position within the route of $k$. When planning the visit of customer $i$ to node $d$ of order $o$ with driver $k$, we first compute his expected delivery time $v_d$ as follows:
+The $SimulateVisit$ procedure takes a partial solution, a delivery node $d$, a driver $k$ and a numeric value $\lambda$ as parameters. Its goal is to find the earliest time when an unloading service can start at $d$ and the best position within the route of $k$. When planning to visit node $d$ of order $o$ and customer $i$ with driver $k$, we first compute his expected delivery time $v_d$ as follows:
 
 $ v_d = \left\{
     \begin{array}{rl}
@@ -585,7 +585,7 @@ If $RCL$ is not empty, we select a random driver from it, insert its correspondi
 
     {\setstretch{1}
         %  {\small
-        \begin{algorithm}[htbp]
+        \begin{algorithm}[]
             \caption{Customer-Based insertion algorithm }
             \label{alg:greedyCustIns}
             \DontPrintSemicolon
@@ -602,7 +602,7 @@ If $RCL$ is not empty, we select a random driver from it, insert its correspondi
 
             \ForEach{order $o_1 \in \mathcal{O}_i$}{
 
-            $delay \leftarrow 0$
+            $\lambda \leftarrow 0$
 
             \For{ $j=0$ \KwTo $n^{max}_{o_1}-1$    }{
 
@@ -673,7 +673,7 @@ Consider the scenario where two customers require their services to start at the
 
 The delivery-based insertion heuristic constructs a feasible solution from scratch by scheduling a delivery node one at a time. The pseudocode for this heuristic is outlined in Algorithm~\ref{alg:delbasedIns}. It starts with an empty solution $S$ and initially fills $CL$ with the first delivery of a randomly selected order for each customer. Within each iteration of the $while$ loop, we filter $CL$ to obtain a reduced candidate list $CL'$ of deliveries from a given neighborhood. With this filtering, we can force the algorithm to schedule nodes with certain criteria first, which could be nodes from customers with the same demand, due date, or geographic area. We can also decide whether to schedule customers with the highest (or lowest) demand or the earliest (latest) due date first.
 
-For each delivery $d$ in $CL'$, the algorithm determines the best available driver $k$ and adds the corresponding loading and unloading task $(L^k_d, U^k_d)$ to a list of tasks. This is done using the $SimulateVisit$ procedure described earlier. Next, the algorithm constructs a $RCL$ from the list of tasks. If it is empty, the algorithm proceeds to the next iteration. Otherwise, it randomly selects a pair of tasks from the RCL, inserts them into $S$, and updates the remaining order and customer quantities. If an order $o$ is not fulfilled after visiting $d^j_{o}$, we add its next delivery node $d^{j+1}_{o}$ to $CL$.  Otherwise, if the customer has remaining orders, we select the first delivery node $d^{0}_{o'}$ of another randomly selected order $o'$ and add it to $CL$.
+For each delivery $d$ in $CL'$, the algorithm determines the best available driver $k$ and adds the corresponding loading and unloading task $(L^k_d, U^k_d)$ to a list of tasks. This is done using the $SimulateVisit$ procedure described earlier. Next, the algorithm constructs a $RCL$ from the list of tasks. If it is empty, the algorithm proceeds to the next iteration. Otherwise, it randomly selects a pair of tasks from the $RCL$, inserts them into $S$, and updates the remaining order and customer quantities. If an order $o$ is not fulfilled after visiting $d^j_{o}$, we add its next delivery node $d^{j+1}_{o}$ to $CL$.  Otherwise, if the customer has remaining orders, we select the first delivery node $d^{0}_{o'}$ of another randomly selected order $o'$ and add it to $CL$.
 
     % The greedy aspect of GRASP is the creation of the set $RCL$, the probabilistic aspect is the random selection in $RCL$, and the adaptive aspect is the updating of $CL$ and the re-evaluation of the incremental costs.
 
@@ -745,35 +745,16 @@ For each delivery $d$ in $CL'$, the algorithm determines the best available driv
         %  }
     }
 
-\subsection{ Local Search}
+\subsection{Local Search}
 
-We use four local search operators to improve the solution obtained after the construction phase.
+After the construction phase, the local search phase iteratively invokes five operators using a first-improvement strategy. The first operator (\textit{Swap Load}) exchanges loads between two deliveries of the same order. The \textit{Swap Driver} operator explores alternative driver assignments by swapping drivers assigned to two delivery nodes. The \textit{Relocate} operator removes a delivery node and places it in a different location. The \textit{Consolidate Load} operator assigns an order request initially split between two drivers to a single driver, if the driver's capacity allows. The \textit{Remove and Reschedule} operator selects an unscheduled customer, denoted $i$, within the current solution. It then identifies a set $C$ containing scheduled customers with the same time slot as $i$. All elements of $C$ are removed and rescheduled along with $i$. This local search process continues until no further improvements can be made or a timeout is reached.
 
-\subsubsection*{Swap load operator}
-
-The first operator exchanges loads between two deliveries of the same order. This move affects the loading operations and can potentially improve the number of scheduled orders.
-
-\subsubsection*{Swap driver operator}
-
-This operator investigates different driver assignments by swapping the drivers assigned to two delivery nodes in the current solution.
-
-\subsubsection*{Relocate load operator}
-
-This operator moves a delivery load that was originally split between two drivers to a single driver, if that driver's capacity allows.
-%   By consolidating the load into a single vehicle, we can potentially optimize the routing and reduce the total travel distance. This operator helps in better utilizing the available capacity of the vehicles and improving the overall efficiency of the solution.
-
-\subsubsection*{Remove and reschedule operator}
-
-This operator takes a customer $i$ not scheduled in the current solution. It then identifies a set $C$ of scheduled customer's with the same time slot as $i$. Elements of $C$ are removed and attempted to be rescheduled along with $i$.
-
-
-% The application of these local search operators is performed iteratively, allowing for multiple rounds of neighborhood exploration and solution refinement. Each operator is applied sequentially, and the resulting solution is evaluated to determine if an improvement has been achieved. The process continues until no further improvements can be made, indicating that a locally optimal solution has been reached.
 
 \subsection{Path relinking}
 
-After the construction and local search steps, it may happen that some customer orders cannot be scheduled within a solution. The goal of the path relinking procedure is to use each customer's scheduling information from existing solutions and combine them effectively to construct a solution that schedules all customers. This algorithm iterates through each element of a pool of solutions and attempts to insert the customer's deliveries into a newly constructed solution.
+After the construction and local search steps, it is possible that some customers remain unscheduled in one solution while being accommodated in another. The goal of the path relinking procedure is to use each customer's scheduling information from existing solutions and combine them effectively to construct a solution that schedules all customers. This algorithm iterates through each element of a pool of solutions and attempts to insert each customer's schedule into a newly constructed solution.
 
-\section{ Experimental results}
+\section{Computational results}
 \label{comp_exp}
 
 In this section, we present and discuss the results of the computational experiments of the GRASP heuristic described in section~\ref{grasp_method}. The GRASP algorithm is coded in C++. We run our experiments on a dataset extracted from data provided by our industrial partner.
