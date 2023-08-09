@@ -754,31 +754,32 @@ After the construction phase, the local search phase iteratively invokes five op
 
 After the construction and local search steps, it is possible that some customers remain unscheduled in one solution while being accommodated in another. The goal of the path relinking procedure is to use each customer's scheduling information from existing solutions and combine them effectively to construct a solution that schedules all customers. This algorithm iterates through each element of a pool of solutions and attempts to insert each customer's schedule into a newly constructed solution.
 
-\section{Computational results}
+\section{Computational experiments}
 \label{comp_exp}
 
-In this section, we present and discuss the results of the computational experiments of the GRASP heuristic described in section~\ref{grasp_method}. The GRASP algorithm is coded in C++. We run our experiments on a dataset extracted from data provided by our industrial partner.
+In this section, we present and discuss the results of the computational experiments of the GRASP heuristic described in section~\ref{grasp_method}. The GRASP algorithm is coded in C++. We run our experiments on a dataset extracted from delivery operations records provided by our industry partner and on the benchmark data used in \cite{kinable2014concrete}.
 
 \subsection{Generation of instances}
+\newcommand{\nbInstance}{36}
+The dataset used in this section was obtained from our partner and contains records representing delivery operations from up to 8 production centers over a period of $\nbInstance$ days. We have created $\nbInstance$ instances, where each instance corresponds to a daily operation. An instance contains information such as each driver's capacity, associated batch plant, and shift start time. For each customer, we have the due time, the total demand, and the number of orders (type of concrete) received. For each order, we have its demand and associated production plant. Finally, we have the loading capacity for each plant. The name of an instance has the format $C\_k\_n\_o\_z$, where $k$ is the number of available drivers, $n$ is the number of customers, $o$ is the total number of daily orders, and $z$ is the number of plants. The dataset is divided into small, medium, and large sets according to the total number of daily orders. We have summarized the data set in the table~\ref{tab:instances}.
 
-The dataset used in this section was obtained from our partner and contains records representing delivery operations from up to 8 production centers over a period of 50 days. We generated 50 instances, with each instance corresponding to a daily operation. The instances include informations such as each driver capacity, associated depot, and shift start time. For each customer, we have the due time, total demand, and the number of orders (type of concrete) received. For each order, we specified its demand and associated production plant. Finally, we include loading capacities for each production center. 
-The name of an instance has the format $C\_k\_n\_o\_z$. $k$ is the number of available drivers, $n$ the number of customers, $o$ the total number of daily orders, and $z$ the number of plants.
+\begin{table}[htpb]
+    \caption{Instances summary}
+    \label{tab:instances}
+    \resizebox*{\textwidth}{!}{
+    \begin{tabular}{lcccccc}
+        \toprule
+        {} &  \# &           Load  &   \#Order & \#Client &  \#Driver & \#Depot \\
+          &       &         (m$^3$)        &         &         &          &        \\
+        \midrule
+        Small  &     8 &    226.5-957.5 &     7-15 &    4-11 &    13-39 &    1-3 \\
+        Medium &    14 &  1,164.5-2,971.0 &    44-98 &   41-89 &   76-140 &    6-8 \\
+        Large  &    14 &  3,078.5-3,953.5 &  107-137 &  92-128 &  133-153 &    8-8 \\
+        \bottomrule
+        \end{tabular}  
+    }
+\end{table}
 
-The dataset is subdivised in a small, medium and large sets, according to the number of drivers and total demands served. We summarized both sets in Table~\ref*{}
-or 
-The dataset is subdivised in a small, medium and large sets, according to the number of orders served. We summarized both sets in Table~\ref*{}
-
-
-% This dataset allows us to evaluate the effectiveness and performance of our GRASP algorithm in optimizing delivery operations in a real-world setting.
-
-
-\begin{itemize}
-    \item   8 production centers located in greater Montreal
-    \item   42 days of delivery operations from Fall 2020
-    \item   From 7 to 139 orders each day
-    \item   Up to 137 drivers
-    \item   2 types of trucks of capacity 8 and 12 m$^3$
-\end{itemize}
 
 \subsubsection{ Results for the generated instances}
 
@@ -794,24 +795,51 @@ distance, demande servie, first, underwork, overtime.
 \begin{table}
     \resizebox*{\textwidth}{!}{
 
-\begin{tabular}{lrrrrrrr}
-    \toprule
-    {} &  satisfiedCost &  driverUsed &  travelCost &  firstDeliveryCost &  underWorkCost &  overTimeCost &  runtime \\
-    Name     &                &             &             &                    &                &               &          \\
-    \midrule
-    20201121 &          226.5 &          13 &     1243.55 &               0.51 &           0.00 &          0.00 &     5.26 \\
-    20201010 &          267.0 &          13 &      745.10 &               0.00 &           0.00 &          0.00 &     5.32 \\
-    20201107 &          333.5 &          18 &      777.25 &               0.00 &         200.16 &          0.00 &     5.19 \\
-    20201031 &          375.0 &          15 &     1017.64 &               0.00 &         216.06 &         28.10 &     5.42 \\
-    20201114 &          388.0 &          19 &     1743.64 &               0.00 &         149.48 &          0.00 &     5.42 \\
-    20201128 &          776.0 &          31 &     2278.18 &               0.00 &           4.19 &        438.14 &     5.16 \\
-    20201024 &          937.5 &          35 &     4403.57 &               0.00 &          58.30 &       1005.24 &     5.72 \\
-    20201021 &         1160.5 &          73 &     6107.22 &               0.00 &        2535.40 &        185.02 &     5.28 \\
-    20201013 &         1565.0 &         102 &     9214.74 &              19.53 &        2955.35 &         95.74 &     5.32 \\
-    20201026 &         1839.5 &         116 &    13585.60 &              44.44 &        1826.70 &        227.56 &     5.41 \\
-    20201007 &         2512.5 &         127 &    15166.00 &               5.09 &         877.68 &        574.76 &     5.67 \\
-    \bottomrule
-    \end{tabular}
+    \begin{tabular}{llrrrrrrrr}
+        \toprule
+              &                 &  satisfiedCost &  travelCost &  firstDeliveryCost &  maxfirstDelivery &  underWorkCost &  overTimeCost &  driverUsed &  runtime \\
+        size & Instance &                &             &                    &                   &                &               &             &          \\
+        \midrule
+        small & C\_15\_4\_7\_2 &          375.0 &     1013.11 &               0.00 &              0.00 &          56.79 &        244.61 &          15 &  3009.54 \\
+              & C\_19\_7\_8\_2 &          388.0 &     1714.74 &               0.00 &              0.00 &          97.56 &        283.83 &          19 &  3020.89 \\
+              & C\_13\_5\_8\_1 &          267.0 &      745.10 &               0.00 &              0.00 &           0.00 &          0.00 &          13 &  3027.39 \\
+              & C\_31\_8\_11\_3 &          776.0 &     2297.20 &               0.00 &              0.00 &         627.37 &        539.96 &          30 &  3033.85 \\
+              & C\_39\_10\_11\_3 &          937.5 &     4077.20 &               0.00 &              0.00 &         720.00 &        866.98 &          31 &  3020.75 \\
+              & C\_18\_6\_11\_2 &          333.5 &      753.26 &               0.00 &              0.00 &         653.78 &          0.00 &          17 &  3004.51 \\
+              & C\_13\_11\_12\_1 &          226.5 &     1243.55 &               0.00 &              0.00 &          66.01 &          0.00 &          13 &  3022.06 \\
+              & C\_35\_11\_15\_3 &          613.5 &     3724.29 &              12.41 &             12.41 &         246.04 &        454.51 &          28 &  3035.23 \\
+        Medium & C\_76\_41\_44\_6 &         1160.5 &     5715.53 &               1.00 &              1.00 &        3566.49 &        771.23 &          69 &  3021.92 \\
+              & C\_104\_42\_47\_8 &         1565.0 &     9114.62 &              23.00 &             16.24 &        4180.95 &        671.94 &          94 &  3047.99 \\
+              & C\_98\_63\_70\_7 &         1746.5 &    13888.90 &              19.86 &             12.40 &        1086.60 &       1477.76 &          94 &  3025.72 \\
+              & C\_118\_57\_70\_6 &         2327.5 &    15066.80 &              83.79 &             16.44 &        1522.11 &       1892.64 &         117 &  3020.70 \\
+              & C\_130\_68\_74\_7 &         2595.0 &    19133.50 &             251.77 &             54.40 &        1523.19 &       2924.28 &         128 &  3053.96 \\
+              & C\_117\_67\_78\_8 &         1839.5 &    13946.30 &              44.68 &              9.98 &        1578.90 &        639.28 &         116 &  3007.88 \\
+              & C\_128\_66\_80\_8 &         2512.5 &    15177.80 &               2.00 &              2.00 &        1874.83 &        965.65 &         125 &  3007.70 \\
+              & C\_120\_71\_82\_8 &         2060.0 &    12461.20 &              68.38 &             20.06 &        3119.66 &       1478.63 &         107 &  3028.24 \\
+              & C\_140\_79\_83\_7 &         2425.0 &    18811.40 &             252.94 &             41.65 &        2193.63 &       1963.05 &         136 &  3025.83 \\
+              & C\_129\_78\_85\_8 &         2685.5 &    16927.30 &             202.26 &             50.12 &        1492.50 &       2794.21 &         128 &  3030.32 \\
+              & C\_133\_80\_89\_8 &         2893.5 &    17572.10 &             187.42 &             49.24 &        1803.22 &       1306.94 &         130 &  3040.74 \\
+              & C\_136\_85\_97\_8 &         2673.0 &    16832.10 &             154.97 &             50.21 &        3507.40 &       1958.58 &         132 &  3028.15 \\
+              & C\_137\_89\_97\_7 &         2939.5 &    21934.10 &             697.18 &             59.10 &        1220.15 &       3038.33 &         137 &  3025.45 \\
+              & C\_135\_84\_98\_7 &         2971.0 &    22399.30 &             867.12 &             59.44 &         550.77 &       2887.51 &         133 &  3137.11 \\
+        Large & C\_143\_92\_107\_8 &         3684.5 &    22700.20 &             147.42 &             48.31 &         899.82 &       3702.01 &         142 &  3019.52 \\
+              & C\_141\_98\_108\_8 &         3541.0 &    20550.10 &             566.69 &             57.49 &        1438.11 &       2910.97 &         139 &  3011.84 \\
+              & C\_133\_98\_109\_8 &         3078.5 &    23102.40 &             193.01 &             49.44 &         450.57 &       3931.83 &         132 &  3018.05 \\
+              & C\_133\_101\_119\_8 &         3229.0 &    18978.90 &             467.94 &             59.47 &        1084.78 &       2334.16 &         129 &  3179.81 \\
+              & C\_145\_108\_122\_8 &         3670.5 &    23401.60 &             668.15 &             59.77 &        1438.60 &       3569.62 &         143 &  3056.51 \\
+              & C\_144\_101\_123\_8 &         3437.5 &    24560.70 &             451.36 &             56.61 &        1663.43 &       4359.64 &         142 &  3039.02 \\
+              & C\_153\_99\_123\_8 &         3513.0 &    20696.60 &             839.56 &             52.60 &        2465.87 &       2892.55 &         149 &  3072.58 \\
+              & C\_146\_114\_129\_8 &         3499.5 &    21991.50 &             898.10 &             55.22 &        1750.60 &       4943.03 &         142 &  3011.54 \\
+              & C\_142\_112\_129\_8 &         3471.0 &    21526.10 &             252.62 &             58.09 &         624.87 &       3360.64 &         137 &  3018.76 \\
+              & C\_153\_112\_131\_8 &         3953.5 &    25455.30 &             868.81 &             49.15 &         500.68 &       3775.57 &         148 &  3005.96 \\
+              & C\_144\_114\_132\_8 &         3401.5 &    23259.00 &            1092.82 &             57.99 &         634.53 &       2705.26 &         140 &  3046.75 \\
+              & C\_143\_114\_136\_8 &         3350.5 &    21760.00 &            1131.39 &             59.58 &        1284.13 &       2360.19 &         141 &  3056.56 \\
+              & C\_153\_128\_137\_8 &         3946.5 &    25822.20 &             742.75 &             57.10 &         899.92 &       5101.58 &         150 &  3060.79 \\
+              & C\_141\_115\_137\_8 &         3739.5 &    24670.70 &             750.04 &             55.88 &         518.63 &       5156.41 &         137 &  3021.26 \\
+        \bottomrule
+        \end{tabular}
+        
+        
     }
 \end{table}
     
