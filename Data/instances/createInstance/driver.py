@@ -14,6 +14,7 @@ class Driver:
         self.t_nbr = ""
         self.d_nbr = -1
         self.description = ""
+        self.start_shift = 0
 
     def __str__(self):
         return f"Driver Nbr {self.t_nbr} {self.d_nbr} Rank {self.rank} {self.description} depot n {self.depot_nbr} fac {self.factory_nbr} de capacité {self.capacity}\n"

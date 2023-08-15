@@ -175,6 +175,7 @@ void Data::LoadCQInstance() {
             Driver d;
             inputFile >> d.id >> d.no >> d.truck_nbr >> d.rank >> d.depotID >>
                       d.capacity >> d.start_shift_time;
+//            d.start_shift_time = 260;
             d.id = i;
             if (d.rank == -1) d.rank = MAX_RANK;
             Node d1;
@@ -220,8 +221,8 @@ void Data::LoadCQInstance() {
             n.constID = n.custID;
             n.id = GetNodeCount();
             n.no = n.id + 1;
-//            n.late_tw = n.early_tw + ceil(UnloadingTime(n.demand, n.demand)) + 60;
-            n.late_tw = n.early_tw + Parameters::MAX_LATE_TW;
+            n.late_tw = n.early_tw + ceil(UnloadingTime(n.demand, n.demand)) + 60;
+//            n.late_tw = n.early_tw + Parameters::MAX_LATE_TW;
             n.type = Parameters::CUSTOMER;
             n.siteID = n.id;
             Node d1;

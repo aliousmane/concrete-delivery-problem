@@ -35,59 +35,75 @@ def create_instance_CQ(Object,jour)->None:
         sortedMap[ord] = (cur['QUANTITY'].sum(), ordres[ordres['ORDER_ID']==ord]['SHIPTIME (min)'].min(),len(delivered_prod))
 
     sortedMap = sorted(sortedMap.items(), key=lambda x:(x[1][0],x[1][1],x[1][2]))
-    # print(sortedMap)
-    print(totalDemand)
+
     drivers = list(dict.fromkeys(tickets['DRIVER_NBR']))
     dict_driver = {}
+    usedLoc = set()
     for driver in drivers:
         trucks = list(dict.fromkeys(tickets['TRUCK_NBR'][tickets['DRIVER_NBR']==driver]))    
         
         if int(driver) == 1:
             for t in trucks:
                 d = Driver()
+                df_drv = tickets[tickets['TRUCK_NBR']==t]
+                _data = df_drv[["BEGIN_LOAD", "ARRIVE_PLANT"]].copy()
+                _data.sort_values(["BEGIN_LOAD"], inplace=True)
+                begin, end = _data.iloc[0, 0], _data.iloc[-1, 1]
+                a = (begin.hour * 60 + begin.minute - 10)
+                a =  a - a%5
+                d.start_shift = a
+                d.factory_nbr = Counter(df_drv['SHIP_LOC']).most_common(1)[0][0]
                 d.t_nbr = t
                 d.d_nbr = int(driver)
-                _df = tickets[tickets['TRUCK_NBR']==t]
-                _cap = max(_df['QUANTITY'])
+                _cap = max(df_drv['QUANTITY'])
                 if _cap <= 8:
                     d.capacity = 8
                 else:
                     d.capacity = 12
-                d.factory_nbr = Counter(_df['SHIP_LOC']).most_common(1)[0][0]
                 dict_driver[d.t_nbr] = d
 
         elif len(trucks) == 1:
+            d  = Driver()
+            df_drv = tickets[tickets['TRUCK_NBR'].isin(trucks)]
+            _data = df_drv[["BEGIN_LOAD", "ARRIVE_PLANT"]].copy()
+            _data.sort_values(["BEGIN_LOAD"], inplace=True)
+            begin, end = _data.iloc[0, 0], _data.iloc[-1, 1]
+            a = (begin.hour * 60 + begin.minute - 10)
+            a =  a - a%5
             d = Driver()
-            d.t_nbr = trucks[0]
-            d.d_nbr = int(driver)
-            _df = tickets[tickets['TRUCK_NBR'] == d.t_nbr]
-            _cap = max(_df['QUANTITY'])
+            d.factory_nbr = Counter(df_drv['SHIP_LOC']).most_common(1)[0][0]
+            d.start_shift = a
+            _cap = max(df_drv['QUANTITY'])
             if _cap <= 8:
                 d.capacity = 8
             else:
                 d.capacity = 12
-            d.factory_nbr = Counter(_df['SHIP_LOC']).most_common(1)[0][0]
+
+            d.t_nbr = trucks[0]
+            d.d_nbr = int(driver)
             dict_driver[d.t_nbr] = d       
         else:
             d = Driver()
-            d.t_nbr = '|'.join(trucks)
-            d.d_nbr = int(driver)
-            _df = tickets[tickets['TRUCK_NBR'].isin(trucks)]
-            _cap = max(_df['QUANTITY'])
+            df_drv = tickets[tickets['TRUCK_NBR'].isin(trucks)]
+            _data = df_drv[["BEGIN_LOAD", "ARRIVE_PLANT"]].copy()
+            _data.sort_values(["BEGIN_LOAD"], inplace=True)
+            begin, end = _data.iloc[0, 0], _data.iloc[-1, 1]
+            a = (begin.hour * 60 + begin.minute - 10)
+            a =  a - a%5
+            d = Driver()
+            d.factory_nbr = Counter(df_drv['SHIP_LOC']).most_common(1)[0][0]
+            d.start_shift = a
+            _cap = max(df_drv['QUANTITY'])
             if _cap <= 8:
                 d.capacity = 8
             else:
                 d.capacity = 12
-            d.factory_nbr = Counter(_df['SHIP_LOC']).most_common(1)[0][0]
+            d.t_nbr = '|'.join(trucks)
+            d.d_nbr = int(driver)
             dict_driver[d.t_nbr] = d
-#                     
+        usedLoc.add(d.factory_nbr)             
                 
     contents = []
-    usedLoc = set()
-    for i, id in enumerate(dict_driver):
-        dr = dict_driver[id]
-        df_drv = tickets[tickets['TRUCK_NBR'].isin (dr.t_nbr.split('|'))]
-        usedLoc.add(Counter(df_drv['SHIP_LOC']).most_common(1)[0][0])
     count = 0
     for dep in usedLoc:    
         if dep not in Object.df_depots.index:
@@ -98,29 +114,22 @@ def create_instance_CQ(Object,jour)->None:
     #  Ajouter les chauffeurs
     # Lines of drivers: driver id, driver number, driver rank, depot assigned driver max capacity
     driver_cap = set()
-    dict_driver = dict(sorted(dict_driver.items(), key=lambda x:(x[1].capacity,x[1].factory_nbr)))
+    dict_driver = dict(sorted(dict_driver.items(), key=lambda x:(x[1].capacity,x[1].factory_nbr,x[1].start_shift)))
 
     contents.append(f"Drivers:  {len(dict_driver):8}\n")
 
     for i, id in enumerate(dict_driver):
         
         dr = dict_driver[id]
-        df_drv = tickets[tickets['TRUCK_NBR'].isin(dr.t_nbr.split('|'))]
-        _data = df_drv[["BEGIN_LOAD", "ARRIVE_PLANT"]].copy()
-        _data.sort_values(["BEGIN_LOAD"], inplace=True)
-        begin, end = _data.iloc[0, 0], _data.iloc[-1, 1]
-    
-        factory_nbr = Counter(df_drv['SHIP_LOC']).most_common(1)[0][0]
-        a = (begin.hour * 60 + begin.minute - 30)
         contents.append(
-            f"{i:3} {dr.d_nbr:8} {'_'.join(dr.t_nbr.split(' ')):8} {dr.rank:6} {Object.depot_loc_id[factory_nbr]:2} {dr.capacity:2.0f}"
-            f" { a - a%5 :4}\n")
+            f"{i:3} {dr.d_nbr:8} {'_'.join(dr.t_nbr.split(' ')):8} {dr.rank:6} {Object.depot_loc_id[dr.factory_nbr]:2} {dr.capacity:2.0f}"
+            f" { dr.start_shift :4}\n")
         driver_cap.add(dr.capacity)
 
         if dr.d_nbr == 1 or dr.d_nbr == 999:
-            Instances_with_extern_fleet.add(jour)
-    if jour not in Instances_with_extern_fleet:
-                Instances_with_intern_fleet.add(jour)
+            Instances_with_extern_fleet.add(str(jour))
+    if str(jour) not in Instances_with_extern_fleet:
+                Instances_with_intern_fleet.add(str(jour))
     dmd_total = 0
     clientCount = 0
     new_orders = list()
@@ -130,11 +139,9 @@ def create_instance_CQ(Object,jour)->None:
         delivered_prod =  list(set(tickets[tickets['ORDER_ID']==ord]['PROD_NBR']) & set(ordered_prod))
         if len(delivered_prod) == 0:
             continue
-        # print(ord)
         ticket_ordres = tickets[tickets['PROD_NBR'].isin(delivered_prod)][tickets['ORDER_ID'].isin([ord])]
         
         dmd_total = dmd_total + ticket_ordres['QUANTITY'].sum()
-        # print(ord,' ',ticket_ordres['QUANTITY'].sum())
         ordre = ordres[ordres['ORDER_ID']==ord].iloc[0]
         
         cur_order_count = 0
@@ -148,7 +155,7 @@ def create_instance_CQ(Object,jour)->None:
         new_orders.append(ord)
     contents.insert(-clientCount, f"Clients:  {clientCount} {dmd_total}\n")
             
-    print('Client Demand ',dmd_total)
+    print('Client Demand ',dmd_total,end=' ')
 
     order_count = 0    
     sum_order_dmd = 0
@@ -204,6 +211,6 @@ def create_all_instances_CQ(Object) -> None:
     Object.instance_size = dict()
     Object.instance_size[f"date"]=['depot','client','order','driver','demand','cap']
     ticket_date = list(dict.fromkeys(Object.df_tickets['DATE']))
-#         ticket_date = [datetime.date(2020, 10, 10)]
+    # ticket_date = [datetime.date(2020, 10, 10),datetime.date(2020, 10, 1)]
     for jour in ticket_date:
-        create_instance_CQ(Object,jour)            
+        create_instance_CQ(Object,jour)         

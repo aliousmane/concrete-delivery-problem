@@ -147,13 +147,10 @@ void InsRmvMethodFast::ApplyInsertMove(Sol &s, Move<Delivery, Driver, MoveVrp> &
     s.InsertAfter(m.move.dock, m.move.prev, m.to);
     s.InsertAfter(m.n, m.move.dock, m.to);
     s.AssignDeliveryToCustomer(m.n);
-    assert(m.demand > 0);
     s.DeliveryLoad[m.n->delID] = m.demand;
-    assert(s.DeliveryLoad[m.n->delID] > 0);
     s.ArrivalTime[m.move.dock->id] = m.arrival_dock;
     s.ArrivalTime[m.n->id] = m.arrival_del;
     s.DepotAssignTo[m.move.dock->id] = m.move.depot;
-    assert(m.arrival_dock <= m.arrival_del + s.Travel(m.move.dock, m.n));
 }
 
 Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, Driver *d, Cost &solcost, double demand,
@@ -441,6 +438,7 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         newcost.satisfiedCost = demand;
         newcost.isFeasible = true;
         newcost += s.updateCost;
+        newcost.undeliveredCost -=s.updateCost.undeliveredCost;
 
         newcost.underWorkCost = newcost.underWorkCost - d->underWork + Sol::GetUnderWorkCost(node_arr
                                                                                              + s.Travel(n->distID,

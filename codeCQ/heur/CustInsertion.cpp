@@ -14,13 +14,15 @@ void CustInsertion::Insert(Sol &s) {
     assert(!customersList.empty());
     const int insertion_type = Parameters::LOAD_INSERTION;
     InsertWithBactrack(s, customersList);
-    bool beginLoop = false;
+    bool beginLoop = true;
     while (!removedList.empty() && beginLoop) {
         double demand = s.updateCost.satisfiedCost;
-        customersList = removedList;
+        customersList =   std::vector<Customer*>(removedList.begin(),removedList.end());
+        cout<<" try "<<s.GetLastCost()<<endl;
+        cout<<" try backward "<<s.updateCost<<endl;
+        Prompt::print(customersList);
         Sol cur(s);
         Parameters::LOAD_INSERTION = Parameters::DEPOTINSERTION::BACKWARD;
-
         InsertWithBactrack(cur, customersList);
         if (cur < s) {
             s = cur;
@@ -34,7 +36,6 @@ void CustInsertion::Insert(Sol &s) {
 void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *> &list) {
     if (list.size() > 1) {Sort(s, list, CustInsertion::_k);}
     removedList.clear();
-    removedList.shrink_to_fit();
     listMoves.clear();
     listMoves.shrink_to_fit();
     listMoves.resize(s.GetDeliveryCount());
@@ -53,18 +54,20 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *> &list) {
         Order *cur_order = s.GetRandomOrder(c, UsedOrder);
         if (cur_order == nullptr) {
             nextCustomer = true;
+            removedList.insert(c);
             s.UnassignCustomer(c);
             continue;
         }
         UsedOrder.insert(cur_order->orderID);
         nextCustomer = Insert(s, c, cur_order);
     }
+    s.Update();
 }
 
 bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
     bool nextCustomer = false;
     int depth = 0;
-//    if (c->custID == 5)
+//    if (c->custID == 57)
 //        Parameters::SHOW = true;
     for (int j = 0; j < s.GetDeliveryCount(cur_order);) {
         Delivery *del = s.GetDelivery(cur_order, j);
@@ -80,6 +83,7 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
 
         if (depth++ > Parameters::BACKTRACK_DEPTH * s.GetDeliveryCount(cur_order)) {
             nextCustomer = true;
+            removedList.insert(c);
             s.UnassignCustomer(c);
             break;
         }
@@ -182,7 +186,7 @@ bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
             }
 //            s.UnassignOrder(cur_order);
             s.UnassignCustomer(c);
-            removedList.emplace_back(c);
+            removedList.insert(c);
             break;
         }
         if (best.IsFeasible) {
@@ -300,7 +304,8 @@ void CustInsertion::Insert(Sol &s, std::vector<int> const &list) {
                         continue;
                     }
                 }
-                s.UnassignOrder(cur_order);
+                s.UnassignCustomer(c);
+                removedList.insert(c);
                 break;
             }
             if (best.IsFeasible) {

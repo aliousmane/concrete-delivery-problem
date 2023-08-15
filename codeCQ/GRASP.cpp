@@ -36,7 +36,7 @@ void GRASP<NodeT, DriverT>::Optimize(
     }
     //TODO SortNode<Node, Driver>::radixSortGreatDemand(list_cust, s.GetData()->GetMaxDemand());
     std::vector<int> SORT_TYPE_VEC{
-            Parameters::SORT::ONE,
+//            Parameters::SORT::ONE,
                             Parameters::SORT::TWO,
 //            Parameters::SORT::THREE,
 //                            Parameters::SORT::FOUR,
@@ -175,6 +175,7 @@ void GRASP<NodeT, DriverT>::Optimize(
             // printf("Best iter %d %2.1lf lateness %d\n", best.iter, s.GetCost().satisfiedCost, s.GetCost().lateDeliveryCost);
             printf("iter_k %d %2.1lf lateness %2.0lf\n", iter_k, s.GetCost().satisfiedCost,
                    s.GetCost().lateDeliveryCost);
+            Prompt::print(best.unscheduledCustomers);
         }
     }
     s.duration_time = _chrono.getTime();
