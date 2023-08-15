@@ -3,12 +3,10 @@ import numpy as np
 import subprocess
 
 destination_server = 'alious@beluga.calculquebec.ca'
-remote_path = "/home/alious/works/CimentQuebec/result/cdp/"
-local_path = "/Users/aliwa/Documents/Ulaval/thesis/works/cimentQuebec/result/cdp/"
+remote_path = "/home/alious/works/CimentQuebec/result/cq/"
+local_path = "/Users/aliwa/Documents/Ulaval/thesis/works/cimentQuebec/result/cq/"
 path = "/Users/aliwa/Documents/Ulaval/thesis/works/cimentQuebec/"
 
-df_kinableA = pd.read_csv("kinableA.csv", sep=";", header=0)
-df_kinableB = pd.read_csv("kinableB.csv", sep=";", header=0)
 
 def downloadFile(file="results.csv"):
     local_file = f"{local_path}/{file}"
@@ -74,10 +72,6 @@ def getStats(result_file, df_kinable, methods,statFile,instanceName):
             # print(df_better)
 
 methodA= ["UB","CP","MIP","Heuristic","Hybrid"]
-fileA=f"{local_path}/test_A.csv"
-fileA=downloadFile("test_A.csv")
-getStats(fileA,df_kinableA,methodA,"./statsA.csv","A")
-fileB=f"{local_path}/test_B.csv"
-fileB=downloadFile("test_B.csv")
-methodB=["UB","CP","Heuristic"]
-getStats(fileB,df_kinableB,methodB,"./statsB.csv","B")
+# fileA=f"{local_path}/test_A.csv"
+fileA=downloadFile("results.csv")
+# getStats(fileA,df_kinableA,methodA,"./statsA.csv","A")
