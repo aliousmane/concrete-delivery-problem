@@ -15,6 +15,7 @@
 \usepackage[english]{babel}
 \usepackage{adjustbox}
 \usepackage{tikz}
+\usepackage{subcaption}
 \usetikzlibrary{automata, topaths, calc, positioning, shapes, backgrounds, fit, matrix}
 \usepackage{caption}
 \usepackage{tabularx}
@@ -510,11 +511,11 @@ In this section, we present the heuristic approach we implement to solve this va
 
 \subsection{GRASP algorithm }
 
-The GRASP algorithm, proposed by \cite{feo1989probabilistic}, is a two-phase iterative suite consisting of constructive and local search algorithms. In the construction phase, a feasible solution $S$ is generated using a greedy randomized algorithm. Then, a local search algorithm explores the neighborhood of $S$ to identify a local optimum. Algorithm~\ref{alg_grasp} outlines the pseudocode of the GRASP algorithm. To avoid redundant computations, a hash table $H$ is used to ensure that the local search is not applied multiple times to the same solution.  The procedure stops and returns the best overall solution when certain stopping conditions, such as reaching a time limit or a maximum number of iterations, are met. In our implementation, we also add a path relinking procedure that uses information about previous solutions to improve the search process.
+The GRASP algorithm, proposed by \cite{feo1989probabilistic}, is a two-phase iterative suite consisting of constructive and local search algorithms. In the construction phase, a feasible solution $S$ is generated using a greedy randomized algorithm. Then, a local search algorithm explores the neighborhood of $S$ to identify a local optimum. Algorithm~\ref{alg_grasp} outlines the pseudocode of the GRASP algorithm. To avoid redundant computations, a hash table $H$ is used to ensure that the local search is not applied multiple times to the same solution.  The procedure stops and returns the best overall solution when certain stopping conditions, such as reaching a time limit or a maximum number of iterations, are met. %In our implementation, we also add a path relinking procedure that uses information about previous solutions to improve the search process.
 
     {\setstretch{1.0}
         {\small
-        \begin{algorithm}[hpt]
+        \begin{algorithm}[hbpt]
             \caption{Pseudo-code of the GRASP algorithm }
             \label{alg_grasp}
             \DontPrintSemicolon
@@ -526,7 +527,7 @@ The GRASP algorithm, proposed by \cite{feo1989probabilistic}, is a two-phase ite
 
             Initialize an empty hash table $H$
 
-            $counter \leftarrow  0$
+            % $counter \leftarrow  0$
 
             \While{Conditions not met}{
 
@@ -538,20 +539,20 @@ The GRASP algorithm, proposed by \cite{feo1989probabilistic}, is a two-phase ite
                     Add $S$ to $H$
                 }
 
-                $T \leftarrow T \cup \{S\}$
+                % $T \leftarrow T \cup \{S\}$
 
 
                 \uIf{$Cost(S)< Cost(S^*)$}{
                     $S^* \leftarrow S$
                 }
 
-                \uIf{$counter \text{ } mod \text{ } \phi == 0$}{
-                    $S^* \leftarrow PathRelinking(T)$
+                % \uIf{$counter \text{ } mod \text{ } \phi == 0$}{
+                %     $S^* \leftarrow PathRelinking(T)$
 
-                    $T \leftarrow \emptyset$
-                }
+                %     $T \leftarrow \emptyset$
+                % }
 
-                $counter \leftarrow counter + 1$
+                % $counter \leftarrow counter + 1$
 
             }
 
@@ -585,7 +586,7 @@ If $RCL$ is not empty, we select a random driver from it, insert its correspondi
 
     {\setstretch{1}
         %  {\small
-        \begin{algorithm}[]
+        \begin{algorithm}[htpb]
             \caption{Customer-Based insertion algorithm }
             \label{alg:greedyCustIns}
             \DontPrintSemicolon
@@ -679,7 +680,7 @@ For each delivery $d$ in $CL'$, the algorithm determines the best available driv
 
     {\setstretch{1}
         %  {\small
-        \begin{algorithm}[H]
+        \begin{algorithm}[htb]
             \caption{Delivery-based insertion algorithm }
             \label{alg:delbasedIns}
             \DontPrintSemicolon
@@ -750,9 +751,9 @@ For each delivery $d$ in $CL'$, the algorithm determines the best available driv
 After the construction phase, the local search phase iteratively invokes five operators using a first-improvement strategy. The first operator (\textit{Swap Load}) exchanges loads between two deliveries of the same order. The \textit{Swap Driver} operator explores alternative driver assignments by swapping drivers assigned to two delivery nodes. The \textit{Relocate} operator removes a delivery node and places it in a different location. The \textit{Consolidate Load} operator assigns an order request initially split between two drivers to a single driver, if the driver's capacity allows. The \textit{Remove and Reschedule} operator selects an unscheduled customer, denoted $i$, within the current solution. It then identifies a set $C$ containing scheduled customers with the same time slot as $i$. All elements of $C$ are removed and rescheduled along with $i$. This local search process continues until no further improvements can be made or a timeout is reached.
 
 
-\subsection{Path relinking}
+% \subsection{Path relinking}
 
-After the construction and local search steps, it is possible that some customers remain unscheduled in one solution while being accommodated in another. The goal of the path relinking procedure is to use each customer's scheduling information from existing solutions and combine them effectively to construct a solution that schedules all customers. This algorithm iterates through each element of a pool of solutions and attempts to insert each customer's schedule into a newly constructed solution.
+% After the construction and local search steps, it is possible that some customers remain unscheduled in one solution while being accommodated in another. The goal of the path relinking procedure is to use each customer's scheduling information from existing solutions and combine them effectively to construct a solution that schedules all customers. This algorithm iterates through each element of a pool of solutions and attempts to insert each customer's schedule into a newly constructed solution.
 
 \section{Computational experiments}
 \label{comp_exp}
@@ -761,26 +762,26 @@ In this section, we present and discuss the results of computational experiments
 
 \subsection{Generation of instances}
 \newcommand{\nbInstance}{36}
-The dataset used in this section was obtained from our partner and contains records representing delivery operations from up to 8 production centers over a period of $\nbInstance$ days. We have created $\nbInstance$ instances, where each instance corresponds to a daily operation. An instance contains information such as each driver's capacity, associated batch plant, and shift start time. For each customer, we have the due time, the total demand, and the number of orders (type of concrete) received. For each order, we have its demand and associated production plant. Finally, we have the loading capacity for each plant. The name of an instance has the format $C\_k\_n\_o\_z$, where $k$ is the number of available drivers, $n$ is the number of customers, $o$ is the total number of daily orders, and $z$ is the number of plants. The dataset is divided into small, medium, and large sets according to the total number of daily orders. We have summarized the dataset in the Table~\ref{tab:instances}.
+The dataset used in this section was obtained from our partner and contains records representing delivery operations from up to 8 production centers over a period of $\nbInstance$ days. We have created $\nbInstance$ instances, where each instance corresponds to a daily operation. An instance contains information such as each driver's capacity, associated batch plant, and shift start time. For each customer, we have the due time, the total demand, and the number of orders (type of concrete) received. For each order, we have its demand and associated production plant. Finally, we have the loading capacity for each plant. The name of an instance has the format $C\_k\_n\_o\_z$, where $k$ is the number of available drivers, $n$ is the number of customers, $o$ is the total number of daily orders, and $z$ is the number of plants. The dataset is divided into small, medium, and large sets according to the total number of daily orders. We have summarized the dataset in Table~\ref{tab:instances}.
 
 \begin{table}[htpb]
     \centering
     \caption{Instances summary}
     \label{tab:instances}
+    \small
     \resizebox*{0.8\textwidth}{!}{
     \begin{tabular}{lcccccc}
         \toprule
         {} &  \# &         Demand  &   \#Order & \#Client &  \#Driver & \#Depot \\
           &       &         (m$^3$)        &         &         &          &        \\
         \midrule
-        Small  &     8 &    226.5-937.5 &     7-14 &    4-11 &    13-35 &    1-3 \\
-        Medium &    14 &  1,160.5-2,971.0 &    43-98 &   40-89 &   76-137 &    6-8 \\
-        Large  &    14 &  3,078.5-3,953.5 &  107-136 &  92-127 &  129-150 &    8 \\
+        Small  &     8 &    226.5 - 937.5 &     7 - 14 &    4 - 11 &    13-35 &    1-3 \\
+        Medium &    14 &  1,160.5 - 2,971.0 &    43 - 98 &   40 - 89 &   76-137 &    6-8 \\
+        Large  &    14 &  3,078. - 3,953.5 &  107 - 136 &  92 - 127 &  129-150 &    8 \\
         \bottomrule
         \end{tabular}  
     }
 \end{table}
-
 
 \subsubsection{Results for the instances of \cite{kinable2014concrete}}
 
@@ -790,6 +791,7 @@ The dataset used in this section was obtained from our partner and contains reco
     \centering
     \caption{Performance of the GRASP heuristic on the CDP benchmark instances}
     \label{tab:cdp_instances}
+    \scriptsize
     \resizebox{1\textwidth}{!}{
     \begin{tabular}{@{}cccccccccccc@{}}
     \toprule
@@ -811,10 +813,11 @@ Overall, the GRASP algorithm shows promise in providing near-optimal solutions i
 The computational results of our instances solved with the GRASP heuristic are summarized in the tables below. The stopping criterion is set to 20,000 iterations. The parameters used in our experiments are listed in Table~\ref*{tab:problem_parameters}.
 
 
-\begin{table}[htpb]
+\begin{table}[hbt]
     \centering
     \caption{Parameters of the real-world instances}
     \label{tab:problem_parameters}
+    \small
 %    \resizebox*{\textwidth}{!}{
     \begin{tabularx}{\textwidth}{Xr}
         \toprule
@@ -828,10 +831,10 @@ The computational results of our instances solved with the GRASP heuristic are s
         Max overtime duration ($O_T$) & 120 min \\
         Max delay between two consecutive deliveries of the same order ($\gamma^1$) & 20 min \\
         Max delay between two consecutive deliveries of different orders ($\gamma^2)$ & 25 min \\
-    %    $\beta_1$ & 10000  \\
-    %    $\beta_2$ & 10000  \\
-    %    $\beta_3$ & 1000  \\
-    %    $\beta_4$ & 100  \\
+       $\beta_1$ & 10,0000  \\
+       $\beta_2$ & 1,0000  \\
+       $\beta_3$ & 30  \\
+       $\beta_4$ & 20  \\
         \bottomrule
     \end{tabularx}
 %    }
@@ -839,40 +842,96 @@ The computational results of our instances solved with the GRASP heuristic are s
 
 Table \ref*{tab:runtime} shows the percentage of concrete delivered by varying the execution times of the algorithm. For small instances, all requests are delivered in less than five minutes, while for medium and large instances, over 99\% of requests are delivered.  For these instances, it takes more than ten minutes to ensure complete delivery of all orders.
 
-\begin{table}[htbp]
+
+\begin{table}[htb]
     \centering
     \caption{RMC delivered within different runtimes}
     \label{tab:runtime}
-    \resizebox*{0.5\textwidth}{!}{
-        \begin{tabular}{llcccc}
+    \scriptsize
+    \resizebox*{0.8\textwidth}{!}{
+        \begin{tabular}{llccccc}
             \toprule
-            &  &      \multicolumn{4}{c}{Runtime (min)} \\
-            \cmidrule{3-6}
-            & &      5   & 10  &  30  & 60  \\
-            %  & {} &         &         &        &        \\
+            &  &      \multicolumn{5}{c}{Runtime (min)} \\
+            \cmidrule{3-7}
+                  &  &      1  &      5  &      10 &     30 &     60 \\
             \midrule
-            \multirow{1}{*}{Small} & \% Load &  100.00 &  100.00 &  100.0 &  100.0 \\
-                %   & \# instances &    8 &    8 &    8 &    8 \\
-            \cmidrule{2-6}
-                  \multirow{1}{*}{Medium} & \% Load &   99.86 &   99.86 &  100.0 &  100.0 \\
-                %   & \# instances &   13 &   13 &   14 &   14 \\
-                  \cmidrule{2-6}
-                  \multirow{1}{*}{Large} & \% Load &   99.79 &   99.93 &  100.0 &  100.0 \\
-                %   & \# instances &   12 &   13 &   14 &   14 \\
+            \multirow{2}{*}{Small}  & \%Load &  100.00 &  100.00 &  100.00 &  100.0 &  100.0 \\
+                  & \#Instance &    8 &    8 &    8 &    8 &    8 \\
+                  \cmidrule{2-7}
+            \multirow{2}{*}{Medium}  & \%Load &   99.71 &   99.93 &   99.86 &  100.0 &  100.0 \\
+                  & \#Instance &   11 &   13 &   13 &   14 &   14 \\
+                  \cmidrule{2-7}
+            \multirow{2}{*}{Large}  & \%Load &   99.64 &   99.64 &   99.79 &  100.0 &  100.0 \\
+                  & \#Instance &   10 &   10 &   12 &   14 &   14 \\
             \bottomrule
-            \end{tabular} 
+            \end{tabular}
     }
     
 \end{table}
 
-Table \ref*{tab:results_grasp_ls} shows the detailed results for each instance. The runtime is set to 3600 seconds. The table reports the requirements of each instance, the components of the objective function, the number of drivers used, and the execution time in seconds.
+
+Table \ref*{tab:all_instances} shows the detailed results for each instance. The runtime is set to 3600 seconds. The table reports the requirements of each instance, the components of the objective function, the number of drivers used, and the execution time in seconds.
 %  the travel cost ($TC$), the penalties associated with unfulfilled orders ($PUO$), the sum of the first delivery delays ($FDD$) for each customer, the sum of the driver underutilization costs ($DUC$) and driver overtime costs ($DOC$). 
 
 All daily orders are served with our algorithm, using less drivers than the available fleet. For the small size instances, all first deliveries are timely, except for one instance. The sum of the driver underutilization costs ($DUC$) is high for medium and large instances. This indicates underutilization of the scheduled fleet. Some drivers are not scheduled at all or work very little. The sum of the driver overtime costs ($DOC$) is also high for these instances. This can be explained by the fact that the algorithm prefers to put certain drivers on overtime rather than use a driver who has to travel to another plant for a delivery, which would increase the travel cost ($TC$).
 
 $FDD$ is the sum of the delays of the first deliveries. To get an idea of the actuel delay per customer, we report $mFDD$, which is the maximum delay for all first deliveries. This tells us that we have a maximum delay that varies between 0 and 12 minutes for small instances, 1 and 60 minutes for medium instances, and 50 to 60 minutes for large instances.
+\begin{table}[htb]
+    \centering
+    \caption{Results with all instances}
+    \label{tab:all_instances}
+    \resizebox*{1.2\textwidth}{!}{
+    \begin{tabular}{llrrrrrrrrrrrrrrrrrr}
+        \toprule
+         &  & \multicolumn{18}{c}{Best} \\
+         &  & Demand & $TC$ & $FDD$ & $mFDD$ & $DUC$ & $DOC$ & $Z$ & \#K & Time & $TC$ & $FDD$ & $mFDD$ & $DUC$ & $DOC$ & Z & \#K & $PUO$ & Time \\
+         &  & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) \\
+        size & Instance &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\
+        \midrule
+        \multirow[c]{8}{*}{Small} & C_13_11_12_1 & 226.50 & 1,243.55 & 0.00 & 0.00 & 0.00 & 0.00 & 1,243.55 & 13 & 60.34 & 1,243.55 & 0.00 & 0.00 & 37.68 & 0.00 & 2,373.86 & 13.00 & 0.00 & 60.23 \\
+         & C_13_5_8_1 & 267.00 & 745.10 & 0.00 & 0.00 & 0.00 & 0.00 & 745.10 & 13 & 60.28 & 745.10 & 0.00 & 0.00 & 0.00 & 0.00 & 745.10 & 13.00 & 0.00 & 60.29 \\
+         & C_18_6_11_2 & 333.50 & 753.26 & 0.00 & 0.00 & 125.33 & 0.00 & 4,513.25 & 18 & 60.21 & 753.26 & 0.00 & 0.00 & 194.68 & 0.00 & 6,593.74 & 18.00 & 0.00 & 60.27 \\
+         & C_15_4_7_2 & 375.00 & 1,014.25 & 0.00 & 0.00 & 172.13 & 76.10 & 7,700.13 & 15 & 60.39 & 1,014.93 & 0.00 & 0.00 & 132.77 & 291.65 & 10,830.80 & 15.00 & 0.00 & 60.37 \\
+         & C_19_7_8_2 & 388.00 & 1,745.83 & 0.00 & 0.00 & 224.47 & 87.86 & 10,237.08 & 19 & 60.21 & 1,765.51 & 0.00 & 0.00 & 314.77 & 150.86 & 14,225.62 & 18.60 & 0.00 & 60.21 \\
+         & C_29_10_14_3 & 613.50 & 3,628.79 & 49.18 & 18.77 & 112.94 & 547.16 & 67,145.19 & 29 & 60.88 & 3,741.98 & 48.61 & 21.45 & 210.99 & 735.59 & 73,392.66 & 28.40 & 0.00 & 60.65 \\
+         & C_31_8_11_3 & 776.00 & 2,297.20 & 0.00 & 0.00 & 606.66 & 566.96 & 31,836.07 & 30 & 61.06 & 2,330.55 & 0.00 & 0.00 & 781.61 & 656.53 & 38,909.59 & 29.40 & 0.00 & 60.56 \\
+         & C_35_9_10_3 & 937.50 & 4,174.37 & 0.00 & 0.00 & 221.69 & 1,161.60 & 34,056.98 & 35 & 61.27 & 4,175.30 & 0.00 & 0.00 & 341.84 & 1,329.53 & 41,021.00 & 34.40 & 0.00 & 60.96 \\
+        \multirow[c]{14}{*}{Medium} & C_76_40_43_6 & 1,160.50 & 5,967.04 & 6.18 & 3.48 & 2,961.59 & 644.42 & 113,884.73 & 71 & 60.24 & 6,311.56 & 17.24 & 9.45 & 3,014.61 & 705.95 & 128,106.36 & 67.80 & 0.00 & 60.38 \\
+         & C_104_42_47_8 & 1,565.00 & 9,777.47 & 32.02 & 13.04 & 2,829.97 & 240.64 & 131,507.57 & 98 & 60.30 & 9,358.19 & 34.11 & 20.52 & 3,890.10 & 678.98 & 173,754.55 & 94.40 & 0.00 & 60.26 \\
+         & C_94_63_70_7 & 1,746.50 & 14,428.70 & 78.89 & 19.26 & 1,147.89 & 1,464.35 & 157,038.10 & 94 & 60.52 & 14,369.08 & 90.19 & 24.90 & 1,353.87 & 1,391.38 & 173,007.04 & 93.20 & 0.00 & 60.45 \\
+         & C_116_67_78_8 & 1,839.50 & 13,871.90 & 67.25 & 33.18 & 2,347.71 & 523.28 & 162,021.52 & 114 & 60.28 & 13,602.88 & 67.90 & 32.59 & 2,419.36 & 857.33 & 171,229.15 & 113.60 & 0.00 & 60.36 \\
+         & C_116_71_82_8 & 2,060.00 & 12,089.70 & 147.66 & 27.17 & 1,966.01 & 922.73 & 237,183.56 & 116 & 60.30 & 12,678.16 & 158.64 & 35.84 & 1,991.31 & 1,125.75 & 253,575.07 & 114.20 & 0.00 & 60.26 \\
+         & C_117_57_70_6 & 2,327.50 & 15,153.30 & 114.16 & 22.20 & 1,823.68 & 1,671.48 & 217,448.30 & 117 & 60.45 & 15,495.00 & 142.42 & 34.52 & 1,388.61 & 1,680.45 & 233,181.42 & 117.00 & 0.00 & 60.39 \\
+         & C_137_79_83_7 & 2,425.00 & 18,360.30 & 335.15 & 34.20 & 2,552.72 & 1,794.17 & 465,977.30 & 135 & 60.26 & 18,960.44 & 375.76 & 48.60 & 2,124.67 & 1,857.88 & 495,614.54 & 135.60 & 0.00 & 60.43 \\
+         & C_127_66_80_8 & 2,512.50 & 17,599.10 & 14.37 & 5.00 & 1,046.33 & 1,242.32 & 88,203.50 & 126 & 60.15 & 16,033.26 & 10.42 & 3.60 & 1,579.58 & 1,552.10 & 104,879.09 & 125.40 & 0.00 & 60.26 \\
+         & C_128_68_74_7 & 2,595.00 & 18,728.80 & 191.00 & 42.50 & 1,418.80 & 2,841.15 & 309,116.80 & 127 & 60.36 & 19,774.38 & 361.55 & 49.14 & 944.63 & 2,616.67 & 461,998.19 & 127.80 & 0.00 & 60.61 \\
+         & C_136_85_97_8 & 2,673.00 & 18,894.60 & 137.37 & 48.57 & 1,155.58 & 2,137.00 & 233,669.00 & 134 & 60.71 & 18,223.56 & 188.51 & 46.67 & 2,134.46 & 2,352.19 & 317,811.36 & 131.40 & 0.00 & 60.48 \\
+         & C_128_78_85_8 & 2,685.50 & 18,041.60 & 192.36 & 35.71 & 1,374.29 & 3,234.19 & 316,314.10 & 127 & 60.68 & 18,463.86 & 305.84 & 39.44 & 1,277.34 & 3,156.96 & 425,759.26 & 127.20 & 0.00 & 60.37 \\
+         & C_131_77_85_8 & 2,893.50 & 18,063.00 & 200.24 & 43.22 & 780.69 & 1,539.10 & 272,509.58 & 131 & 60.23 & 18,003.00 & 212.58 & 47.46 & 1,248.71 & 1,716.14 & 302,370.43 & 129.60 & 0.00 & 60.41 \\
+         & C_137_89_97_7 & 2,939.50 & 22,038.10 & 438.27 & 58.56 & 849.81 & 3,461.14 & 555,029.11 & 137 & 60.33 & 23,293.04 & 636.01 & 56.14 & 849.88 & 3,523.86 & 755,280.53 & 137.00 & 0.00 & 60.47 \\
+         & C_133_84_98_7 & 2,971.00 & 20,992.60 & 1,061.17 & 59.39 & 546.11 & 2,742.51 & 1,153,396.07 & 133 & 60.30 & 22,000.05 & 1,157.60 & 59.25 & 805.41 & 2,291.38 & 1,249,585.08 & 133.00 & 18.70 & 60.67 \\
+        \multirow[c]{14}{*}{Large} & C_132_98_109_8 & 3,078.50 & 23,425.80 & 160.94 & 29.44 & 493.20 & 4,426.10 & 287,683.71 & 132 & 60.40 & 23,469.12 & 247.44 & 31.77 & 548.73 & 4,162.33 & 370,622.52 & 131.80 & 0.00 & 60.51 \\
+         & C_129_101_119_8 & 3,229.00 & 19,453.30 & 166.74 & 35.78 & 1,138.10 & 4,719.55 & 314,728.30 & 129 & 60.31 & 19,051.68 & 268.97 & 40.76 & 1,232.06 & 3,820.36 & 401,387.86 & 129.00 & 0.00 & 60.45 \\
+         & C_141_114_136_8 & 3,350.50 & 21,863.20 & 943.94 & 55.35 & 1,177.01 & 2,513.42 & 1,051,386.90 & 141 & 60.36 & 21,505.60 & 1,127.23 & 57.20 & 1,422.68 & 2,339.21 & 1,238,202.03 & 141.00 & 8.70 & 60.58 \\
+         & C_140_114_132_8 & 3,401.50 & 23,969.70 & 988.55 & 54.37 & 981.26 & 3,253.14 & 1,107,019.45 & 140 & 60.55 & 23,938.44 & 1,055.09 & 54.86 & 910.17 & 3,269.09 & 1,171,715.10 & 139.80 & 0.00 & 60.68 \\
+         & C_143_101_123_8 & 3,437.50 & 26,284.90 & 335.48 & 43.51 & 566.06 & 3,912.96 & 457,006.99 & 143 & 60.80 & 25,711.02 & 352.25 & 46.32 & 902.98 & 4,085.07 & 486,754.99 & 143.00 & 0.00 & 60.54 \\
+         & C_137_112_129_8 & 3,471.00 & 22,338.30 & 275.09 & 45.62 & 375.23 & 3,819.75 & 385,076.08 & 137 & 60.76 & 22,562.40 & 340.81 & 49.10 & 402.39 & 3,371.09 & 442,869.08 & 137.00 & 0.00 & 60.82 \\
+         & C_142_114_129_8 & 3,499.50 & 22,387.60 & 654.63 & 55.27 & 1,090.38 & 4,472.55 & 799,184.00 & 142 & 60.58 & 22,478.28 & 800.95 & 57.01 & 1,294.76 & 4,168.21 & 945,633.44 & 141.60 & 0.00 & 61.20 \\
+         & C_149_98_122_8 & 3,513.00 & 21,224.70 & 684.52 & 51.12 & 2,267.63 & 3,046.60 & 834,708.60 & 148 & 61.18 & 20,767.50 & 778.44 & 54.95 & 2,236.93 & 2,852.20 & 923,357.90 & 147.75 & 3.00 & 60.77 \\
+         & C_139_98_108_8 & 3,541.00 & 22,043.20 & 522.32 & 51.62 & 482.79 & 3,648.54 & 631,819.76 & 139 & 61.46 & 21,613.40 & 661.04 & 55.50 & 852.30 & 3,716.15 & 782,546.76 & 138.60 & 0.00 & 61.16 \\
+         & C_144_108_122_8 & 3,670.50 & 25,806.90 & 675.42 & 50.38 & 548.50 & 3,209.16 & 781,866.07 & 144 & 60.38 & 24,738.28 & 746.03 & 56.42 & 664.90 & 3,465.76 & 860,025.70 & 144.00 & 0.00 & 61.69 \\
+         & C_142_92_107_8 & 3,684.50 & 23,586.40 & 182.64 & 24.02 & 802.97 & 4,396.54 & 318,243.24 & 142 & 60.40 & 24,553.30 & 298.65 & 38.73 & 644.19 & 4,423.61 & 431,001.04 & 142.00 & 0.00 & 60.47 \\
+         & C_138_114_136_8 & 3,739.50 & 23,639.00 & 600.38 & 55.18 & 1,230.76 & 5,313.96 & 767,223.00 & 137 & 60.16 & 25,366.94 & 791.53 & 54.14 & 668.63 & 5,501.79 & 946,993.86 & 137.20 & 0.00 & 60.90 \\
+         & C_150_127_136_8 & 3,946.50 & 27,332.90 & 507.30 & 57.10 & 250.32 & 5,295.70 & 648,057.44 & 150 & 60.81 & 25,785.24 & 613.80 & 57.10 & 629.13 & 4,686.38 & 752,189.57 & 149.60 & 0.00 & 60.91 \\
+         & C_148_112_131_8 & 3,953.50 & 25,559.20 & 886.90 & 55.98 & 559.29 & 4,213.16 & 1,013,500.22 & 148 & 60.52 & 26,231.23 & 1,002.04 & 57.21 & 517.76 & 3,467.44 & 1,113,149.29 & 148.00 & 6.90 & 61.01 \\
+        \bottomrule
+        \end{tabular}
+}
+\end{table}
+    
 
-\begin{table}[htbp]
+\iffalse
+\begin{table}[!h]
     \caption{Results with all instances}
     \label{tab:results_grasp_ls}
     \resizebox*{\textwidth}{!}{
@@ -923,7 +982,56 @@ $FDD$ is the sum of the delays of the first deliveries. To get an idea of the ac
             \end{tabular}
     }
 \end{table}
+\fi
 
+Pour avoir une idée de la file d'attente au niveau des dépôts, traçons le diagramme Gantt des opérations des 3 dépôts utilisés dans l'instance c29,10,14,3
+
+
+\begin{table}[]
+    \centering
+    \caption{Details of instance $C29\_10\_14\_3$}
+    \label{tab:my-table}
+   \resizebox*{1\textwidth}{!}{
+    \begin{tabular}{@{}c|cccccccccccccc@{}}
+        \toprule
+        Order & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 \\ \midrule
+        Customer & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 8 & 9 & 9 & 9 & 9 \\
+        \midrule
+        Demand & 3.0 & 6.0 & 6.5 & 9.5 & 10.0 & 15.0 & 17.0 & 118.0 & 1.0 & 210.5 & 1.0 & 3.0 & 19.0 & 194.0 \\
+        \midrule
+        Plant & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 2 & 0 & 0 & 2 & 2 & 2 & 2 \\
+        \midrule
+        TW & 09:00 & 10:00 & 12:00 & 09:15 & 07:00 & 07:00 & 10:30 & 10:00 & 07:00 & 07:00 & 07:25 & 07:25 & 07:25 & 07:25 \\ \bottomrule
+        \end{tabular}
+   }
+\end{table}
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\linewidth]{depot_0.pdf}
+        \vspace*{-2em}
+        \caption{Scheduling of tasks at plant 0}
+        \label{fig:plant0}
+    \end{subfigure}%
+    \hfill% Horizontal space between the subfigures
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\linewidth]{depot_1.pdf}
+        \vspace*{-2em}
+        \caption{Scheduling of tasks at plant  1}
+        \label{fig:plant1}
+    \end{subfigure}
+    \vspace*{-1mm}
+    \begin{subfigure}{\textwidth}
+        \includegraphics[width=\linewidth]{depot_2.pdf}
+        \vspace*{-4em}
+        \caption{Scheduling of tasks at plant  2}
+        \label{fig:plant2}
+    \end{subfigure}
+
+    \caption{Loading and unloading schedules for the plants of instance $C29\_10\_14\_3$}
+    \label{fig:combined}
+\end{figure}
 We tried to reduce the maximum delay of the first delivery but found that some orders couldn't be fulfilled because of driver shifts and overtime constraints. We decided to remove these constraints and rerun our computation. We found that for small instances, the maximum delay dropped to zero, and for medium and large instances, it was reduced by almost 50\%. This suggests that when we input a good work schedule, our algorithm works effectively to ensure that all orders are filled and that delays for first deliveries and travel costs are minimized. In Table~\ref*{tab:lift_shift_constraints}, we can see that the average travel time decreases for all instances except the large ones. That's because the goals of minimizing travel cost and not delaying the first delivery are sometimes in conflict: to ensure that the first delivery is not late, drivers assigned to one plant often have to travel to another. And since all plants are used in large cases, this can increase travel times. 
 
 %  Therefore, we can use our algorithm for fleet sizing or as a submodule of a driver scheduling algorithm.
