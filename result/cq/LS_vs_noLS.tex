@@ -1,10 +1,18 @@
-\begin{tabular}{lrrrrrrrr}
+\begin{table}[htb]
+\centering
+\caption{Influence of the local search step on the GRASP algorithm}
+\label{tab:grasp_ls_nols}
+\begin{tabular}{lrrrrrrrrrrrrr}
 \toprule
-{} &  travelCost\_y &  firstDeliveryCost\_y &  underWorkCost\_y &  overTimeCost\_y &  travelCost\_x &  firstDeliveryCost\_x &  underWorkCost\_x &  overTimeCost\_x \\
-size   &               &                      &                  &                 &               &                      &                  &                 \\
+ & \multicolumn{13}{c}{LS} \\
+ & Load & Served_G & $TC$ & $FDD$ & $DUC$ & $DOC$ & Time & $TC$ & Served_L & $FDD$ & $DUC$ & $DOC$ & Time \\
+ & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) \\
+size &  &  &  &  &  &  &  &  &  &  &  &  &  \\
 \midrule
-Small  &       1946.06 &                12.41 &           229.40 &          298.74 &       1998.75 &                 8.07 &           231.63 &          215.43 \\
-Medium &      15641.50 &              2856.37 &          2087.17 &         1769.29 &      15275.21 &               503.43 &          2239.91 &         1654.76 \\
-Large  &      22748.24 &              9070.66 &          1118.18 &         3650.25 &      22638.46 &              1149.27 &          1224.09 &         3506.92 \\
+Small & 3,917.00 & 100.00 & 2,039.77 & 8.04 & 225.15 & 221.71 & 24.22 & 1,965.93 & 100.00 & 5.94 & 250.12 & 328.33 & 60.41 \\
+Medium & 32,394.00 & 99.82 & 14,118.33 & 358.96 & 2,242.93 & 1,328.91 & 58.32 & 15,896.96 & 100.00 & 239.98 & 1,917.64 & 1,749.73 & 60.48 \\
+Avg & nan & nan & 12,830.60 & 426.42 & 1,236.43 & 1,659.86 & 48.26 & 15,494.82 & nan & 321.84 & 1,126.03 & 2,171.76 & 60.54 \\
+Large & 49,516.00 & 99.40 & 23,176.19 & 1,008.66 & 839.28 & 3,814.06 & 60.20 & 23,650.53 & 100.00 & 610.78 & 827.73 & 3,797.73 & 60.68 \\
 \bottomrule
 \end{tabular}
+\end{table}

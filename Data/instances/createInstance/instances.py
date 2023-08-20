@@ -23,12 +23,23 @@ class Instance:
         self.instance_size = dict()
         self.dict_driver = {}
         self.depot_loc_id = {}
+        self.df_temps = None
+        self.temps = None
+        self.df_dist = None
+        self.dist = None
         #self.clean_depot()
         #self.clean_employee()
         #self.clean_tickets()
         #self.get_driver_from_ticket()
-        
     
+    def init_time(self)->None:
+        self.df_temps = pd.read_csv(f"{DATA_FOLDER}/Matrice_de_temps_all.csv",header=None)
+        self.temps = self.df_temps.to_numpy()
+
+    def init_dist(self)->None:
+        self.df_dist = pd.read_csv(f"{DATA_FOLDER}/Matrice_de_distance_all.csv",header=None)
+        self.dist = self.df_dist.to_numpy()
+
     def init_order(self)->None:
         self.df_orders = pd.read_excel(f"{DATA_FOLDER}/DORDERSTAB_BETON.xlsx", engine='openpyxl', sheet_name="data")
         self.df_orders.sort_values(by='QUANTITY',inplace=True)
