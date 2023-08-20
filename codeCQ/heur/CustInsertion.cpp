@@ -9,7 +9,10 @@ using namespace std;
 void CustInsertion::Insert(Sol &s) {
     Sol::InitStructure(s.GetData());
     removedList.clear();
-    s.Update();
+    if(!s.isUpdated){
+        s.Update();
+    }
+    s.isUpdated = false;
     _insrmv.FillStructures(s, customersList, driversList);
     assert(!customersList.empty());
     const int insertion_type = Parameters::LOAD_INSERTION;
@@ -18,9 +21,9 @@ void CustInsertion::Insert(Sol &s) {
     while (!removedList.empty() && beginLoop) {
         double demand = s.updateCost.satisfiedCost;
         customersList =   std::vector<Customer*>(removedList.begin(),removedList.end());
-        cout<<" try "<<s.GetLastCost()<<endl;
-        cout<<" try backward "<<s.updateCost<<endl;
-        Prompt::print(customersList);
+        // cout<<" try "<<s.GetLastCost()<<endl;
+        // cout<<" try backward "<<s.updateCost<<endl;
+        // Prompt::print(customersList);
         Sol cur(s);
         Parameters::LOAD_INSERTION = Parameters::DEPOTINSERTION::BACKWARD;
         InsertWithBactrack(cur, customersList);

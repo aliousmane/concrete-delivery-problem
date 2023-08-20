@@ -13,7 +13,10 @@ using namespace std;
 void PriorityQueueInsertion::Insert(Sol &s) {
     _data = *s.GetData();
     Sol::InitStructure(s.GetData());
-    s.Update();
+    if(!s.isUpdated){
+        s.Update();
+    }
+    s.isUpdated = false;
     removedList.clear();
     _insrmv.FillStructures(s, customersList, driversList);
     InsertByRules(s);
@@ -44,22 +47,16 @@ void PriorityQueueInsertion::Insert(Sol &s, std::vector<Customer *> &list) {
         std::vector<int> unUsedId;
         for (auto id: listId) {
             Delivery *cur_del = s.GetDelivery(id);
-            if (!s.isClientSatisfied(cur_del->custID)) {
-//                cout<<"Cust "<<cur_del->custID<<"-";
-//                cout<<*s.GetCustomer(cur_del->custID)<<endl;
+			if(s.GetDriverAssignedTo(cur_del)== nullptr){
                 unUsedId.push_back(id);
-            } else if (!s.isOrderSatisfied(cur_del->orderID)) {
-                unUsedId.push_back(id);
-//                cout<<"Cust "<<cur_del->custID<<"-";
-//                cout<<*s.GetCustomer(cur_del->custID)<<endl;
-            } else {
+			}
+			else {
                 priority_file.Supprimer(id);
             }
         }
         if (unUsedId.empty()) {
             continue;
         }
-//        cout<<endl;
         _insrmv.GetBestInsertion(s, unUsedId, driversList, best);
 
         if (!best.IsFeasible) {
@@ -85,7 +82,8 @@ void PriorityQueueInsertion::Insert(Sol &s, std::vector<Customer *> &list) {
                     }
                 }
                 //TODO remove next line
-                s.UnassignOrder(o);
+//                s.UnassignOrder(o);
+                s.UnassignCustomer(del->custID);
                 removedList.emplace_back(s.GetCustomer(del->custID));
             }
             continue;

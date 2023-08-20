@@ -171,7 +171,11 @@ void Solver::SaveResults(Sol &s) {
             fprintf(f, "%s;", _data->instance_name.c_str());
             fprintf(f, "%s;", s.GetLastCost().str().c_str());
             fprintf(f, "%d;", s.GetDepotCount());
-            fprintf(f, "%ld\n", Parameters::GetElapsedTime());
+            fprintf(f, "%ld;", Parameters::GetElapsedTime());
+            fprintf(f, "%d;", Parameters::MAX_OVERTIME );
+            fprintf(f, "%d;", Parameters::INTRA_ORDER_DELIVERY);
+            fprintf(f, "%d;", Parameters::INTER_ORDER_DELIVERY);
+            fprintf(f, "%d\n", Parameters::FIRST_DEL_MAX_ARRIVAL);
             fclose(f);
             printf("Saved to %s\n", _data->result_file.c_str());
         }

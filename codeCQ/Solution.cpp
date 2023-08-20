@@ -15,6 +15,7 @@ std::vector<std::set<int>> Sol::TabuFleet = std::vector<std::set<int>>();
 std::map<std::tuple<int, int>, double> Sol::nodeMaxStartService = std::map < std::tuple<int, int>,
 double>();
 std::vector<double> Sol::FixLoad = std::vector<double>();
+std::vector<int> Sol::FixDriver = std::vector<int>();
 std::vector<double> Sol::FixStartLoad = std::vector<double>();
 std::vector<double> Sol::FixCustomerStartLoad = std::vector<double>();
 
@@ -181,7 +182,9 @@ void Sol::UnassignCustomer(Customer *c) {
     std::vector<Order *> orders = GetOrders(c);
     for (auto o1: orders) {
         UnassignOrder(o1);
+        orderCapRestante[o1->orderID]=o1->demand;
     }
+    clientCapRestante[c->custID] = c->demand;
 }
 
 void Sol::UnassignOrder(Order *o) {
@@ -272,7 +275,7 @@ void Sol::RemoveDelivery(Delivery *del) {
     for (int r = 0; r < del->rank; r++) {
         Delivery *del1 = GetDelivery(del->orderID, r);
         Driver *d1 = GetDriverAssignedTo(del1);
-        if (d1 == nullptr) break;
+        if (d1 == nullptr) continue;
         if (d1 == d) {
             find = true;
             break;
@@ -487,7 +490,6 @@ void Sol::ShowCustomer() {
 }
 
 void Sol::BuildFromDepotSetIntervall() {
-    // cout << "In build\n";
     for (int count = 0; count < GetDepotCount(); count++) {
         Depot *depot = GetDepot(count);
         BuildFromDepotSetIntervall(depot);
@@ -500,7 +502,6 @@ void Sol::BuildFromDepotSetIntervall(Depot *depot) {
     DepotSize[depot->depotID] = 0;
     DepotNext[prev->id] = end;
     DepotPrev[end->id] = prev;
-//    ShowSlot(depot);
     for (auto const &intv: depotLoadingIntervals[depot->depotID]) {
         Dock *dock_int = dynamic_cast<Dock *>(GetNode(intv.nodeID));
         InsertAfterDepot(dock_int, prev, depot);

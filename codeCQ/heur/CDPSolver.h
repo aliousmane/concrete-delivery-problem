@@ -20,7 +20,6 @@ public:
     void run();
     static double ComputeCost(Sol &s, const std::set<int>& setClients);
     static void SolveInstance(Sol &s,Data &dat,int iter);
-    static void SolveCDP(Sol &s,Data &dat,int iter,bool restart);
     static std::set<int> EliminateCustomer(Data &dat,const int iter);
     static void BuildOnSolution(Sol &s,Data &dat,int iter);
     static void findCorrelation(Data &dat, std::vector<TimeSlot> const & listInt, std::vector<std::set<int>> & linkedClientSlot,
@@ -43,6 +42,7 @@ public:
 
 
 private:
+    static void SolveCDP(Sol &s,Data &dat,int iter,bool restart);
     Data *_data;
 
 };

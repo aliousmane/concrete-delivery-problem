@@ -27,7 +27,7 @@ void GRASP<NodeT, DriverT>::Optimize(
                                                                                                          3));
     unordered_map<string, Sol, MyHashFunction> customerMap;
     unordered_map<string, Sol, MyHashFunction> LocalSearchMap;
-
+    
     list_cust.resize(s.GetCustomerCount());
     for (int i = 0; i < s.GetCustomerCount(); i++) {
         Customer *c = s.GetCustomer(i);
@@ -36,7 +36,7 @@ void GRASP<NodeT, DriverT>::Optimize(
     }
     //TODO SortNode<Node, Driver>::radixSortGreatDemand(list_cust, s.GetData()->GetMaxDemand());
     std::vector<int> SORT_TYPE_VEC{
-//            Parameters::SORT::ONE,
+             Parameters::SORT::ONE,
                             Parameters::SORT::TWO,
 //            Parameters::SORT::THREE,
 //                            Parameters::SORT::FOUR,
@@ -54,6 +54,7 @@ void GRASP<NodeT, DriverT>::Optimize(
         printf("GRASP heuristic: %d iterations: %d Heuristic(s)\n", _iterator_count,
                (int) grasp_insert_operators.size());
     }
+    long runtime = Parameters::GetElapsedTime();
     int iter_k = 0;
     bool stop = false;
     for (int iter = 0; iter < _iterator_count; iter++) {
@@ -73,6 +74,13 @@ void GRASP<NodeT, DriverT>::Optimize(
 //                for (int op = 0; op < (int) grasp_insert_operators.size(); op++)
                 {
                     if (stop) break;
+                    
+                    if(Parameters::GetElapsedTime()- runtime > Parameters::RUNTIME)
+                    {
+                        cout<<" Temps écoulé!! ARRÊT"<<endl;
+                        stop = true;
+                        break;
+                    }
 
                     Sol cur(s.GetData(), s.keyCustomers);
                     auto f = grasp_insert_operators[op];

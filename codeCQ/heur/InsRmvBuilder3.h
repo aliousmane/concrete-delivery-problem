@@ -21,6 +21,13 @@ public:
             Delivery *del = s.GetDelivery(delID);
             assert(del != nullptr);
             for (Driver *d: driversList) {
+
+				if(Sol::FixDriver[del->delID]!=-1){
+					if(Sol::FixDriver[del->delID]!=d->id){
+						continue;
+					}
+				}
+
                 if (d->overTime >= Parameters::MAX_OVERTIME) {
                     continue;
                 }
@@ -44,6 +51,11 @@ public:
                 if (d->overTime >= Parameters::MAX_OVERTIME) {
                     continue;
                 }
+	            if(Sol::FixDriver[del->delID]!=-1){
+		            if(Sol::FixDriver[del->delID]!=d->id){
+			            continue;
+		            }
+	            }
                 insrmv.cancel = false;
                 Move<Delivery, Driver, MoveVrp> m;
                 InsertCost(s, del, d, m);
@@ -64,7 +76,7 @@ public:
         mo.n = n;
         mo.to = d;
         mo.demand = (Sol::FixLoad[n->delID] == -1) ?
-                    std::min(d->capacity, s.orderCapRestante[n->orderID]) : Sol::FixLoad[n->delID];
+                    std::min(d->capacity, s.orderCapRestante[n->orderID]) : std::min(s.orderCapRestante[n->orderID],Sol::FixLoad[n->delID]);
 
         if (mo.demand > d->capacity) return;
 
@@ -94,7 +106,7 @@ public:
         mo.n = n;
         mo.to = d;
         mo.demand = (Sol::FixLoad[n->delID] == -1) ?
-                    std::min(d->capacity, s.orderCapRestante[n->orderID]) : Sol::FixLoad[n->delID];
+                    std::min(d->capacity, s.orderCapRestante[n->orderID]) : std::min(s.orderCapRestante[n->orderID],Sol::FixLoad[n->delID]);
 
         if (mo.demand > d->capacity) return;
 

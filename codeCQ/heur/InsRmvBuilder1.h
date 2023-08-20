@@ -24,6 +24,11 @@ public:
                 if(d->overTime >= Parameters::MAX_OVERTIME){
                     continue;
                 }
+	            if(Sol::FixDriver[del->delID]!=-1){
+		            if(Sol::FixDriver[del->delID]!=d->id){
+			            continue;
+		            }
+	            }
                 insrmv.cancel = false;
                 Move<Delivery, Driver, MoveVrp> m;
                 InsertCost(s, del, d, m);
@@ -44,7 +49,7 @@ public:
         mo.n = n;
         mo.to = d;
         mo.demand = (Sol::FixLoad[n->delID] == -1) ?
-                    std::min(d->capacity, s.orderCapRestante[n->orderID]) : Sol::FixLoad[n->delID];
+                    std::min(d->capacity, s.orderCapRestante[n->orderID]) : std::min(s.orderCapRestante[n->orderID],Sol::FixLoad[n->delID]);
 
         if (mo.demand > d->capacity) return;
 
@@ -74,6 +79,11 @@ public:
                 if(d->overTime >= Parameters::MAX_OVERTIME){
                     continue;
                 }
+	            if(Sol::FixDriver[del->delID]!=-1){
+		            if(Sol::FixDriver[del->delID]!=d->id){
+			            continue;
+		            }
+	            }
                 insrmv.cancel = false;
                 Move<Delivery, Driver, MoveVrp> m;
                 InsertCost(s, del, d, list_moves);
@@ -92,7 +102,7 @@ public:
         mo.n = n;
         mo.to = d;
         mo.demand = (Sol::FixLoad[n->delID] == -1) ?
-                    std::min(d->capacity, s.orderCapRestante[n->orderID]) : Sol::FixLoad[n->delID];
+                    std::min(d->capacity, s.orderCapRestante[n->orderID]) : std::min(s.orderCapRestante[n->orderID],Sol::FixLoad[n->delID]);
 
         if (mo.demand > d->capacity) return;
 
@@ -130,7 +140,7 @@ public:
 
             std::vector<std::pair<double, double>> _arrival;
             if (prec_del_of_cust->type != Parameters::DELIVERY) {
-                insrmv.max_arrival_Time += 5;
+                insrmv.max_arrival_Time += 20;
                 _arrival.
                         emplace_back(s.EarlyTW(n) - s.GetTimeBtwDel(n) - 1,
                                      insrmv.max_arrival_Time - Sol::minDelay[n->id]);

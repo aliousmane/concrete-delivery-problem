@@ -91,7 +91,7 @@ void Sol::UpdateForward(Depot *dep) {
                 auto *dock = dynamic_cast<Dock *>(prev);
 //                cout << " Update " << dock->id << " V "<<VisitFlags[dock->id]<<" |";
                 auto *prec_del = dynamic_cast<Delivery *>(DriverPrev[dock->id]);
-                if (prec_del != nullptr) {
+				if (prec_del != nullptr) {
                     Depot *prec_dep = GetDepotAssignedTo(DriverPrev[prec_del->id]);
                     if (!VisitFlags[prec_del->id] and dep != prec_dep) {
 //                        cout << "Update at first " << DriverPrev[prec_del->id]->id << " of depot " << prec_dep->depotID
@@ -199,6 +199,7 @@ void Sol::Update(Depot *dep, Dock *dock, Delivery *del) {
     } else {
         if (WaitingTime[del->id] < 0) {
             lateCustomers.insert(c->custID);
+            updateCost.maxLateness = std::max(-WaitingTime[del->id] ,updateCost.maxLateness );
         }
     }
 
@@ -359,13 +360,17 @@ void Sol::GetCost(Depot *dep, Dock *dock, Delivery *del, Cost &cur_cost) {
 
     double arr_node = ArrivalTime[del->id];
 
+    double lateness = cur_cost.firstDeliveryCost;
     Sol::SetTimingCost(del, arr_node, real_del_time, EarlyTW(del),
                        cur_cost);
-
+    lateness = cur_cost.firstDeliveryCost - lateness;
+    if(CustomerPrev[del->id]->type != Parameters::TypeNode::DELIVERY){
+        cur_cost.maxLateness = std::max(lateness,cur_cost.maxLateness);
+    }
     arr_node = StartServiceTime[del->id];
     arr_node += UNLOADING_DURATION;
 
-    cur_cost.lateDeliveryCost += Sol::GetLateDeliveryCost(del, arr_node, LateTW(del));
+    cur_cost.lateDeliveryCost += Sol::GetLateDeliveryCost(del, arr_node, LateTW(del));;
     arr_node += Data::CleaningTime(del, d);
 
     shiftDurationCost[d->id] = arr_node + Travel(del->distID, d->distID) - d->start_shift_time;
@@ -553,7 +558,7 @@ bool Sol::FindBackwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, co
                     break;
                 }
             }
-            if (cur_dock->early_tw + 60 < dock->early_tw) {
+            if (cur_dock->early_tw + 120 < dock->early_tw) {
                 find = false;
                 abort = true;
                 break;
@@ -590,9 +595,7 @@ bool Sol::FindBackwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, co
             cout << "End " << slot << endl;
             Prompt::print(SlotSet);
             exit(1);
-
         }
-
     }
     return find;
 }

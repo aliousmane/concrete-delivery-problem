@@ -13,7 +13,7 @@ public:
              truckWaitingCost(0), clientWaitingCost(0), driverUsed(0),
              firstDeliveryCost(0), lateDeliveryCost(0), overTimeCost(0),
              firstDeliveryCount(0), lateDeliveryCount(0), satisfiedCost(0),
-             isFeasible(true), waste(0), underWorkCost(0), distanceCost(0) {}
+             isFeasible(true), waste(0), underWorkCost(0), distanceCost(0),maxLateness(0) {}
 
     explicit Cost(bool value);
 
@@ -34,7 +34,8 @@ public:
                underWorkCost == rhs.underWorkCost &&
                driverUsed == rhs.driverUsed &&
                waste == rhs.waste &&
-               isFeasible == rhs.isFeasible;
+               isFeasible == rhs.isFeasible &&
+               maxLateness == rhs.maxLateness;
     }
 
     bool operator!=(const Cost &rhs) const {
@@ -67,6 +68,7 @@ public:
         this->isFeasible = c.isFeasible;
         this->waste = c.waste;
         this->underWorkCost = c.underWorkCost;
+        this->maxLateness = c.maxLateness;
         return *this;
     }
 
@@ -101,6 +103,7 @@ public:
         waste = 0;
         underWorkCost = 0;
         distanceCost = 0;
+        maxLateness = 0;
     }
 
     double distanceCost;
@@ -120,6 +123,7 @@ public:
     int driverUsed;
     bool isFeasible;
     double waste;
+    double maxLateness;
 private:
     bool ObtainMinCDP(const Cost &rhs) const;
 

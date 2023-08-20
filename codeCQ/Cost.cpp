@@ -108,7 +108,7 @@ std::ostream &operator<<(std::ostream &os, const Cost &cost) {
        " waitingCost: "
        << cost.waitingCost << " undeliveredCost: "
        << cost.undeliveredCost << " clientWaitingCost: " << cost.clientWaitingCost << " driverUsed: " << cost.driverUsed
-       << " firstDelivery: " << cost.firstDeliveryCost << " underTime: "
+       << " firstDelivery: " << cost.firstDeliveryCost << "("<<cost.maxLateness<<")"<<" underTime: "
        << cost.underWorkCost << " overTime: "
        << cost.overTimeCost << " Total: " << cost.totalCost;
     return os;
@@ -117,7 +117,7 @@ std::ostream &operator<<(std::ostream &os, const Cost &cost) {
 std::string Cost::str() const {
     std::stringstream ss;
     ss << satisfiedCost << ";" << undeliveredCost << ";" << travelCost << ";" << distanceCost << ";"
-       << firstDeliveryCost << ";";
+       << firstDeliveryCost << ";"<< maxLateness << ";";
     ss << clientWaitingCost << ";" << driverUsed << ";" << underWorkCost << ";" << overTimeCost;
     return ss.str();
 }

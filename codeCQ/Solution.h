@@ -93,6 +93,7 @@ public:
     static std::vector<double> pushVisit;
     static std::vector<double> StartBefore;
     static std::vector<double> FixLoad;
+    static std::vector<int> FixDriver;
     static std::vector<double> FixStartLoad;
     static std::vector<double> FixCustomerStartLoad;
     static std::map<std::tuple<int, int>, double> nodeMaxStartService;
@@ -316,7 +317,7 @@ public:
 
     bool isOrderSatisfied(int ordId) const { return (orderCapRestante[ordId] <= 0); }
 
-    bool isClientSatisfied(Customer *c) const { return (clientCapRestante[c->custID] <= 0); }
+    bool isClientSatisfied(Customer *c) const { return isClientSatisfied(c->custID); }
 
     bool isSatisfied(Customer *c) const { return (clientCapRestante[c->custID] <= 0); }
 
@@ -355,6 +356,7 @@ public:
     void UpdateDemand(Customer *c, Order *o, double load) {
         orderCapRestante[o->orderID] -= load;
         clientCapRestante[c->custID] -= load;
+        assert(clientCapRestante[c->custID] >= 0);
         orderLoads[o->orderID].insert(load);
     }
 
@@ -538,6 +540,7 @@ public:
     static void InitStructure(Data *dat) {
 
         Sol::FixLoad.resize(dat->GetDeliveryCount(), -1);
+        Sol::FixDriver.resize(dat->GetDeliveryCount(), -1);
         Sol::FixStartLoad.resize(dat->GetDeliveryCount(), -1);
         Sol::FixCustomerStartLoad.resize(dat->GetCustomerCount(), -1);
         Sol::CustomerConflict.clear();
@@ -563,7 +566,7 @@ public:
     static bool FindForwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, const double duration);
     static bool FindBackwardSlot(std::set<TimeSlot> const &SlotSet, TimeSlot &slot, const double duration);
 
-
+    bool isUpdated{false};
 private:
     Data *_data{};
     Cost _last_cost;

@@ -49,6 +49,7 @@ void CDPSolver::SolveCDP(Sol &s, Data &dat, int iter, bool restart) {
     CustInsertion2 custIns23(dat, builder3);
     CustInsertionBacktrack custIns_BT3(dat, builder3);
     PriorityQueueInsertion prioIns3(dat, builder3);
+    PriorityQueueInsertion prioIns1(dat, builder1);
     DriverInsertion driverIns3(dat, builder3);
 
     vector<pair<int, string>> custInfo = {
@@ -62,12 +63,12 @@ void CDPSolver::SolveCDP(Sol &s, Data &dat, int iter, bool restart) {
     };
     vector<pair<int, string>> priorityInfo = {
             {0, "PrioriSort I Early TW"},
-            {1, "PrioriSort I Late TW"},
+//            {1, "PrioriSort I Late TW"},
             {2, "PrioriSort D Early TW"},
             {4, "PrioriSort D Demand"},
             {5, "PrioriSort I Demand"},
-            {6, "PrioriSort I TW width"},
-            {7, "PrioriSort D TW width"},
+//            {6, "PrioriSort I TW width"},
+//            {7, "PrioriSort D TW width"},
     };
     vector<pair<int, string>> driverInfo = {
             {0, "Driver I Cap"},
@@ -82,6 +83,7 @@ void CDPSolver::SolveCDP(Sol &s, Data &dat, int iter, bool restart) {
         AllInsertionOp.emplace_back(&custIns3, val.first, "Builder 3 " + val.second);
     }
     for (const auto &val: priorityInfo) {
+//        AllInsertionOp.emplace_back(&prioIns1, val.first, "Builder 3 " + val.second);
 //        AllInsertionOp.emplace_back(&prioIns3, val.first, "Builder 3 " + val.second);
     }
     for (const auto &val: driverInfo) {
@@ -95,10 +97,8 @@ void CDPSolver::SolveCDP(Sol &s, Data &dat, int iter, bool restart) {
                 cur = s;
             }
             cur.availableDrivers = s.availableDrivers;
-//            Prompt::print({"Iter", to_string(i), heur.name});
             heur.Insert(cur);
             if (cur < best) {
-//                cout << "current best cost " << cur.GetCost()<< " with " << heur.name << endl;
                 best = cur;
                 if (s.hasScheduled(s.keyCustomers))
                     break;
@@ -121,6 +121,7 @@ void CDPSolver::SolveInstance(Sol &s, Data &dat, int iter) {
 }
 
 void CDPSolver::BuildOnSolution(Sol &s, Data &dat, int iter) {
+    s.isUpdated = true;
     CDPSolver::SolveCDP(s, dat, iter, false);
 }
 
