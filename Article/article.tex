@@ -40,6 +40,7 @@
 \usepackage{lineno}
 \usepackage{tkz-graph}
 \usepackage{breqn}
+
 \tikzset{
 base/.style = {shape=rectangle, 
                       anchor=center,minimum size=5mm, 
@@ -105,7 +106,7 @@ label/.style   = {base,font=\ttfamily\normalsize, text width = 8em,
   inner sep=0em, rounded corners=1mm,bottom color=red!80,},
   dummy/.style    = {circle,draw}
 }
-
+\newcolumntype{H}{>{\setbox0=\hbox\bgroup}c<{\egroup}@{}}
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
@@ -197,7 +198,7 @@ The focus of this paper is on the distribution of RMC from a Canadian company th
 
 A customer $i$ requests one or more types of concrete to be delivered to their construction site on a specific day, with the delivery service starting at the due time $a_i$.  We call an order $o$ a request for a specific type of concrete. $q_i$ is the sum of the demands $q_o$ of each order $o$ placed, $a_i$ is the desired arrival time of the first concrete mixer, and $\tau^u_i$ is the unloading rate for customer $i$. If the order requires more concrete than a single truck can carry, multiple deliveries are scheduled.
 
-Let $O_i$ be the set of all orders requested by customer $i$. Each element of $O_i$ must be fully delivered before moving on to another order. Exactly one order $o \in O_i$ must have its first delivery start at $a_i$, while the others can start at most $\gamma^2$ time after $o$ is completed. A plant is assigned to an order, and it must be the supplier of all subsequent deliveries of that order. 
+Let $O_i$ be the set of all orders requested by customer $i$. Each element of $O_i$ must be fully delivered before moving on to another order. Exactly one order $o \in O_i$ must have its first delivery start at $a_i$, while the others can start at most $\gamma^2$ time after $o$ is completed. A plant is assigned to an order, and it must be the supplier of all subsequent deliveries of that order.
 To avoid cold joint problems with the concrete, subsequent deliveries of the same order must be made in close succession. We define a maximum time delay $\gamma^1$ after which no more deliveries are allowed. The customer's unloading rate and the quantity to be unloaded give the time required to unload a truckload. Let $\mathcal{C}$ be the set of construction sites (customers) with a planned delivery for the day, and $\mathcal{O}=\{{O_i, i \in \mathcal{C}}\}$ be the set of all requested orders for all customers.
 
 % \subsection*{Drivers}
@@ -246,51 +247,51 @@ The objective function minimizes total travel cost ($TC$), penalties associated 
 
 
 \begin{alignat}{3}
-    \label{mod:obj}   \min & \smashoperator{ \sum_{ \substack{(i,j,k) \in A} }} {t_{ij}x^{k}_{ij}} + \beta_1\smashoperator{\sum_{ o \in \mathcal{O}}}{  \left(1-y_o\right)} \hspace{-0mm}  + \beta_2 \smashoperator{ \sum_{i \in \mathcal{C} } } { g_i  } +  \sum_{k \in K}\left({\beta_3 w^{1}_k  + \beta_4  w^{2}_k}\right)  &                         \\
-    \label{mod:c1}         & \sum_{j \in \delta^{+}(i) }{x^k_{ij}} =1       & \forall i \in S, k \in K                                                                         \\
-    \label{mod:c2}         & \sum_{j \in \delta^{-}(i)}{x^k_{ji}} = 1   & \forall i \in E, k \in K                                                                         \\
-    \label{mod:c03}        & v_j \geq  w_i  - M\left(1-x^{k}_{ij}\right)                                                                                                                                                                                                                                            & \hspace{-20mm}  i \in S, j \in \delta^{+}(i),  k \in K                                           \\
-    \label{mod:c3}         & v_j \geq  w_i + \alpha_{b} + t_{ij} - M\left(1-x^{k}_{ij}\right)                                                                                                                                                                                                                       & \hspace{-20mm} \forall b \in \mathcal{B}, i \in \mathcal{L}_b, j \in \delta^{+}(i),  k \in K     \\
-    \label{mod:c4}         & v_j \geq  w_i + \rho + t_{ij} - M\left(1-x^{k}_{ij}\right)                                                                                                                                                                                                                           & \hspace{-20mm} \forall i \in \mathcal{D}  , j \in \delta^{+}(i), k \in K                         \\
-    \label{mod:c5}         & w_{i} \geq v_{i}  + \frac{q^k_j}{\tau^l_b} -M\left(1- x^{k}_{ij}\right)                                                                                                                                                                                                                & \hspace{-20mm} \forall  b \in \mathcal{B},  i \in \mathcal{L}_{b},  j \in \delta^{+}(i), k \in K \\
-    \label{mod:c6}         & w_{j} \geq v_{j}  + {  \frac{q^k_j}{\tau^u_c} -M\left(1- x^{k}_{ij}\right) }                                                                                                                                                                                                           & \hspace{-20mm}  \forall c \in  \mathcal{C}, j \in \mathcal{D}_{c}, i \in \delta^{-}(j),  k \in K \\
-    \label{mod:c7}         & w_{j} \leq v_{i}  + \Delta + M\left(1- x^{k}_{ij}\right)                                                                                                                                                                                                                               & \hspace{-20mm}   j \in \mathcal{D},  i \in \delta^{-}(j),  k \in K                               \\
-    \label{mod:c8}         & v_{d^0_{o}} \geq a_i                                                                                                                                                                                                                                                                   & \hspace{-20mm} \forall  i \in \mathcal{C}, \forall o \in \mathcal{O}_i                           \\
-    \label{mod:c9}         & g_{i} \geq v_{d^0_{o_1}} - a_i - M\left(  \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})  }{u_{jd^0_{o_1}}}\right)                                                                                                                                                                             & \hspace{-20mm}  \forall  i \in \mathcal{C}, \forall o_1 \in \mathcal{O}_i                        \\
-    \label{mod:c101}       & v_{d^0_{o_1}} \geq w_j - M\left(1- u_{jd^0_{o_1}}\right)                                                                                                                                                                                                                               & \hspace{-40mm}    \forall o_1 \in \mathcal{O}_i,  j \in \delta_{D}^{-}(d^0_{o_1})                \\
-    \label{mod:c10}        & v_{d^0_{o_1}}  \leq  w_j + \gamma^2 + M\left(1- u_{j,d^0_{o_1}}\right)                                                                                                                                                                                                                 & \hspace{-20mm}  \forall  o_1 \in \mathcal{O},  j \in \delta_{D}^{-}(d^0_{o_1})                   \\
-    \label{mod:c11}        & \sum_{ \substack{o_1 \in \mathcal{O}_i }}{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } = |\mathcal{O}_i|-1                                                                                                                                                             & \hspace{-20mm} \forall  i \in \mathcal{C},|\mathcal{O}_i| > 1                                    \\
-    \label{mod:c12}        & \sum_{ \substack{o_1 \in \mathcal{O}_i }}\sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}{u_{d^0_{o_1},j } } = |\mathcal{O}_i|-1                                                                                                                                                                & \hspace{-40mm} \forall  i \in \mathcal{C}, |\mathcal{O}_i| > 1                                   \\
-    \label{mod:c13}        & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } \leq 1                                                                                                                                                                                        & \hspace{-20mm}  \forall o_1 \in \mathcal{O}                                                      \\
-    \label{mod:c14}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \leq 1                                                                                                                                                                                        & \hspace{-20mm} \forall o_1 \in \mathcal{O}                                                       \\
-    \label{mod:c15}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } +\smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \geq 1                                                                                                           & \hspace{-20mm} \forall o_1 \in \mathcal{O}                                                       \\
-    \label{mod:c16}        & v_{j} \geq w_{j-1} - M\left(1- u_{j-1,j}\right)                                                                                                                                                                                                                                        & \hspace{-20mm}  \forall o \in \mathcal{O}, j \in \mathcal{D}_{o}, j \geq 1                       \\
-    \label{mod:c17}        & v_{j}  \leq  w_{j-1} + \gamma^1 + M\left(1- u_{j-1,j}\right)                                                                                                                                                                                                                           & \hspace{-20mm} \forall i \in \mathcal{C}, \forall o \in O_i, j \in \mathcal{D}_{o}, j \geq 1     \\
-    \label{mod:c18}        & u_{j-1,j} \geq u_{j,j+1}                                                                                                                                                                                                                                                               & \hspace{-35mm} \forall o_1 \in\mathcal{O},  j \in \mathcal{D}_{o_1}, 1 \leq j \leq n_{o_{1}}-1   \\
-    \label{mod:c19}        & u_{j-1,j} \geq \sum_{l \in \mathcal{L}}{x_{lj}}                                                                                                                                                                                                                                        & \hspace{-20mm}  \forall o_1 \in \mathcal{O}, j \in \mathcal{D}_{o_1}, j \geq 1                   \\
-    \label{mod:c20}        & v_{j} \geq w_{i} - M\left(1- u_{i,j}\right)                                                                                                                                                                                                                                            & \hspace{-20mm}  \forall i \in \mathcal{L}, j \in \delta^{+}_{L}(i)                               \\
-    \label{mod:c21}        & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{L}(i)}}{u_{i,j } } \leq 1                                                                                                                                                                                                        & \hspace{-20mm}  \forall i \in \mathcal{L}                                                        \\
-    \label{mod:c22}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } \leq 1                                                                                                                                                                                                        & \hspace{-20mm} \forall i \in \mathcal{L}                                                         \\
-    \label{mod:c230}       & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } }  \geq \sum_{k \in K}\sum_{j \in  \delta^{-}(i) }{x^k_{ji}}                                                                                                                                                    & \hspace{-20mm} \forall i \in \mathcal{L}                                                         \\
-    \label{mod:c231}       & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } \geq \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i+1)}}{u_{j,i+1 } }                                                                                                                                          & \hspace{-20mm} \forall i \in \mathcal{L}                                                         \\
-    \label{mod:c23}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } + \smashoperator{ \sum_{ j \in \delta^{+}_{L}(i)}}{u_{i,j } } \geq \sum_{k \in K}\sum_{j \in  \delta^{-}(i) }{x^k_{ji}}                                                                                       & \hspace{-20mm} \forall i \in \mathcal{L}                                                         \\
-    \label{mod:c24}        & \sum_{k \in K}\sum_{j \in \mathcal{D}_o}{q^k_j} = q_o                                                                                                                                                                                                                                  & \hspace{-20mm}  \forall o \in \mathcal{O}                                                        \\
-    \label{mod:c240}       & q^k_j \leq \sum_{i \in  \delta^{-}(j)}{Q^k x^k_{ij}}                                                                                                                                                                                                                                   & \hspace{-20mm}  \forall j \in \mathcal{D}, k \in K                                               \\
-    \label{mod:c25}        & \sum_{k \in K}\sum_{j \in \delta^{+}(i)}{x^{k}_{ij} \leq 1}                                                                                                                                                                                                                            & i \in \mathcal{L} \cup \mathcal{D}                                                               \\
-    \label{mod:c26}        & \sum_{k \in K}\sum_{j \in \delta^{+}(i)} {x^{k}_{ij} } =  \sum_{k \in K}\sum_{j \in \delta^{-}(i)}{x^{k}_{ji} }                                                                                                                                                                        & i \in \mathcal{L} \cup \mathcal{D}                                                               \\
+    \label{mod:obj}   \min & \smashoperator{ \sum_{ \substack{(i,j,k) \in A} }} {t_{ij}x^{k}_{ij}} + \beta_1\smashoperator{\sum_{ o \in \mathcal{O}}}{  \left(1-y_o\right)} \hspace{-0mm}  + \beta_2 \smashoperator{ \sum_{i \in \mathcal{C} } } { g_i  } +  \sum_{k \in K}\left({\beta_3 w^{1}_k  + \beta_4  w^{2}_k}\right) &                                                                                                  \\
+    \label{mod:c1}         & \sum_{j \in \delta^{+}(i) }{x^k_{ij}} =1                                                                                                                                                                                                                                                         & \forall i \in S, k \in K                                                                         \\
+    \label{mod:c2}         & \sum_{j \in \delta^{-}(i)}{x^k_{ji}} = 1                                                                                                                                                                                                                                                         & \forall i \in E, k \in K                                                                         \\
+    \label{mod:c03}        & v_j \geq  w_i  - M\left(1-x^{k}_{ij}\right)                                                                                                                                                                                                                                                      & \hspace{-20mm}  i \in S, j \in \delta^{+}(i),  k \in K                                           \\
+    \label{mod:c3}         & v_j \geq  w_i + \alpha_{b} + t_{ij} - M\left(1-x^{k}_{ij}\right)                                                                                                                                                                                                                                 & \hspace{-20mm} \forall b \in \mathcal{B}, i \in \mathcal{L}_b, j \in \delta^{+}(i),  k \in K     \\
+    \label{mod:c4}         & v_j \geq  w_i + \rho + t_{ij} - M\left(1-x^{k}_{ij}\right)                                                                                                                                                                                                                                       & \hspace{-20mm} \forall i \in \mathcal{D}  , j \in \delta^{+}(i), k \in K                         \\
+    \label{mod:c5}         & w_{i} \geq v_{i}  + \frac{q^k_j}{\tau^l_b} -M\left(1- x^{k}_{ij}\right)                                                                                                                                                                                                                          & \hspace{-20mm} \forall  b \in \mathcal{B},  i \in \mathcal{L}_{b},  j \in \delta^{+}(i), k \in K \\
+    \label{mod:c6}         & w_{j} \geq v_{j}  + {  \frac{q^k_j}{\tau^u_c} -M\left(1- x^{k}_{ij}\right) }                                                                                                                                                                                                                     & \hspace{-20mm}  \forall c \in  \mathcal{C}, j \in \mathcal{D}_{c}, i \in \delta^{-}(j),  k \in K \\
+    \label{mod:c7}         & w_{j} \leq v_{i}  + \Delta + M\left(1- x^{k}_{ij}\right)                                                                                                                                                                                                                                         & \hspace{-20mm}   j \in \mathcal{D},  i \in \delta^{-}(j),  k \in K                               \\
+    \label{mod:c8}         & v_{d^0_{o}} \geq a_i                                                                                                                                                                                                                                                                             & \hspace{-20mm} \forall  i \in \mathcal{C}, \forall o \in \mathcal{O}_i                           \\
+    \label{mod:c9}         & g_{i} \geq v_{d^0_{o_1}} - a_i - M\left(  \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})  }{u_{jd^0_{o_1}}}\right)                                                                                                                                                                                       & \hspace{-20mm}  \forall  i \in \mathcal{C}, \forall o_1 \in \mathcal{O}_i                        \\
+    \label{mod:c101}       & v_{d^0_{o_1}} \geq w_j - M\left(1- u_{jd^0_{o_1}}\right)                                                                                                                                                                                                                                         & \hspace{-40mm}    \forall o_1 \in \mathcal{O}_i,  j \in \delta_{D}^{-}(d^0_{o_1})                \\
+    \label{mod:c10}        & v_{d^0_{o_1}}  \leq  w_j + \gamma^2 + M\left(1- u_{j,d^0_{o_1}}\right)                                                                                                                                                                                                                           & \hspace{-20mm}  \forall  o_1 \in \mathcal{O},  j \in \delta_{D}^{-}(d^0_{o_1})                   \\
+    \label{mod:c11}        & \sum_{ \substack{o_1 \in \mathcal{O}_i }}{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } = |\mathcal{O}_i|-1                                                                                                                                                                       & \hspace{-20mm} \forall  i \in \mathcal{C},|\mathcal{O}_i| > 1                                    \\
+    \label{mod:c12}        & \sum_{ \substack{o_1 \in \mathcal{O}_i }}\sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}{u_{d^0_{o_1},j } } = |\mathcal{O}_i|-1                                                                                                                                                                          & \hspace{-40mm} \forall  i \in \mathcal{C}, |\mathcal{O}_i| > 1                                   \\
+    \label{mod:c13}        & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } \leq 1                                                                                                                                                                                                  & \hspace{-20mm}  \forall o_1 \in \mathcal{O}                                                      \\
+    \label{mod:c14}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \leq 1                                                                                                                                                                                                  & \hspace{-20mm} \forall o_1 \in \mathcal{O}                                                       \\
+    \label{mod:c15}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } +\smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \geq 1                                                                                                                     & \hspace{-20mm} \forall o_1 \in \mathcal{O}                                                       \\
+    \label{mod:c16}        & v_{j} \geq w_{j-1} - M\left(1- u_{j-1,j}\right)                                                                                                                                                                                                                                                  & \hspace{-20mm}  \forall o \in \mathcal{O}, j \in \mathcal{D}_{o}, j \geq 1                       \\
+    \label{mod:c17}        & v_{j}  \leq  w_{j-1} + \gamma^1 + M\left(1- u_{j-1,j}\right)                                                                                                                                                                                                                                     & \hspace{-20mm} \forall i \in \mathcal{C}, \forall o \in O_i, j \in \mathcal{D}_{o}, j \geq 1     \\
+    \label{mod:c18}        & u_{j-1,j} \geq u_{j,j+1}                                                                                                                                                                                                                                                                         & \hspace{-35mm} \forall o_1 \in\mathcal{O},  j \in \mathcal{D}_{o_1}, 1 \leq j \leq n_{o_{1}}-1   \\
+    \label{mod:c19}        & u_{j-1,j} \geq \sum_{l \in \mathcal{L}}{x_{lj}}                                                                                                                                                                                                                                                  & \hspace{-20mm}  \forall o_1 \in \mathcal{O}, j \in \mathcal{D}_{o_1}, j \geq 1                   \\
+    \label{mod:c20}        & v_{j} \geq w_{i} - M\left(1- u_{i,j}\right)                                                                                                                                                                                                                                                      & \hspace{-20mm}  \forall i \in \mathcal{L}, j \in \delta^{+}_{L}(i)                               \\
+    \label{mod:c21}        & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{L}(i)}}{u_{i,j } } \leq 1                                                                                                                                                                                                                  & \hspace{-20mm}  \forall i \in \mathcal{L}                                                        \\
+    \label{mod:c22}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } \leq 1                                                                                                                                                                                                                  & \hspace{-20mm} \forall i \in \mathcal{L}                                                         \\
+    \label{mod:c230}       & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } }  \geq \sum_{k \in K}\sum_{j \in  \delta^{-}(i) }{x^k_{ji}}                                                                                                                                                              & \hspace{-20mm} \forall i \in \mathcal{L}                                                         \\
+    \label{mod:c231}       & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } \geq \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i+1)}}{u_{j,i+1 } }                                                                                                                                                    & \hspace{-20mm} \forall i \in \mathcal{L}                                                         \\
+    \label{mod:c23}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } + \smashoperator{ \sum_{ j \in \delta^{+}_{L}(i)}}{u_{i,j } } \geq \sum_{k \in K}\sum_{j \in  \delta^{-}(i) }{x^k_{ji}}                                                                                                 & \hspace{-20mm} \forall i \in \mathcal{L}                                                         \\
+    \label{mod:c24}        & \sum_{k \in K}\sum_{j \in \mathcal{D}_o}{q^k_j} = q_o                                                                                                                                                                                                                                            & \hspace{-20mm}  \forall o \in \mathcal{O}                                                        \\
+    \label{mod:c240}       & q^k_j \leq \sum_{i \in  \delta^{-}(j)}{Q^k x^k_{ij}}                                                                                                                                                                                                                                             & \hspace{-20mm}  \forall j \in \mathcal{D}, k \in K                                               \\
+    \label{mod:c25}        & \sum_{k \in K}\sum_{j \in \delta^{+}(i)}{x^{k}_{ij} \leq 1}                                                                                                                                                                                                                                      & i \in \mathcal{L} \cup \mathcal{D}                                                               \\
+    \label{mod:c26}        & \sum_{k \in K}\sum_{j \in \delta^{+}(i)} {x^{k}_{ij} } =  \sum_{k \in K}\sum_{j \in \delta^{-}(i)}{x^{k}_{ji} }                                                                                                                                                                                  & i \in \mathcal{L} \cup \mathcal{D}                                                               \\
     % \label{mod:c27}        & \sum_{k \in K}  \sum_{i \in \mathcal{D}_c} \sum_{j \in \delta^{-}(i) }  {x^k_{ji}} \leq M\sigma_{c, b}     & \forall c \in \mathcal{C}, b \in \mathcal{B}                                                     \\
     % \label{mod:c28}        & \sum_{b \in \mathcal{B}} \sigma_{c, b} \leq 1    & \hspace{-20mm}\forall c \in \mathcal{C}, b \in \mathcal{B}                                       \\
-    \label{mod:c29}        & w^1_k \geq  M_T + H_k - v_{e_k}                                                                                                                                                                                                                                                        & \hspace{-20mm} \forall k \in K                                                                   \\
-    \label{mod:c30}        & w^2_k \geq (v_{e_k} - H_k) - N_T                                                                                                                                                                                                                                                       & \hspace{-20mm} \forall k \in K                                                                   \\
-    \label{mod:c31}        & w_{e_k} \leq H_k + O_T                                                                                                                                                                                                                                                                 & \hspace{-00mm}  k \in K \hspace{0mm}                                                             \\
-    \label{mod:c32}        & 0 \leq q^k_j \leq Q^k                                                                                                                                                                                                                                                                  & \hspace{-20mm}  j \in \mathcal{D}, k \in K                                                       \\
-    \label{mod:c33}        & x^k_{ij} \in \{0,1\}                                                                                                                                                                                                                                                                   & \hspace{-20mm}  (i,j) \in A , k \in K  \hspace{0mm}                                              \\
-    \label{mod:c34}        & u_{ij} \in \{0,1\}                                                                                                                                                                                                                                                                     & \hspace{-20mm}  (i,j) \in A^D , k \in K  \hspace{0mm}                                            \\
+    \label{mod:c29}        & w^1_k \geq  M_T + H_k - v_{e_k}                                                                                                                                                                                                                                                                  & \hspace{-20mm} \forall k \in K                                                                   \\
+    \label{mod:c30}        & w^2_k \geq (v_{e_k} - H_k) - N_T                                                                                                                                                                                                                                                                 & \hspace{-20mm} \forall k \in K                                                                   \\
+    \label{mod:c31}        & w_{e_k} \leq H_k + O_T                                                                                                                                                                                                                                                                           & \hspace{-00mm}  k \in K \hspace{0mm}                                                             \\
+    \label{mod:c32}        & 0 \leq q^k_j \leq Q^k                                                                                                                                                                                                                                                                            & \hspace{-20mm}  j \in \mathcal{D}, k \in K                                                       \\
+    \label{mod:c33}        & x^k_{ij} \in \{0,1\}                                                                                                                                                                                                                                                                             & \hspace{-20mm}  (i,j) \in A , k \in K  \hspace{0mm}                                              \\
+    \label{mod:c34}        & u_{ij} \in \{0,1\}                                                                                                                                                                                                                                                                               & \hspace{-20mm}  (i,j) \in A^D , k \in K  \hspace{0mm}                                            \\
     % \label{mod:c35}        & \sigma_{ib} \in \{0,1\}    & \hspace{-20mm}  i \in \mathcal{C}, b \in \mathcal{B}                                             \\
-    \label{mod:c36}        & y_o \in \{0,1\}                                                                                                                                                                                                                                                                        & \hspace{-20mm}  o \in \mathcal{O}                                                                \\
-    \label{mod:c37}        & v_i \geq 0,  w_i \geq 0                                                                                                                                                                                                                                                                & \hspace{-20mm}  i \in V                                                                          \\
-    \label{mod:c38}        & w^1_{k} \geq 0,  w^2_k \geq 0                                                                                                                                                                                                                                                          & \hspace{-20mm}  i \in V                                                                          \\
-    \label{mod:cend}       & g_i \geq 0                                                                                                                                                                                                                                                                             & \hspace{-20mm}  i \in \mathcal{C}.
+    \label{mod:c36}        & y_o \in \{0,1\}                                                                                                                                                                                                                                                                                  & \hspace{-20mm}  o \in \mathcal{O}                                                                \\
+    \label{mod:c37}        & v_i \geq 0,  w_i \geq 0                                                                                                                                                                                                                                                                          & \hspace{-20mm}  i \in V                                                                          \\
+    \label{mod:c38}        & w^1_{k} \geq 0,  w^2_k \geq 0                                                                                                                                                                                                                                                                    & \hspace{-20mm}  i \in V                                                                          \\
+    \label{mod:cend}       & g_i \geq 0                                                                                                                                                                                                                                                                                       & \hspace{-20mm}  i \in \mathcal{C}.
 \end{alignat}
 
 $\beta_1$ to $\beta_4$ are the penalty coefficients of each component of the objective function (\ref{mod:obj}). Constraints (\ref{mod:c1}) and (\ref{mod:c2}) state that driver $k$ leaves his start node exactly once a day and returns to his end node. A driver cannot serve a node before the start of his shift with constraints (\ref{mod:c03}). Constraints (\ref{mod:c3}) and (\ref{mod:c4}) set a driver to take some time after loading or unloading to adjust the concrete or clean the truck before moving on to the next node. The duration of the loading operation depends on the plant's loading rate and the amount $q^k_j$ of RMC loaded (\ref{mod:c5}). Similarly, the unloading service depends on the site's rate and $q^k_j$ (\ref{mod:c6}). Unloading operations must end at most $\Delta$ minutes after loading begins (\ref{mod:c7}).
@@ -515,49 +516,49 @@ The GRASP algorithm, proposed by \cite{feo1989probabilistic}, is a two-phase ite
 
     {\setstretch{1.0}
         {\small
-        \begin{algorithm}[hbpt]
-            \caption{Pseudo-code of the GRASP algorithm }
-            \label{alg_grasp}
-            \DontPrintSemicolon
-            \LinesNumbered
-            \setcounter{AlgoLine}{0}
-            % \KwIn{ \textit{H}: List of constructive greedy randomized heuristics }
-            \KwIn{ $\phi$: number of iterations before path relinking }
-            $S^* \leftarrow \emptyset$    \hspace{2mm} $T \leftarrow \emptyset$       $Cost(S^*) \leftarrow \infty$
+            \begin{algorithm}[hbpt]
+                \caption{Pseudo-code of the GRASP algorithm }
+                \label{alg_grasp}
+                \DontPrintSemicolon
+                \LinesNumbered
+                \setcounter{AlgoLine}{0}
+                % \KwIn{ \textit{H}: List of constructive greedy randomized heuristics }
+                \KwIn{ $\phi$: number of iterations before path relinking }
+                $S^* \leftarrow \emptyset$    \hspace{2mm} $T \leftarrow \emptyset$       $Cost(S^*) \leftarrow \infty$
 
-            Initialize an empty hash table $H$
+                Initialize an empty hash table $H$
 
-            % $counter \leftarrow  0$
+                % $counter \leftarrow  0$
 
-            \While{Conditions not met}{
+                \While{Conditions not met}{
 
-                $S \leftarrow GreedyRandomizedHeuristic()$
+                    $S \leftarrow GreedyRandomizedHeuristic()$
 
-                \uIf{ $S \notin H$}{
-                    $S \leftarrow LocalSearch(S)$
+                    \uIf{ $S \notin H$}{
+                        $S \leftarrow LocalSearch(S)$
 
-                    Add $S$ to $H$
+                        Add $S$ to $H$
+                    }
+
+                    % $T \leftarrow T \cup \{S\}$
+
+
+                    \uIf{$Cost(S)< Cost(S^*)$}{
+                        $S^* \leftarrow S$
+                    }
+
+                    % \uIf{$counter \text{ } mod \text{ } \phi == 0$}{
+                    %     $S^* \leftarrow PathRelinking(T)$
+
+                    %     $T \leftarrow \emptyset$
+                    % }
+
+                    % $counter \leftarrow counter + 1$
+
                 }
 
-                % $T \leftarrow T \cup \{S\}$
-
-
-                \uIf{$Cost(S)< Cost(S^*)$}{
-                    $S^* \leftarrow S$
-                }
-
-                % \uIf{$counter \text{ } mod \text{ } \phi == 0$}{
-                %     $S^* \leftarrow PathRelinking(T)$
-
-                %     $T \leftarrow \emptyset$
-                % }
-
-                % $counter \leftarrow counter + 1$
-
-            }
-
-            \KwRet{$S^{*}$}
-        \end{algorithm}}
+                \KwRet{$S^{*}$}
+            \end{algorithm}}
     }
 
 For the construction phase, we have developed two greedy randomized heuristics. The first heuristic, called customer-based insertion, schedules customers one at a time. On the other hand, the second heuristic, called delivery-based insertion, does not necessarily complete the scheduling of one customer before starting to plan another customer's schedule.
@@ -770,16 +771,16 @@ The dataset used in this section was obtained from our partner and contains reco
     \label{tab:instances}
     \small
     \resizebox*{0.8\textwidth}{!}{
-    \begin{tabular}{lcccccc}
-        \toprule
-        {} &  \# &         Demand  &   \#Order & \#Client &  \#Driver & \#Depot \\
-          &       &         (m$^3$)        &         &         &          &        \\
-        \midrule
-        Small  &     8 &    226.5 - 937.5 &     7 - 14 &    4 - 11 &    13-35 &    1-3 \\
-        Medium &    14 &  1,160.5 - 2,971.0 &    43 - 98 &   40 - 89 &   76-137 &    6-8 \\
-        Large  &    14 &  3,078. - 3,953.5 &  107 - 136 &  92 - 127 &  129-150 &    8 \\
-        \bottomrule
-        \end{tabular}  
+        \begin{tabular}{lcccccc}
+            \toprule
+            {}     & \# & Demand            & \#Order   & \#Client & \#Driver & \#Depot \\
+                   &    & (m$^3$)           &           &          &          &         \\
+            \midrule
+            Small  & 8  & 226.5 - 937.5     & 7 - 14    & 4 - 11   & 13-35    & 1-3     \\
+            Medium & 14 & 1,160.5 - 2,971.0 & 43 - 98   & 40 - 89  & 76-137   & 6-8     \\
+            Large  & 14 & 3,078. - 3,953.5  & 107 - 136 & 92 - 127 & 129-150  & 8       \\
+            \bottomrule
+        \end{tabular}
     }
 \end{table}
 
@@ -793,15 +794,15 @@ The dataset used in this section was obtained from our partner and contains reco
     \label{tab:cdp_instances}
     \scriptsize
     \resizebox{1\textwidth}{!}{
-    \begin{tabular}{@{}cccccccccccc@{}}
-    \toprule
-     &  & \multicolumn{2}{c}{CP} & \multicolumn{2}{c}{MIP} & \multicolumn{2}{c}{SD-heuristic} & \multicolumn{2}{c}{Hybrid} & \multicolumn{2}{c}{GRASP} \\ \cmidrule(l){3-10} \cmidrule(l){11-12} 
-     &  & Gap (\%) & Time (ms) & Gap (\%) & Time (ms) & Gap (\%) & Time (ms) & Gap (\%) & Time (ms) & Gap (\%) & Time (ms) \\ \cmidrule(l){3-10} \cmidrule(l){11-12} 
-    \multirow{2}{*}{Set A} & Avg & 4.2 & 197,012 & 7.3 & 13,405,798 & 9.1 & 23 & 7.0 & 100,765 & 5.7 & 13,186 \\ \cmidrule(l){2-10} \cmidrule(l){11-12} 
-     & Opt & \multicolumn{2}{c}{40/64} & \multicolumn{2}{c}{37/64} & \multicolumn{2}{c}{30/64} & \multicolumn{2}{c}{35/64} & \multicolumn{2}{c}{35/64} \\ \cmidrule(l){3-10} \cmidrule(l){11-12} 
-     \multirow{2}{*}{Set B} & Avg & 12.1 & 357,313 & - & - & 16.3 & 1,331 & - & - & 13.8 & 574,983\\ \cmidrule(l){2-10} \cmidrule(l){11-12} 
-     & Opt & \multicolumn{2}{c}{55/128} & \multicolumn{2}{c}{-} & \multicolumn{2}{c}{40/128} & \multicolumn{2}{c}{-} & \multicolumn{2}{c}{44/128} \\ \bottomrule
-    \end{tabular}
+        \begin{tabular}{@{}cccccccccccc@{}}
+            \toprule
+                                   &     & \multicolumn{2}{c}{CP}     & \multicolumn{2}{c}{MIP}   & \multicolumn{2}{c}{SD-heuristic} & \multicolumn{2}{c}{Hybrid} & \multicolumn{2}{c}{GRASP}                                                            \\ \cmidrule(l){3-10} \cmidrule(l){11-12}
+                                   &     & Gap (\%)                   & Time (ms)                 & Gap (\%)                         & Time (ms)                  & Gap (\%)                   & Time (ms) & Gap (\%) & Time (ms) & Gap (\%) & Time (ms) \\ \cmidrule(l){3-10} \cmidrule(l){11-12}
+            \multirow{2}{*}{Set A} & Avg & 4.2                        & 197,012                   & 7.3                              & 13,405,798                 & 9.1                        & 23        & 7.0      & 100,765   & 5.7      & 13,186    \\ \cmidrule(l){2-10} \cmidrule(l){11-12}
+                                   & Opt & \multicolumn{2}{c}{40/64}  & \multicolumn{2}{c}{37/64} & \multicolumn{2}{c}{30/64}        & \multicolumn{2}{c}{35/64}  & \multicolumn{2}{c}{35/64}                                                            \\ \cmidrule(l){3-10} \cmidrule(l){11-12}
+            \multirow{2}{*}{Set B} & Avg & 12.1                       & 357,313                   & -                                & -                          & 16.3                       & 1,331     & -        & -         & 13.8     & 574,983   \\ \cmidrule(l){2-10} \cmidrule(l){11-12}
+                                   & Opt & \multicolumn{2}{c}{55/128} & \multicolumn{2}{c}{-}     & \multicolumn{2}{c}{40/128}       & \multicolumn{2}{c}{-}      & \multicolumn{2}{c}{44/128}                                                           \\ \bottomrule
+        \end{tabular}
     }
 \end{table}
 
@@ -810,201 +811,148 @@ Overall, the GRASP algorithm shows promise in providing near-optimal solutions i
 
 \subsubsection{Results for the generated instances}
 
-The computational results of our instances solved with the GRASP heuristic are summarized in the tables below. The stopping criterion is set to 20,000 iterations. The parameters used in our experiments are listed in Table~\ref*{tab:problem_parameters}.
-
+The computational results of our instances solved with the GRASP heuristic are summarized in the tables below. %The stopping criteria are set to 20,000 iterations or 3600 seconds of running time (unless otherwise specified).
+The parameters used in our experiments are listed in Table~\ref*{tab:problem_parameters}.
 
 \begin{table}[hbt]
     \centering
     \caption{Parameters of the real-world instances}
     \label{tab:problem_parameters}
     \small
-%    \resizebox*{\textwidth}{!}{
+    %    \resizebox*{\textwidth}{!}{
     \begin{tabularx}{\textwidth}{Xr}
         \toprule
-        \multicolumn{1}{c}{Parameter} & \multicolumn{1}{c}{Value} \\ \midrule
-        Unloading duration ($\tau_c^u$) & 2 min$/m^3$ \\
-        Cleaning duration ($\rho$) & 10 min \\
-        Adjustment duration ($\alpha$) & 10 min \\
-        Max travel time ($\Delta$) & 120 min \\
-        Min working time ($M_T$) & 180 min \\
-        Max working time ($N_T$) & 480 min \\
-        Max overtime duration ($O_T$) & 120 min \\
-        Max delay between two consecutive deliveries of the same order ($\gamma^1$) & 20 min \\
-        Max delay between two consecutive deliveries of different orders ($\gamma^2)$ & 25 min \\
-       $\beta_1$ & 10,0000  \\
-       $\beta_2$ & 1,0000  \\
-       $\beta_3$ & 30  \\
-       $\beta_4$ & 20  \\
+        \multicolumn{1}{c}{Parameter}                                                 & \multicolumn{1}{c}{Value} \\ \midrule
+        Unloading duration ($\tau_c^u$)                                               & 2 min$/m^3$               \\
+        Cleaning duration ($\rho$)                                                    & 10 min                    \\
+        Adjustment duration ($\alpha$)                                                & 10 min                    \\
+        Max travel time ($\Delta$)                                                    & 120 min                   \\
+        Min working time ($M_T$)                                                      & 180 min                   \\
+        Max working time ($N_T$)                                                      & 480 min                   \\
+        Max overtime duration ($O_T$)                                                 & 120 min                   \\
+        Max delay between two consecutive deliveries of the same order $\gamma^1$)   & 20 min                    \\
+        Max delay between two consecutive deliveries of different orders ($\gamma^2)$ & 25 min                    \\
+        Penalty of unfulfilled orders ($\beta_1$)                                     & 10,0000                   \\
+        Penalty of first delivery delay ($\beta_2$)                                   & 1,0000                    \\
+        Penalty for driver underutilization  ($\beta_3$)                              & 30                        \\
+        Driver overtime penalty $ (\beta_4$)                                          & 20                        \\
         \bottomrule
     \end{tabularx}
-%    }
+    %    }
+\end{table}
+%  the travel cost ($TC$), the penalties associated with unfulfilled orders ($PUO$), the sum of the first delivery delays ($FDD$) for each customer, the sum of the driver underutilization costs ($DUC$) and driver overtime costs ($DOC$).
+The table \ref*{tab:all_instances} contains the detailed results for all instances with a stop criterion of 3600 seconds. The table shows the demand of each instance, the average and the best values of the objective function when solving each instance five times. All daily orders are served by our algorithm within these five replications. On average, five instances require multiple runs of the algorithm to successfully serve all customers, as shown in column $UQ$, which is the undelivered quantity. The sum of the driver underutilization costs ($DUC$) is high for medium and large instances. This indicates the underutilization of the scheduled fleet. Some drivers are not scheduled at all or work very little. The sum of driver overtime costs ($DOC$) is also high for these instances. This can be explained by the fact that the algorithm prefers to put certain drivers on overtime rather than use a driver who has to travel to another plant for a delivery, which would increase the travel costs ($TC$).
+
+$FDD$ is the sum of the delays of the first deliveries.  For the small instances, all but one of the first deliveries are on time. For the other instances, there is at least one customer with a late first delivery.
+To get an idea of the actual delay per customer, we report $mFDD$, which is the maximum delay of all first deliveries. This tells us that we have a maximum delay that varies between 0 and 19 minutes for small instances, 3.5 and 60 minutes for medium instances, and 24 to 60 minutes for large instances.
+
+\begin{table}[!ht]
+    \centering
+    \caption{Results with all instances}
+    \label{tab:all_instances}
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{llccccccccccccc}
+    \toprule
+    &                 &          & \multicolumn{6}{c}{Avg} & \multicolumn{6}{c}{Best}   \\
+    \cmidrule(l){4-9} \cmidrule(l){10-15}
+    &  & Demand   & $UQ$   & $TC$  & $FDD$    & $DUC$    & $DOC$    & \multirow[c]{2}{*}{Z} & $TC$      & $FDD$    & $mFDD$  & $DUC$    & $DOC$    & \multirow[c]{2}{*}{Z} \\
+        & & ($m^3$)  & ($m^3$) & (min)  & (min)    & (min)    & (min)    &     & (min)     & (min)    & (min) & (min)   &(min)& \\
+        \midrule
+        \multirow[c]{8}{*}{Small} & C_13_11_12_1 & 226.5 & 0.0 & 1,243.5 & 0.0 & 37.7 & 0.0 & 2,373.9 & 1,243.5 & 0.0 & 0.0 & 0.0 & 0.0 & 1,243.5 \\
+        & C_13_5_8_1 & 267.0 & 0.0 & 745.1 & 0.0 & 0.0 & 0.0 & 745.1 & 745.1 & 0.0 & 0.0 & 0.0 & 0.0 & 745.1 \\
+        & C_18_6_11_2 & 333.5 & 0.0 & 753.3 & 0.0 & 194.7 & 0.0 & 6,593.7 & 753.3 & 0.0 & 0.0 & 125.3 & 0.0 & 4,513.2 \\
+        & C_15_4_7_2 & 375.0 & 0.0 & 1,014.9 & 0.0 & 132.8 & 291.6 & 10,830.8 & 1,014.2 & 0.0 & 0.0 & 172.1 & 76.1 & 7,700.1 \\
+        & C_19_7_8_2 & 388.0 & 0.0 & 1,765.5 & 0.0 & 314.8 & 150.9 & 14,225.6 & 1,745.8 & 0.0 & 0.0 & 224.5 & 87.9 & 10,237.1 \\
+        & C_29_10_14_3 & 613.5 & 0.0 & 3,742.0 & 48.6 & 211.0 & 735.6 & 73,392.7 & 3,628.8 & 49.2 & 18.8 & 112.9 & 547.2 & 67,145.2 \\
+        & C_31_8_11_3 & 776.0 & 0.0 & 2,330.6 & 0.0 & 781.6 & 656.5 & 38,909.6 & 2,297.2 & 0.0 & 0.0 & 606.7 & 567.0 & 31,836.1 \\
+        & C_35_9_10_3 & 937.5 & 0.0 & 4,175.3 & 0.0 & 341.8 & 1,329.5 & 41,021.0 & 4,174.4 & 0.0 & 0.0 & 221.7 & 1,161.6 & 34,057.0 \\
+        \cmidrule(l){1-15}
+        \multirow[c]{14}{*}{Medium} & C_76_40_43_6 & 1,160.5 & 0.0 & 6,311.6 & 17.2 & 3,014.6 & 706.0 & 128,106.4 & 5,967.0 & 6.2 & 3.5 & 2,961.6 & 644.4 & 113,884.7 \\
+        & C_104_42_47_8 & 1,565.0 & 0.0 & 9,358.2 & 34.1 & 3,890.1 & 679.0 & 173,754.5 & 9,777.5 & 32.0 & 13.0 & 2,830.0 & 240.6 & 131,507.6 \\
+        & C_94_63_70_7 & 1,746.5 & 0.0 & 14,369.1 & 90.2 & 1,353.9 & 1,391.4 & 173,007.0 & 14,428.7 & 78.9 & 19.3 & 1,147.9 & 1,464.3 & 157,038.1 \\
+        & C_116_67_78_8 & 1,839.5 & 0.0 & 13,602.9 & 67.9 & 2,419.4 & 857.3 & 171,229.1 & 13,871.9 & 67.2 & 33.2 & 2,347.7 & 523.3 & 162,021.5 \\
+        & C_116_71_82_8 & 2,060.0 & 0.0 & 12,678.2 & 158.6 & 1,991.3 & 1,125.8 & 253,575.1 & 12,089.7 & 147.7 & 27.2 & 1,966.0 & 922.7 & 237,183.6 \\
+        & C_117_57_70_6 & 2,327.5 & 0.0 & 15,495.0 & 142.4 & 1,388.6 & 1,680.5 & 233,181.4 & 15,153.3 & 114.2 & 22.2 & 1,823.7 & 1,671.5 & 217,448.3 \\
+        & C_137_79_83_7 & 2,425.0 & 0.0 & 18,960.4 & 375.8 & 2,124.7 & 1,857.9 & 495,614.5 & 18,360.3 & 335.1 & 34.2 & 2,552.7 & 1,794.2 & 465,977.3 \\
+        & C_127_66_80_8 & 2,512.5 & 0.0 & 16,033.3 & 10.4 & 1,579.6 & 1,552.1 & 104,879.1 & 17,599.1 & 14.4 & 5.0 & 1,046.3 & 1,242.3 & 88,203.5 \\
+        & C_128_68_74_7 & 2,595.0 & 0.0 & 19,774.4 & 361.6 & 944.6 & 2,616.7 & 461,998.2 & 18,728.8 & 191.0 & 42.5 & 1,418.8 & 2,841.2 & 309,116.8 \\
+        & C_136_85_97_8 & 2,673.0 & 0.0 & 18,223.6 & 188.5 & 2,134.5 & 2,352.2 & 317,811.4 & 18,894.6 & 137.4 & 48.6 & 1,155.6 & 2,137.0 & 233,669.0 \\
+        & C_128_78_85_8 & 2,685.5 & 0.0 & 18,463.9 & 305.8 & 1,277.3 & 3,157.0 & 425,759.3 & 18,041.6 & 192.4 & 35.7 & 1,374.3 & 3,234.2 & 316,314.1 \\
+        & C_131_77_85_8 & 2,893.5 & 0.0 & 18,003.0 & 212.6 & 1,248.7 & 1,716.1 & 302,370.4 & 18,063.0 & 200.2 & 43.2 & 780.7 & 1,539.1 & 272,509.6 \\
+        & C_137_89_97_7 & 2,939.5 & 0.0 & 23,293.0 & 636.0 & 849.9 & 3,523.9 & 755,280.5 & 22,038.1 & 438.3 & 58.6 & 849.8 & 3,461.1 & 555,029.1 \\
+        & C_133_84_98_7 & 2,971.0 & 18.7 & 22,000.0 & 1,157.6 & 805.4 & 2,291.4 & 1,249,585.1 & 20,992.6 & 1,061.2 & 59.4 & 546.1 & 2,742.5 & 1,153,396.1 \\
+        \cmidrule(l){1-15}
+        \multirow[c]{14}{*}{Large} & C_132_98_109_8 & 3,078.5 & 0.0 & 23,469.1 & 247.4 & 548.7 & 4,162.3 & 370,622.5 & 23,425.8 & 160.9 & 29.4 & 493.2 & 4,426.1 & 287,683.7 \\
+        & C_129_101_119_8 & 3,229.0 & 0.0 & 19,051.7 & 269.0 & 1,232.1 & 3,820.4 & 401,387.9 & 19,453.3 & 166.7 & 35.8 & 1,138.1 & 4,719.6 & 314,728.3 \\
+        & C_141_114_136_8 & 3,350.5 & 8.7 & 21,505.6 & 1,127.2 & 1,422.7 & 2,339.2 & 1,238,202.0 & 21,863.2 & 943.9 & 55.4 & 1,177.0 & 2,513.4 & 1,051,386.9 \\
+        & C_140_114_132_8 & 3,401.5 & 0.0 & 23,938.4 & 1,055.1 & 910.2 & 3,269.1 & 1,171,715.1 & 23,969.7 & 988.5 & 54.4 & 981.3 & 3,253.1 & 1,107,019.4 \\
+        & C_143_101_123_8 & 3,437.5 & 0.0 & 25,711.0 & 352.2 & 903.0 & 4,085.1 & 486,755.0 & 26,284.9 & 335.5 & 43.5 & 566.1 & 3,913.0 & 457,007.0 \\
+        & C_137_112_129_8 & 3,471.0 & 0.0 & 22,562.4 & 340.8 & 402.4 & 3,371.1 & 442,869.1 & 22,338.3 & 275.1 & 45.6 & 375.2 & 3,819.8 & 385,076.1 \\
+        & C_142_114_129_8 & 3,499.5 & 0.0 & 22,478.3 & 801.0 & 1,294.8 & 4,168.2 & 945,633.4 & 22,387.6 & 654.6 & 55.3 & 1,090.4 & 4,472.6 & 799,184.0 \\
+        & C_149_98_122_8 & 3,513.0 & 3.0 & 20,767.5 & 778.4 & 2,236.9 & 2,852.2 & 923,357.9 & 21,224.7 & 684.5 & 51.1 & 2,267.6 & 3,046.6 & 834,708.6 \\
+        & C_139_98_108_8 & 3,541.0 & 0.0 & 21,613.4 & 661.0 & 852.3 & 3,716.2 & 782,546.8 & 22,043.2 & 522.3 & 51.6 & 482.8 & 3,648.5 & 631,819.8 \\
+        & C_144_108_122_8 & 3,670.5 & 0.0 & 24,738.3 & 746.0 & 664.9 & 3,465.8 & 860,025.7 & 25,806.9 & 675.4 & 50.4 & 548.5 & 3,209.2 & 781,866.1 \\
+        & C_142_92_107_8 & 3,684.5 & 0.0 & 24,553.3 & 298.6 & 644.2 & 4,423.6 & 431,001.0 & 23,586.4 & 182.6 & 24.0 & 803.0 & 4,396.5 & 318,243.2 \\
+        & C_138_114_136_8 & 3,739.5 & 0.0 & 25,366.9 & 791.5 & 668.6 & 5,501.8 & 946,993.9 & 23,639.0 & 600.4 & 55.2 & 1,230.8 & 5,314.0 & 767,223.0 \\
+        & C_150_127_136_8 & 3,946.5 & 0.0 & 25,785.2 & 613.8 & 629.1 & 4,686.4 & 752,189.6 & 27,332.9 & 507.3 & 57.1 & 250.3 & 5,295.7 & 648,057.4 \\
+        & C_148_112_131_8 & 3,953.5 & 6.9 & 26,231.2 & 1,002.0 & 517.8 & 3,467.4 & 1,113,149.3 & 25,559.2 & 886.9 & 56.0 & 559.3 & 4,213.2 & 1,013,500.2 \\
+        \bottomrule
+    \end{tabular}
+    }
 \end{table}
 
-Table \ref*{tab:runtime} shows the percentage of concrete delivered by varying the execution times of the algorithm. For small instances, all requests are delivered in less than five minutes, while for medium and large instances, over 99\% of requests are delivered.  For these instances, it takes more than ten minutes to ensure complete delivery of all orders.
+Table \ref{tab:runtime} shows the percentage of concrete delivered by varying the execution times of the algorithm. For small instances, all requests are delivered in less than a minute, while for medium and large instances, over 99\% of requests are delivered.  For these instances, it takes more than ten minutes to ensure complete delivery of all orders.
 
-
-\begin{table}[htb]
+\begin{table}[htbp]
     \centering
     \caption{RMC delivered within different runtimes}
     \label{tab:runtime}
     \scriptsize
-    \resizebox*{0.8\textwidth}{!}{
-        \begin{tabular}{llccccc}
+    \resizebox*{0.7\textwidth}{!}{
+        \begin{tabular}{lcccccc}
             \toprule
-            &  &      \multicolumn{5}{c}{Runtime (min)} \\
+                                    &        & \multicolumn{5}{c}{Runtime (min)}                                   \\
             \cmidrule{3-7}
-                  &  &      1  &      5  &      10 &     30 &     60 \\
+                                    &        & 1                                 & 5      & 10     & 30    & 60    \\
             \midrule
-            \multirow{2}{*}{Small}  & \%Load &  100.00 &  100.00 &  100.00 &  100.0 &  100.0 \\
-                  & \#Instance &    8 &    8 &    8 &    8 &    8 \\
-                  \cmidrule{2-7}
-            \multirow{2}{*}{Medium}  & \%Load &   99.71 &   99.93 &   99.86 &  100.0 &  100.0 \\
-                  & \#Instance &   11 &   13 &   13 &   14 &   14 \\
-                  \cmidrule{2-7}
-            \multirow{2}{*}{Large}  & \%Load &   99.64 &   99.64 &   99.79 &  100.0 &  100.0 \\
-                  & \#Instance &   10 &   10 &   12 &   14 &   14 \\
+            \multirow{1}{*}{Small}  & \%Load & 100.00                            & 100.00 & 100.00 & 100.0 & 100.0 \\
+            %   & \#Instance &  8 &    8 &    8 &    8 & 8 \\
+            \cmidrule{2-7}
+            \multirow{1}{*}{Medium} & \%Load & 99.71                             & 99.93  & 99.86  & 100.0 & 100.0 \\
+            %   & \#Instance &   11 &   13 &   13 &   14 &   14 \\
+            \cmidrule{2-7}
+            \multirow{1}{*}{Large}  & \%Load & 99.64                             & 99.64  & 99.79  & 100.0 & 100.0 \\
+            %   & \#Instance &   10 &   10 &   12 &   14 &   14 \\
             \bottomrule
-            \end{tabular}
-    }
-    
-\end{table}
-
-
-Table \ref*{tab:all_instances} shows the detailed results for each instance. The runtime is set to 3600 seconds. The table reports the requirements of each instance, the components of the objective function, the number of drivers used, and the execution time in seconds.
-%  the travel cost ($TC$), the penalties associated with unfulfilled orders ($PUO$), the sum of the first delivery delays ($FDD$) for each customer, the sum of the driver underutilization costs ($DUC$) and driver overtime costs ($DOC$). 
-
-All daily orders are served with our algorithm, using less drivers than the available fleet. For the small size instances, all first deliveries are timely, except for one instance. The sum of the driver underutilization costs ($DUC$) is high for medium and large instances. This indicates underutilization of the scheduled fleet. Some drivers are not scheduled at all or work very little. The sum of the driver overtime costs ($DOC$) is also high for these instances. This can be explained by the fact that the algorithm prefers to put certain drivers on overtime rather than use a driver who has to travel to another plant for a delivery, which would increase the travel cost ($TC$).
-
-$FDD$ is the sum of the delays of the first deliveries. To get an idea of the actuel delay per customer, we report $mFDD$, which is the maximum delay for all first deliveries. This tells us that we have a maximum delay that varies between 0 and 12 minutes for small instances, 1 and 60 minutes for medium instances, and 50 to 60 minutes for large instances.
-\begin{table}[htb]
-    \centering
-    \caption{Results with all instances}
-    \label{tab:all_instances}
-    \resizebox*{1.2\textwidth}{!}{
-    \begin{tabular}{llrrrrrrrrrrrrrrrrrr}
-        \toprule
-         &  & \multicolumn{18}{c}{Best} \\
-         &  & Demand & $TC$ & $FDD$ & $mFDD$ & $DUC$ & $DOC$ & $Z$ & \#K & Time & $TC$ & $FDD$ & $mFDD$ & $DUC$ & $DOC$ & Z & \#K & $PUO$ & Time \\
-         &  & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) & (min) \\
-        size & Instance &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\
-        \midrule
-        \multirow[c]{8}{*}{Small} & C_13_11_12_1 & 226.50 & 1,243.55 & 0.00 & 0.00 & 0.00 & 0.00 & 1,243.55 & 13 & 60.34 & 1,243.55 & 0.00 & 0.00 & 37.68 & 0.00 & 2,373.86 & 13.00 & 0.00 & 60.23 \\
-         & C_13_5_8_1 & 267.00 & 745.10 & 0.00 & 0.00 & 0.00 & 0.00 & 745.10 & 13 & 60.28 & 745.10 & 0.00 & 0.00 & 0.00 & 0.00 & 745.10 & 13.00 & 0.00 & 60.29 \\
-         & C_18_6_11_2 & 333.50 & 753.26 & 0.00 & 0.00 & 125.33 & 0.00 & 4,513.25 & 18 & 60.21 & 753.26 & 0.00 & 0.00 & 194.68 & 0.00 & 6,593.74 & 18.00 & 0.00 & 60.27 \\
-         & C_15_4_7_2 & 375.00 & 1,014.25 & 0.00 & 0.00 & 172.13 & 76.10 & 7,700.13 & 15 & 60.39 & 1,014.93 & 0.00 & 0.00 & 132.77 & 291.65 & 10,830.80 & 15.00 & 0.00 & 60.37 \\
-         & C_19_7_8_2 & 388.00 & 1,745.83 & 0.00 & 0.00 & 224.47 & 87.86 & 10,237.08 & 19 & 60.21 & 1,765.51 & 0.00 & 0.00 & 314.77 & 150.86 & 14,225.62 & 18.60 & 0.00 & 60.21 \\
-         & C_29_10_14_3 & 613.50 & 3,628.79 & 49.18 & 18.77 & 112.94 & 547.16 & 67,145.19 & 29 & 60.88 & 3,741.98 & 48.61 & 21.45 & 210.99 & 735.59 & 73,392.66 & 28.40 & 0.00 & 60.65 \\
-         & C_31_8_11_3 & 776.00 & 2,297.20 & 0.00 & 0.00 & 606.66 & 566.96 & 31,836.07 & 30 & 61.06 & 2,330.55 & 0.00 & 0.00 & 781.61 & 656.53 & 38,909.59 & 29.40 & 0.00 & 60.56 \\
-         & C_35_9_10_3 & 937.50 & 4,174.37 & 0.00 & 0.00 & 221.69 & 1,161.60 & 34,056.98 & 35 & 61.27 & 4,175.30 & 0.00 & 0.00 & 341.84 & 1,329.53 & 41,021.00 & 34.40 & 0.00 & 60.96 \\
-        \multirow[c]{14}{*}{Medium} & C_76_40_43_6 & 1,160.50 & 5,967.04 & 6.18 & 3.48 & 2,961.59 & 644.42 & 113,884.73 & 71 & 60.24 & 6,311.56 & 17.24 & 9.45 & 3,014.61 & 705.95 & 128,106.36 & 67.80 & 0.00 & 60.38 \\
-         & C_104_42_47_8 & 1,565.00 & 9,777.47 & 32.02 & 13.04 & 2,829.97 & 240.64 & 131,507.57 & 98 & 60.30 & 9,358.19 & 34.11 & 20.52 & 3,890.10 & 678.98 & 173,754.55 & 94.40 & 0.00 & 60.26 \\
-         & C_94_63_70_7 & 1,746.50 & 14,428.70 & 78.89 & 19.26 & 1,147.89 & 1,464.35 & 157,038.10 & 94 & 60.52 & 14,369.08 & 90.19 & 24.90 & 1,353.87 & 1,391.38 & 173,007.04 & 93.20 & 0.00 & 60.45 \\
-         & C_116_67_78_8 & 1,839.50 & 13,871.90 & 67.25 & 33.18 & 2,347.71 & 523.28 & 162,021.52 & 114 & 60.28 & 13,602.88 & 67.90 & 32.59 & 2,419.36 & 857.33 & 171,229.15 & 113.60 & 0.00 & 60.36 \\
-         & C_116_71_82_8 & 2,060.00 & 12,089.70 & 147.66 & 27.17 & 1,966.01 & 922.73 & 237,183.56 & 116 & 60.30 & 12,678.16 & 158.64 & 35.84 & 1,991.31 & 1,125.75 & 253,575.07 & 114.20 & 0.00 & 60.26 \\
-         & C_117_57_70_6 & 2,327.50 & 15,153.30 & 114.16 & 22.20 & 1,823.68 & 1,671.48 & 217,448.30 & 117 & 60.45 & 15,495.00 & 142.42 & 34.52 & 1,388.61 & 1,680.45 & 233,181.42 & 117.00 & 0.00 & 60.39 \\
-         & C_137_79_83_7 & 2,425.00 & 18,360.30 & 335.15 & 34.20 & 2,552.72 & 1,794.17 & 465,977.30 & 135 & 60.26 & 18,960.44 & 375.76 & 48.60 & 2,124.67 & 1,857.88 & 495,614.54 & 135.60 & 0.00 & 60.43 \\
-         & C_127_66_80_8 & 2,512.50 & 17,599.10 & 14.37 & 5.00 & 1,046.33 & 1,242.32 & 88,203.50 & 126 & 60.15 & 16,033.26 & 10.42 & 3.60 & 1,579.58 & 1,552.10 & 104,879.09 & 125.40 & 0.00 & 60.26 \\
-         & C_128_68_74_7 & 2,595.00 & 18,728.80 & 191.00 & 42.50 & 1,418.80 & 2,841.15 & 309,116.80 & 127 & 60.36 & 19,774.38 & 361.55 & 49.14 & 944.63 & 2,616.67 & 461,998.19 & 127.80 & 0.00 & 60.61 \\
-         & C_136_85_97_8 & 2,673.00 & 18,894.60 & 137.37 & 48.57 & 1,155.58 & 2,137.00 & 233,669.00 & 134 & 60.71 & 18,223.56 & 188.51 & 46.67 & 2,134.46 & 2,352.19 & 317,811.36 & 131.40 & 0.00 & 60.48 \\
-         & C_128_78_85_8 & 2,685.50 & 18,041.60 & 192.36 & 35.71 & 1,374.29 & 3,234.19 & 316,314.10 & 127 & 60.68 & 18,463.86 & 305.84 & 39.44 & 1,277.34 & 3,156.96 & 425,759.26 & 127.20 & 0.00 & 60.37 \\
-         & C_131_77_85_8 & 2,893.50 & 18,063.00 & 200.24 & 43.22 & 780.69 & 1,539.10 & 272,509.58 & 131 & 60.23 & 18,003.00 & 212.58 & 47.46 & 1,248.71 & 1,716.14 & 302,370.43 & 129.60 & 0.00 & 60.41 \\
-         & C_137_89_97_7 & 2,939.50 & 22,038.10 & 438.27 & 58.56 & 849.81 & 3,461.14 & 555,029.11 & 137 & 60.33 & 23,293.04 & 636.01 & 56.14 & 849.88 & 3,523.86 & 755,280.53 & 137.00 & 0.00 & 60.47 \\
-         & C_133_84_98_7 & 2,971.00 & 20,992.60 & 1,061.17 & 59.39 & 546.11 & 2,742.51 & 1,153,396.07 & 133 & 60.30 & 22,000.05 & 1,157.60 & 59.25 & 805.41 & 2,291.38 & 1,249,585.08 & 133.00 & 18.70 & 60.67 \\
-        \multirow[c]{14}{*}{Large} & C_132_98_109_8 & 3,078.50 & 23,425.80 & 160.94 & 29.44 & 493.20 & 4,426.10 & 287,683.71 & 132 & 60.40 & 23,469.12 & 247.44 & 31.77 & 548.73 & 4,162.33 & 370,622.52 & 131.80 & 0.00 & 60.51 \\
-         & C_129_101_119_8 & 3,229.00 & 19,453.30 & 166.74 & 35.78 & 1,138.10 & 4,719.55 & 314,728.30 & 129 & 60.31 & 19,051.68 & 268.97 & 40.76 & 1,232.06 & 3,820.36 & 401,387.86 & 129.00 & 0.00 & 60.45 \\
-         & C_141_114_136_8 & 3,350.50 & 21,863.20 & 943.94 & 55.35 & 1,177.01 & 2,513.42 & 1,051,386.90 & 141 & 60.36 & 21,505.60 & 1,127.23 & 57.20 & 1,422.68 & 2,339.21 & 1,238,202.03 & 141.00 & 8.70 & 60.58 \\
-         & C_140_114_132_8 & 3,401.50 & 23,969.70 & 988.55 & 54.37 & 981.26 & 3,253.14 & 1,107,019.45 & 140 & 60.55 & 23,938.44 & 1,055.09 & 54.86 & 910.17 & 3,269.09 & 1,171,715.10 & 139.80 & 0.00 & 60.68 \\
-         & C_143_101_123_8 & 3,437.50 & 26,284.90 & 335.48 & 43.51 & 566.06 & 3,912.96 & 457,006.99 & 143 & 60.80 & 25,711.02 & 352.25 & 46.32 & 902.98 & 4,085.07 & 486,754.99 & 143.00 & 0.00 & 60.54 \\
-         & C_137_112_129_8 & 3,471.00 & 22,338.30 & 275.09 & 45.62 & 375.23 & 3,819.75 & 385,076.08 & 137 & 60.76 & 22,562.40 & 340.81 & 49.10 & 402.39 & 3,371.09 & 442,869.08 & 137.00 & 0.00 & 60.82 \\
-         & C_142_114_129_8 & 3,499.50 & 22,387.60 & 654.63 & 55.27 & 1,090.38 & 4,472.55 & 799,184.00 & 142 & 60.58 & 22,478.28 & 800.95 & 57.01 & 1,294.76 & 4,168.21 & 945,633.44 & 141.60 & 0.00 & 61.20 \\
-         & C_149_98_122_8 & 3,513.00 & 21,224.70 & 684.52 & 51.12 & 2,267.63 & 3,046.60 & 834,708.60 & 148 & 61.18 & 20,767.50 & 778.44 & 54.95 & 2,236.93 & 2,852.20 & 923,357.90 & 147.75 & 3.00 & 60.77 \\
-         & C_139_98_108_8 & 3,541.00 & 22,043.20 & 522.32 & 51.62 & 482.79 & 3,648.54 & 631,819.76 & 139 & 61.46 & 21,613.40 & 661.04 & 55.50 & 852.30 & 3,716.15 & 782,546.76 & 138.60 & 0.00 & 61.16 \\
-         & C_144_108_122_8 & 3,670.50 & 25,806.90 & 675.42 & 50.38 & 548.50 & 3,209.16 & 781,866.07 & 144 & 60.38 & 24,738.28 & 746.03 & 56.42 & 664.90 & 3,465.76 & 860,025.70 & 144.00 & 0.00 & 61.69 \\
-         & C_142_92_107_8 & 3,684.50 & 23,586.40 & 182.64 & 24.02 & 802.97 & 4,396.54 & 318,243.24 & 142 & 60.40 & 24,553.30 & 298.65 & 38.73 & 644.19 & 4,423.61 & 431,001.04 & 142.00 & 0.00 & 60.47 \\
-         & C_138_114_136_8 & 3,739.50 & 23,639.00 & 600.38 & 55.18 & 1,230.76 & 5,313.96 & 767,223.00 & 137 & 60.16 & 25,366.94 & 791.53 & 54.14 & 668.63 & 5,501.79 & 946,993.86 & 137.20 & 0.00 & 60.90 \\
-         & C_150_127_136_8 & 3,946.50 & 27,332.90 & 507.30 & 57.10 & 250.32 & 5,295.70 & 648,057.44 & 150 & 60.81 & 25,785.24 & 613.80 & 57.10 & 629.13 & 4,686.38 & 752,189.57 & 149.60 & 0.00 & 60.91 \\
-         & C_148_112_131_8 & 3,953.50 & 25,559.20 & 886.90 & 55.98 & 559.29 & 4,213.16 & 1,013,500.22 & 148 & 60.52 & 26,231.23 & 1,002.04 & 57.21 & 517.76 & 3,467.44 & 1,113,149.29 & 148.00 & 6.90 & 61.01 \\
-        \bottomrule
         \end{tabular}
-}
-\end{table}
-    
+    }
 
-\iffalse
+\end{table}
+
+Figure \ref*{fig:plants_schedules} illustrates the Gantt diagrams showing the loading and unloading operations for the orders assigned to each plant in instance $C29\_10\_14\_3$. This instance has three plants, $29$ drivers, and two customers wich have multiple orders. Customer $8$ has two orders ($o_8$,$o_9$) assigned to plant $0$, and customer $9$ has four orders ($o_{10}$ - - $o_{13}$) assigned to plant $2$. All orders requirements are in Table~\ref*{tab:instance_detail}.
+
 \begin{table}[!h]
-    \caption{Results with all instances}
-    \label{tab:results_grasp_ls}
-    \resizebox*{\textwidth}{!}{
-        \begin{tabular}{llccccccccc}
-        \toprule
-        &   &  Demand &  $TC$ & $PUO$&  $FDD$ & $mFDD$ &  $DUC$ &  $DOC$ &  \#Drivers &  Time \\
-        & \multicolumn{1}{c}{Instance} &  (m$^3$)  &(min)  &  & (min) &(min) &(min)    & (min) & & (s)\\
-        \midrule
-            \multirow{9}{*}{Small} & C\_13\_11\_12\_1 &          226.5 &     1243.55 &  0.0 &               0.00 &              0.00 &          66.01 &          0.00 &          13 &  3022.06 \\
-                  & C\_13\_5\_8\_1 &          267.0 &      745.10 &  0.0 &               0.00 &              0.00 &           0.00 &          0.00 &          13 &  3027.39 \\
-                  & C\_18\_6\_11\_2 &          333.5 &      753.26 &  0.0 &               0.00 &              0.00 &         653.78 &          0.00 &          17 &  3004.51 \\
-                  & C\_15\_4\_7\_2 &          375.0 &     1013.11 &  0.0 &               0.00 &              0.00 &          56.79 &        244.61 &          15 &  3009.54 \\
-                  & C\_19\_7\_8\_2 &          388.0 &     1714.74 &  0.0 &               0.00 &              0.00 &          97.56 &        283.83 &          19 &  3020.89 \\
-                  & C\_29\_10\_14\_3 &          613.5 &     3724.29 &  0.0 &              12.41 &             12.41 &         246.04 &        454.51 &          28 &  3035.23 \\
-                  & C\_31\_8\_11\_3 &          776.0 &     2297.20 &  0.0 &               0.00 &              0.00 &         627.37 &        539.96 &          30 &  3033.85 \\
-                  & C\_35\_9\_10\_3 &          937.5 &     4077.20 &  0.0 &               0.00 &              0.00 &         720.00 &        866.98 &          31 &  3020.75 \\
-                  \cmidrule{2-11}
-                  \multirow{14}{*}{Medium} & C\_76\_40\_43\_6 &         1160.5 &     5715.53 &  0.0 &               1.00 &              1.00 &        3566.49 &        771.23 &          69 &  3021.92 \\
-                  & C\_104\_42\_47\_8 &         1565.0 &     9114.62 &  0.0 &              23.00 &             16.24 &        4180.95 &        671.94 &          94 &  3047.99 \\
-                  & C\_94\_63\_70\_7 &         1746.5 &    13888.90 &  0.0 &              19.86 &             12.40 &        1086.60 &       1477.76 &          94 &  3025.72 \\
-                  & C\_116\_67\_78\_8 &         1839.5 &    13946.30 &  0.0 &              44.68 &              9.98 &        1578.90 &        639.28 &         116 &  3007.88 \\
-                  & C\_116\_71\_82\_8 &         2060.0 &    12461.20 &  0.0 &              68.38 &             20.06 &        3119.66 &       1478.63 &         107 &  3028.24 \\
-                  & C\_117\_57\_70\_6 &         2327.5 &    15066.80 &  0.0 &              83.79 &             16.44 &        1522.11 &       1892.64 &         117 &  3020.70 \\
-                  & C\_137\_79\_83\_7 &         2425.0 &    18811.40 &  0.0 &             252.94 &             41.65 &        2193.63 &       1963.05 &         136 &  3025.83 \\
-                  & C\_127\_66\_80\_8 &         2512.5 &    15177.80 &  0.0 &               2.00 &              2.00 &        1874.83 &        965.65 &         125 &  3007.70 \\
-                  & C\_128\_68\_74\_7 &         2595.0 &    19133.50 &  0.0 &             251.77 &             54.40 &        1523.19 &       2924.28 &         128 &  3053.96 \\
-                  & C\_136\_85\_97\_8 &         2673.0 &    16832.10 &  0.0 &             154.97 &             50.21 &        3507.40 &       1958.58 &         132 &  3028.15 \\
-                  & C\_128\_78\_85\_8 &         2685.5 &    16927.30 &  0.0 &             202.26 &             50.12 &        1492.50 &       2794.21 &         128 &  3030.32 \\
-                  & C\_131\_77\_85\_8 &         2893.5 &    17572.10 &  0.0 &             187.42 &             49.24 &        1803.22 &       1306.94 &         130 &  3040.74 \\
-                  & C\_137\_89\_97\_7 &         2939.5 &    21934.10 &  0.0 &             697.18 &             59.10 &        1220.15 &       3038.33 &         137 &  3025.45 \\
-                  & C\_133\_84\_98\_7 &         2971.0 &    22399.30 &  0.0 &             867.12 &             59.44 &         550.77 &       2887.51 &         133 &  3137.11 \\
-                  \cmidrule{2-11}
-                  \multirow{14}{*}{Large} & C\_132\_98\_109\_8 &         3078.5 &    23102.40 &  0.0 &             193.01 &             49.44 &         450.57 &       3931.83 &         132 &  3018.05 \\
-                  & C\_129\_101\_119\_8 &         3229.0 &    18978.90 &  0.0 &             467.94 &             59.47 &        1084.78 &       2334.16 &         129 &  3179.81 \\
-                  & C\_141\_114\_136\_8 &         3350.5 &    21760.00 &  0.0 &            1131.39 &             59.58 &        1284.13 &       2360.19 &         141 &  3056.56 \\
-                  & C\_140\_114\_132\_8 &         3401.5 &    23259.00 &  0.0 &            1092.82 &             57.99 &         634.53 &       2705.26 &         140 &  3046.75 \\
-                  & C\_143\_101\_123\_8 &         3437.5 &    24560.70 &  0.0 &             451.36 &             56.61 &        1663.43 &       4359.64 &         142 &  3039.02 \\
-                  & C\_137\_112\_129\_8 &         3471.0 &    21526.10 &  0.0 &             252.62 &             58.09 &         624.87 &       3360.64 &         137 &  3018.76 \\
-                  & C\_142\_114\_129\_8 &         3499.5 &    21991.50 &  0.0 &             898.10 &             55.22 &        1750.60 &       4943.03 &         142 &  3011.54 \\
-                  & C\_149\_98\_122\_8 &         3513.0 &    20696.60 &  0.0 &             839.56 &             52.60 &        2465.87 &       2892.55 &         149 &  3072.58 \\
-                  & C\_139\_98\_108\_8 &         3541.0 &    20550.10 &  0.0 &             566.69 &             57.49 &        1438.11 &       2910.97 &         139 &  3011.84 \\
-                  & C\_144\_108\_122\_8 &         3670.5 &    23401.60 &  0.0 &             668.15 &             59.77 &        1438.60 &       3569.62 &         143 &  3056.51 \\
-                  & C\_142\_92\_107\_8 &         3684.5 &    22700.20 &  0.0 &             147.42 &             48.31 &         899.82 &       3702.01 &         142 &  3019.52 \\
-                  & C\_138\_114\_136\_8 &         3739.5 &    24670.70 &  0.0 &             750.04 &             55.88 &         518.63 &       5156.41 &         137 &  3021.26 \\
-                  & C\_150\_127\_136\_8 &         3946.5 &    25822.20 &  0.0 &             742.75 &             57.10 &         899.92 &       5101.58 &         150 &  3060.79 \\
-                  & C\_148\_112\_131\_8 &         3953.5 &    25455.30 &  0.0 &             868.81 &             49.15 &         500.68 &       3775.57 &         148 &  3005.96 \\
-            \bottomrule
-            \end{tabular}
+    \centering
+    \caption{Informations of instance $C29\_10\_14\_3$}
+    \label{tab:instance_detail}
+    \resizebox*{1\textwidth}{!}{
+        \begin{tabular}{@{}c|cccccccccccccc@{}}
+            \toprule
+            Order    & 0     & 1     & 2     & 3     & 4     & 5     & 6     & 7     & 8     & 9     & 10    & 11    & 12    & 13    \\ \midrule
+            Customer & 0     & 1     & 2     & 3     & 4     & 5     & 6     & 7     & 8     & 8     & 9     & 9     & 9     & 9     \\
+            \midrule
+            Demand   & 3.0   & 6.0   & 6.5   & 9.5   & 10.0  & 15.0  & 17.0  & 118.0 & 1.0   & 210.5 & 1.0   & 3.0   & 19.0  & 194.0 \\
+            \midrule
+            Plant    & 1     & 1     & 1     & 1     & 1     & 1     & 1     & 2     & 0     & 0     & 2     & 2     & 2     & 2     \\
+            \midrule
+            TW       & 09:00 & 10:00 & 12:00 & 09:15 & 07:00 & 07:00 & 10:30 & 10:00 & 07:00 & 07:00 & 07:25 & 07:25 & 07:25 & 07:25 \\ \bottomrule
+        \end{tabular}
     }
 \end{table}
-\fi
 
-Pour avoir une idée de la file d'attente au niveau des dépôts, traçons le diagramme Gantt des opérations des 3 dépôts utilisés dans l'instance c29,10,14,3
+We can observe that the loading operations for each plant are non-overlapping and the unloading operations occur sequentially, one after the other, at the worksite. Plant $0$ is in charge of both orders of customer $8$. In figure~\ref*{fig:plant0}, order $o_9$ is served before $o_8$. Each row on the figure represents a pair of loading and unloading task for a delivery. Figure~\ref*{fig:plant2} shows how the loading bay is alternately assigned to orders $o_{13}$ and $o_7$ between $10:00$ and $15:30$ a.m.
 
-
-\begin{table}[]
-    \centering
-    \caption{Details of instance $C29\_10\_14\_3$}
-    \label{tab:my-table}
-   \resizebox*{1\textwidth}{!}{
-    \begin{tabular}{@{}c|cccccccccccccc@{}}
-        \toprule
-        Order & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 \\ \midrule
-        Customer & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 8 & 9 & 9 & 9 & 9 \\
-        \midrule
-        Demand & 3.0 & 6.0 & 6.5 & 9.5 & 10.0 & 15.0 & 17.0 & 118.0 & 1.0 & 210.5 & 1.0 & 3.0 & 19.0 & 194.0 \\
-        \midrule
-        Plant & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 2 & 0 & 0 & 2 & 2 & 2 & 2 \\
-        \midrule
-        TW & 09:00 & 10:00 & 12:00 & 09:15 & 07:00 & 07:00 & 10:30 & 10:00 & 07:00 & 07:00 & 07:25 & 07:25 & 07:25 & 07:25 \\ \bottomrule
-        \end{tabular}
-   }
-\end{table}
+We report for the instance $C29\_10\_14\_3$ a $FDD$ of $49.6$ minutes. The gantt chart indicates that customers $4,5$ and $8$ whom need their delivery at $07:00$ a.m. have all a first late delivery. The reason for these delays is that no 
 
 \begin{figure}[htb]
     \centering
@@ -1024,69 +972,135 @@ Pour avoir une idée de la file d'attente au niveau des dépôts, traçons le di
     \vspace*{-1mm}
     \begin{subfigure}{\textwidth}
         \includegraphics[width=\linewidth]{depot_2.pdf}
-        \vspace*{-4em}
+        \vspace*{-3em}
         \caption{Scheduling of tasks at plant  2}
         \label{fig:plant2}
     \end{subfigure}
 
     \caption{Loading and unloading schedules for the plants of instance $C29\_10\_14\_3$}
-    \label{fig:combined}
+    \label{fig:plants_schedules}
 \end{figure}
-We tried to reduce the maximum delay of the first delivery but found that some orders couldn't be fulfilled because of driver shifts and overtime constraints. We decided to remove these constraints and rerun our computation. We found that for small instances, the maximum delay dropped to zero, and for medium and large instances, it was reduced by almost 50\%. This suggests that when we input a good work schedule, our algorithm works effectively to ensure that all orders are filled and that delays for first deliveries and travel costs are minimized. In Table~\ref*{tab:lift_shift_constraints}, we can see that the average travel time decreases for all instances except the large ones. That's because the goals of minimizing travel cost and not delaying the first delivery are sometimes in conflict: to ensure that the first delivery is not late, drivers assigned to one plant often have to travel to another. And since all plants are used in large cases, this can increase travel times. 
+We tried to reduce the maximum delay of the first delivery but found that some orders couldn't be fulfilled because of driver shifts and overtime constraints. We decided to remove these constraints and rerun our computation. We found that for small instances, the maximum delay dropped to zero, and for medium and large instances, it was reduced by almost 50\%. This suggests that when we input a good work schedule, our algorithm works effectively to ensure that all orders are filled and that delays for first deliveries and travel costs are minimized. In Table~\ref*{tab:lift_shift_constraints}, we can see that the average travel time decreases for all instances except the large ones. That's because the goals of minimizing travel cost and not delaying the first delivery are sometimes in conflict: to ensure that the first delivery is not late, drivers assigned to one plant often have to travel to another. And since all plants are used in large cases, this can increase travel times.
 
 %  Therefore, we can use our algorithm for fleet sizing or as a submodule of a driver scheduling algorithm.
 
-\begin{table}[htbp]
+\begin{table}[htb]
     \centering
     \caption{Comparaison with and without shift and overtime constraints}
     \label{tab:lift_shift_constraints}
-    \resizebox*{0.8\textwidth}{!}{
-        \begin{tabular}{lcccccccc}
-            \toprule
-        {} & \multicolumn{4}{c}{Default parameters} &\multicolumn{4}{c}{$M_T=0$, $N_T,O_T=\infty$, $H_k=0$} \\
-        \cmidrule(l){2-5} \cmidrule(l){6-9}
-        {} &   Load & $TC$ &   $FDD$ &  $mFDD$ &   Load &      $TC$ &   $FDD$ &   $mFDD$ \\
-               &($m^3$)  & (min)   &(min)   &(min)  &($m^3$)   &  (min) &(min)  & (min)   \\
-            \midrule
-            Small  &   489.62 &   1946.06 &    1.55 &       1.55 &   489.62 &   1832.90 &    0.00 &       0.00 \\
-            Medium &  2313.86 &  15641.50 &  204.03 &      31.59 &  2313.86 &  14607.66 &   74.76 &      16.56 \\
-            Large  &  3536.86 &  22748.24 &  647.90 &      55.48 &  3536.86 &  22293.04 &  210.14 &      29.00 \\
-            \bottomrule
-            \end{tabular}
-             
-    }
-    
+    \begin{tabular}{lrrrrrrrr}
+        \toprule
+               & \multicolumn{8}{c}{D}                                                                 \\
+               & $TC$                  & $PUO$ & $FDD$  & $mFDD$ & $TC$      & $PUO$ & $FDD$  & $mFDD$ \\
+               & (min)                 & (min) & (min)  & (min)  & (min)     & (min) & (min)  & (min)  \\
+        size   &                       &       &        &        &           &       &        &        \\
+        \midrule
+        Small  & 1,971.27              & 0.00  & 6.08   & 2.68   & 1,842.47  & 0.00  & 0.00   & 0.00   \\
+        Medium & 15,922.87             & 1.34  & 228.67 & 35.27  & 14,771.08 & 0.00  & 83.84  & 19.04  \\
+        Large  & 23,424.94             & 1.33  & 621.30 & 50.33  & 22,377.07 & 0.00  & 195.39 & 33.29  \\
+        \bottomrule
+    \end{tabular}
 \end{table}
+
+
+
+\iffalse
+    \begin{table}[htbp]
+        \centering
+        \caption{Comparaison with and without shift and overtime constraints}
+        \label{tab:lift_shift_constraints}
+        \resizebox*{0.8\textwidth}{!}{
+            \begin{tabular}{lcccccccc}
+                \toprule
+                {}     & \multicolumn{4}{c}{Default parameters} & \multicolumn{4}{c}{$M_T=0$, $N_T,O_T=\infty$, $H_k=0$}                                                          \\
+                \cmidrule(l){2-5} \cmidrule(l){6-9}
+                {}     & Load                                   & $TC$                                                   & $FDD$  & $mFDD$ & Load    & $TC$     & $FDD$  & $mFDD$ \\
+                       & ($m^3$)                                & (min)                                                  & (min)  & (min)  & ($m^3$) & (min)    & (min)  & (min)  \\
+                \midrule
+                Small  & 489.62                                 & 1946.06                                                & 1.55   & 1.55   & 489.62  & 1832.90  & 0.00   & 0.00   \\
+                Medium & 2313.86                                & 15641.50                                               & 204.03 & 31.59  & 2313.86 & 14607.66 & 74.76  & 16.56  \\
+                Large  & 3536.86                                & 22748.24                                               & 647.90 & 55.48  & 3536.86 & 22293.04 & 210.14 & 29.00  \\
+                \bottomrule
+            \end{tabular}
+
+        }
+
+    \end{table}
+\fi
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\linewidth]{travel.pdf}
+        \vspace*{-2em}
+        \caption{travel cost}
+        \label{fig:travel}
+    \end{subfigure}%
+    \hfill% Horizontal space between the subfigures
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\linewidth]{FDD.pdf}
+        \vspace*{-2em}
+        \caption{first delivevery delay}
+        \label{fig:fdd}
+    \end{subfigure}
+    \vspace*{-1mm}
+
+\end{figure}
+
+\subsection{Sensitivity analyses}
+
+\subsubsection{Influence of $\gamma^1$}
 
 The influence of the parameter $\gamma^1$ on the solution quality is demonstrated in Figure~\ref*{fig:gamma1_influence}. Tests were conducted by varying $\gamma^1$ values between 10 and 25 minutes, without any driver shifts or overtime constraints. In small instances, all customers are served regardless of the value of $\gamma^1$. For medium (large) instances, all customers are served with $\lambda^1$ starting at 15 (20) minutes. The delay of the initial delivery decreases as the value of $\gamma^1$ increases. The results indicate that if $\gamma^1$ is high, the plant has the flexibility to delay ongoing deliveries to make room for new ones or make customers wait until the drivers are available. By increasing the maximum delay between two successive deliveries from 10 to 20 minutes, the first delivery delay is reduced by over 50\% for the medium and large size instances. The average travel time remains constant for all instances, regardless of the value of $\gamma^1$.
 
-\begin{figure}[htbp]
+\begin{figure}[!h]
     \centering
-    \includegraphics[width=0.8\textwidth]{gamma1.pdf} 
+    \includegraphics[width=0.8\textwidth]{gamma1.pdf}
     \caption{Influence of the maximum time delay between consecutive deliveries of the same order ($\gamma^1$)}
     \label{fig:gamma1_influence}
 \end{figure}
 
+\subsubsection{Influence of the local search step}
 We checked how well the local search part of the GRASP algorithm works by running tests using only constructive heuristics. The results are presented in Table~\ref*{tab:grasp_ls_nols}. For medium and large instances, the use of local search was necessary to service all customers within 60 minutes. And without local search, most objective metrics experienced a significant increase, except for travel costs.
+
+\begin{table}[htb]
+    \centering
+    \caption{Influence of the local search step on the GRASP algorithm}
+    \label{tab:grasp_ls_nols}
+    \begin{tabular}{lrrrrrrrrrrrrr}
+        \toprule
+               & \multicolumn{13}{c}{LS}                                                                                                                               \\
+               & Load                    & Served_G & $TC$      & $FDD$    & $DUC$    & $DOC$    & Time  & $TC$      & Served_L & $FDD$  & $DUC$    & $DOC$    & Time  \\
+               & (min)                   & (min)    & (min)     & (min)    & (min)    & (min)    & (min) & (min)     & (min)    & (min)  & (min)    & (min)    & (min) \\
+        size   &                         &          &           &          &          &          &       &           &          &        &          &          &       \\
+        \midrule
+        Small  & 3,917.00                & 100.00   & 2,039.77  & 8.04     & 225.15   & 221.71   & 24.22 & 1,965.93  & 100.00   & 5.94   & 250.12   & 328.33   & 60.41 \\
+        Medium & 32,394.00               & 99.82    & 14,118.33 & 358.96   & 2,242.93 & 1,328.91 & 58.32 & 15,896.96 & 100.00   & 239.98 & 1,917.64 & 1,749.73 & 60.48 \\
+        Large  & 49,516.00               & 99.40    & 23,176.19 & 1,008.66 & 839.28   & 3,814.06 & 60.20 & 23,650.53 & 100.00   & 610.78 & 827.73   & 3,797.73 & 60.68 \\
+        Avg    & nan                     & nan      & 12,830.60 & 426.42   & 1,236.43 & 1,659.86 & 48.26 & 15,494.82 & nan      & 321.84 & 1,126.03 & 2,171.76 & 60.54 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 
 \begin{table}[htbp]
     \centering
     \caption{Influence of the local search step on the  GRASP algorithm}
     \label{tab:grasp_ls_nols}
     \resizebox*{1\textwidth}{!}{
-    \begin{tabular}{lccccccccccccc}
-        \toprule
-           & &\multicolumn{5}{c}{GRASP$\backslash$LS} & \multicolumn{5}{c}{GRASP}   \\
-           \cmidrule(l){2-14}
-        {size} &Load &&$TC$&   $FDD$ &  $DUC$ &  $DOC$ & Time&&  $TC$ &  $FDD$&  $DUC$ &  $DOC$&Time \\
-        {} & (m$^3$)&\%Served&(min)&   (min) &  (min) &  (min) & (min)&\%Served&  (min) &  (min)&  (min) &  (min)& (min) \\
-        \cmidrule(l){2-2} \cmidrule(l){3-8} \cmidrule(l){9-14}
-        Small  & 3917.0& 100 &       1998.75 &   64.60 &           231.63 &          215.43 &21.24& 100&      1946.06 &    1.55 &    229.40 &          298.74 &50.34\\
-        Medium & 32394.0& 99.6&     13144.05 &   2528.33 &  2496.47 & 1086.12 &49.41&100&  13564.08 &   75.77 &   2250.66 &         1347.59&50.6 \\
-        Large  & 49516.0& 99.2& 21395.23 & 4885.11 &  1250.14 &  3543.16 & 50.20&100&     21784.95 &  471.62 & 1168.73 &  3640.04&50.74 \\
-        \bottomrule
+        \begin{tabular}{lccccccccccccc}
+            \toprule
+                   &         & \multicolumn{5}{c}{GRASP$\backslash$LS} & \multicolumn{5}{c}{GRASP}                                                                                                  \\
+            \cmidrule(l){2-14}
+            {size} & Load    &                                         & $TC$                      & $FDD$   & $DUC$   & $DOC$   & Time  &          & $TC$     & $FDD$  & $DUC$   & $DOC$   & Time  \\
+            {}     & (m$^3$) & \%Served                                & (min)                     & (min)   & (min)   & (min)   & (min) & \%Served & (min)    & (min)  & (min)   & (min)   & (min) \\
+            \cmidrule(l){2-2} \cmidrule(l){3-8} \cmidrule(l){9-14}
+            Small  & 3917.0  & 100                                     & 1998.75                   & 64.60   & 231.63  & 215.43  & 21.24 & 100      & 1946.06  & 1.55   & 229.40  & 298.74  & 50.34 \\
+            Medium & 32394.0 & 99.6                                    & 13144.05                  & 2528.33 & 2496.47 & 1086.12 & 49.41 & 100      & 13564.08 & 75.77  & 2250.66 & 1347.59 & 50.6  \\
+            Large  & 49516.0 & 99.2                                    & 21395.23                  & 4885.11 & 1250.14 & 3543.16 & 50.20 & 100      & 21784.95 & 471.62 & 1168.73 & 3640.04 & 50.74 \\
+            \bottomrule
         \end{tabular}
-    }  
+    }
 \end{table}
 
 \subsubsection{Comparisons with the real operations}
@@ -1095,20 +1109,42 @@ We checked how well the local search part of the GRASP algorithm works by runnin
 - resultats avec les instances (8 au total) où uniquement la flotte de Unibéton a éét utilisée.
 enlver les contraintes de temps. reduire le gamma1
 
+\begin{table}[htb]
+    \centering
+    \caption{Comparaison with partner operations}
+    \label{tab:comp_unibeton}
+    \begin{tabular}{lrrrrrrr}
+        \toprule
+                      & \multicolumn{7}{c}{$\gamma^1$}                                                                                                                               \\
+                      & Demand                         & D         & ('distanceCost', 5) & ('distanceCost', 10) & ('distanceCost', 15) & ('distanceCost', 20) & ('distanceCost', 25) \\
+                      & (min)                          & (min)     & (min)               & (min)                & (min)                & (min)                & (min)                \\
+        Instance      &                                &           &                     &                      &                      &                      &                      \\
+        \midrule
+        C_13_5_8_1    & 267.00                         & 543.05    & 523.46              & 523.46               & 523.46               & 523.46               & 523.46               \\
+        C_76_40_43_6  & 1,160.50                       & 5,244.68  & 4,917.41            & 4,726.81             & 4,662.97             & 4,644.56             & 4,704.28             \\
+        C_116_67_78_8 & 1,839.50                       & 11,664.77 & 12,220.90           & 11,084.60            & 11,019.80            & 10,856.90            & 10,760.60            \\
+        C_15_4_7_2    & 375.00                         & 789.28    & 702.88              & 702.88               & 703.46               & 702.31               & 702.88               \\
+        C_18_6_11_2   & 333.50                         & 555.13    & 471.47              & 471.47               & 471.47               & 471.47               & 471.47               \\
+        C_94_63_70_7  & 1,746.50                       & 12,011.22 & 12,776.30           & 12,201.20            & 11,895.40            & 11,469.30            & 11,440.40            \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
 
 (utiliser les mêmes pour la comparaison avec les données réelles )
 distance, demande servie, first, underwork, overtime.
 - resultats avec les autres instances
 - distance, demande servie, first delivery.
 - rouler les instances sans shift des livreurs. comparer la distance parcourue, et demande livrée.
-- rouler sans les livreurs externes. regarder la demande servie par jour. 
+- rouler sans les livreurs externes. regarder la demande servie par jour.
 
 \section{Conclusion}
 \label{concl}
 
-Il serait intéressant de voir l'effet des paramètres lambda 1 et lambda 2 différents par clients et /ou ordre. Également le temps de service différent par client. 
+Il serait intéressant de voir l'effet des paramètres lambda 1 et lambda 2 différents par clients et /ou ordre. Également le temps de service différent par client.
 
-l'algorithme serait intéressant à utiliser dans le cadre d'un 
+l'algorithme serait intéressant à utiliser dans le cadre d'un
 
 %  Therefore, we can use our algorithm for fleet sizing or as a submodule of a driver scheduling algorithm.
 
