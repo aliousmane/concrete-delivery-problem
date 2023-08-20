@@ -929,7 +929,7 @@ Table \ref{tab:runtime} shows the percentage of concrete delivered by varying th
 
 \end{table}
 
-Figure \ref*{fig:plants_schedules} illustrates the Gantt diagrams showing the loading and unloading operations for the orders assigned to each plant in instance $C29\_10\_14\_3$. This instance has three plants, $29$ drivers, and two customers wich have multiple orders. Customer $8$ has two orders ($o_8$,$o_9$) assigned to plant $0$, and customer $9$ has four orders ($o_{10}$ - - $o_{13}$) assigned to plant $2$. All orders requirements are in Table~\ref*{tab:instance_detail}.
+Figure \ref*{fig:plants_schedules} illustrates the Gantt diagrams showing the loading and unloading operations for the orders assigned to each plant in instance $C29\_10\_14\_3$. It also shows the differents assignments of each driver throughout the day. This instance has three plants, $29$ drivers, and two customers wich have multiple orders. Customer $8$ has two orders ($o_8$,$o_9$) assigned to plant $0$, and customer $9$ has four orders ($o_{10}$ - - $o_{13}$) assigned to plant $2$. All orders requirements are in Table~\ref*{tab:instance_detail}.
 
 \begin{table}[!h]
     \centering
@@ -950,9 +950,9 @@ Figure \ref*{fig:plants_schedules} illustrates the Gantt diagrams showing the lo
     }
 \end{table}
 
-We can observe that the loading operations for each plant are non-overlapping and the unloading operations occur sequentially, one after the other, at the worksite. Plant $0$ is in charge of both orders of customer $8$. In figure~\ref*{fig:plant0}, order $o_9$ is served before $o_8$. Each row on the figure represents a pair of loading and unloading task for a delivery. Figure~\ref*{fig:plant2} shows how the loading bay is alternately assigned to orders $o_{13}$ and $o_7$ between $10:00$ and $15:30$ a.m.
+We can observe that the loading operations for each plant are non-overlapping and the unloading operations occur sequentially, one after the other, at the worksite. Plant $0$ is in charge of both orders of customer $8$. In figure~\ref*{fig:plant0}, order $o_8$ is served before $o_9$ starting at the due time. Each row on the figure represents the pairs of loading and unloading tasks performed by a driver. The number near a task references the order.  Figure~\ref*{fig:plant2} shows how the loading bay is alternately assigned to orders $o_{13}$ and $o_7$ between $10:00$ and $14:00$ a.m. Driver $26$ starts its service at plant $0$, serves order $o_9$ four times and travels to plant $2$ to perform the last delivery of order $o_{13}$. Driver $25$ also loads at both plants $0$ and $1$. 
 
-We report for the instance $C29\_10\_14\_3$ a $FDD$ of $49.6$ minutes. The gantt chart indicates that customers $4,5$ and $8$ whom need their delivery at $07:00$ a.m. have all a first late delivery. The reason for these delays is that no 
+We report for this solution of instance $C29\_10\_14\_3$ a $FDD$ of $59.5$ minutes. The gantt chart indicates that customers $4,5$ whom need their deliveries at $07:00$ a.m. have all a first late delivery. The reason for these delays is that the drivers assigned to plant $1$ starts their earliest shift at $06:05$, and $06:20$. And it takes $59$($63$) minutes travel time to visit customer $4$($5$) from this plant. So it appears that the big value of $FDD$ we find in our results may be caused by a bad schedule of the drivers shifts.
 
 \begin{figure}[htb]
     \centering
@@ -980,28 +980,37 @@ We report for the instance $C29\_10\_14\_3$ a $FDD$ of $49.6$ minutes. The gantt
     \caption{Loading and unloading schedules for the plants of instance $C29\_10\_14\_3$}
     \label{fig:plants_schedules}
 \end{figure}
-We tried to reduce the maximum delay of the first delivery but found that some orders couldn't be fulfilled because of driver shifts and overtime constraints. We decided to remove these constraints and rerun our computation. We found that for small instances, the maximum delay dropped to zero, and for medium and large instances, it was reduced by almost 50\%. This suggests that when we input a good work schedule, our algorithm works effectively to ensure that all orders are filled and that delays for first deliveries and travel costs are minimized. In Table~\ref*{tab:lift_shift_constraints}, we can see that the average travel time decreases for all instances except the large ones. That's because the goals of minimizing travel cost and not delaying the first delivery are sometimes in conflict: to ensure that the first delivery is not late, drivers assigned to one plant often have to travel to another. And since all plants are used in large cases, this can increase travel times.
+
+\subsection{Sensitivity analyses}
+
+In this section, we investigate the impact on the solution quality of some constraints and parameters of our problem. 
+
+\subsubsection{Influence of the shift and overtime constraints}
+
+We tried to reduce the maximum delay of the first delivery but found that some orders couldn't be fulfilled because of the driver shifts and overtime constraints. We lift  these constraints and rerun our computation. We found that for small instances, the maximum delay dropped to zero, and for medium and large instances, it was reduced by almost 40\%. This suggests that when we input a good work schedule, our algorithm works effectively to ensure that all orders are filled and that delays for first deliveries and travel costs are minimized. We can see that the average travel time decreases for all instances (Table~\ref*{tab:lift_shift_constraints}).% That's because the goals of minimizing travel cost and not delaying the first delivery are sometimes in conflict: to ensure that the first delivery is not late, drivers assigned to one plant often have to travel to another. And since all plants are used in large cases, this can increase travel times.
 
 %  Therefore, we can use our algorithm for fleet sizing or as a submodule of a driver scheduling algorithm.
 
-\begin{table}[htb]
+\begin{table}[!h]
     \centering
     \caption{Comparaison with and without shift and overtime constraints}
+    \scriptsize
     \label{tab:lift_shift_constraints}
+    \resizebox*{0.8\textwidth}{!}{
+
     \begin{tabular}{lrrrrrrrr}
         \toprule
                & \multicolumn{8}{c}{D}                                                                 \\
                & $TC$                  & $PUO$ & $FDD$  & $mFDD$ & $TC$      & $PUO$ & $FDD$  & $mFDD$ \\
                & (min)                 & (min) & (min)  & (min)  & (min)     & (min) & (min)  & (min)  \\
-        size   &                       &       &        &        &           &       &        &        \\
         \midrule
         Small  & 1,971.27              & 0.00  & 6.08   & 2.68   & 1,842.47  & 0.00  & 0.00   & 0.00   \\
         Medium & 15,922.87             & 1.34  & 228.67 & 35.27  & 14,771.08 & 0.00  & 83.84  & 19.04  \\
         Large  & 23,424.94             & 1.33  & 621.30 & 50.33  & 22,377.07 & 0.00  & 195.39 & 33.29  \\
         \bottomrule
     \end{tabular}
+    }
 \end{table}
-
 
 
 \iffalse
@@ -1028,26 +1037,6 @@ We tried to reduce the maximum delay of the first delivery but found that some o
     \end{table}
 \fi
 
-\begin{figure}[htb]
-    \centering
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\linewidth]{travel.pdf}
-        \vspace*{-2em}
-        \caption{travel cost}
-        \label{fig:travel}
-    \end{subfigure}%
-    \hfill% Horizontal space between the subfigures
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\linewidth]{FDD.pdf}
-        \vspace*{-2em}
-        \caption{first delivevery delay}
-        \label{fig:fdd}
-    \end{subfigure}
-    \vspace*{-1mm}
-
-\end{figure}
-
-\subsection{Sensitivity analyses}
 
 \subsubsection{Influence of $\gamma^1$}
 
@@ -1103,13 +1092,36 @@ We checked how well the local search part of the GRASP algorithm works by runnin
     }
 \end{table}
 
-\subsubsection{Comparisons with the real operations}
 
+\subsubsection{Objectives}
+
+Nous avons vérifié l'impact des objectifs de minimisation de la distance et de la première livraison. Ces deux objectives sont contradictoires. Si on fait diminuer un, l'autre augmente. Il faudrait trouver avec le décideur qu'il y ait un trade-off.
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\linewidth]{travel.pdf}
+        \vspace*{-2em}
+        \caption{travel cost}
+        \label{fig:travel}
+    \end{subfigure}%
+    \hfill% Horizontal space between the subfigures
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\linewidth]{FDD.pdf}
+        \vspace*{-2em}
+        \caption{first delivevery delay}
+        \label{fig:fdd}
+    \end{subfigure}
+    \vspace*{-1mm}
+
+\end{figure}
+
+\subsubsection{Comparisons with the real operations}
 
 - resultats avec les instances (8 au total) où uniquement la flotte de Unibéton a éét utilisée.
 enlver les contraintes de temps. reduire le gamma1
 
-\begin{table}[htb]
+\begin{table}[!ht]
     \centering
     \caption{Comparaison with partner operations}
     \label{tab:comp_unibeton}
@@ -1129,8 +1141,6 @@ enlver les contraintes de temps. reduire le gamma1
         \bottomrule
     \end{tabular}
 \end{table}
-
-
 
 (utiliser les mêmes pour la comparaison avec les données réelles )
 distance, demande servie, first, underwork, overtime.

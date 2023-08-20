@@ -103,7 +103,7 @@ def showGanttDepot(df):
     # 'rgb(250, 81, 134)', 'rgb(255, 128, 0)'
     # ]
     depotList=np.unique(df['Depot'])
-    df['Task'] = df.apply(lambda x: f"del {x.Del}_{x.Order}_{x.Cust}_{x.Driver}",axis=1)
+    df['Task'] = df.apply(lambda x: f"Driver {x.Driver}",axis=1)
     # color = [f"rgb{distinctipy.get_rgb256(x)}" for x in distinctipy.get_colors(14)]
     # print(color)
     for dep in depotList:
@@ -132,7 +132,14 @@ def showGanttDepot(df):
             # yaxis=dict(visible=False),  # Hide the y-axis
             # xaxis=dict(type="date"),     # Use a date-based x-axis
             # title="Timeline",
+            # font=dict(
+            # family="Courier New, monospace",
+            # size=5,  # Set the font size here
+            # color="RebeccaPurple"
             # )
+            # )
+        # fig.update_traces(textposition='inside')
+        fig.update_layout(uniformtext_minsize=6)#, uniformtext_mode='hide')
         fig.update_coloraxes(showscale=False)
         # fig.update_traces(showlegend=False)
         fig.update_xaxes(
