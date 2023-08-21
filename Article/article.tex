@@ -764,7 +764,7 @@ In this section, we present and discuss the results of computational experiments
 
 \subsection{Generation of instances}
 \newcommand{\nbInstance}{36}
-The dataset used in this section was obtained from our partner and contains records representing delivery operations from up to 8 production centers over a period of $\nbInstance$ days. We have created $\nbInstance$ instances, where each instance corresponds to a daily operation. An instance contains information such as each driver's capacity, associated batch plant, and shift start time. For each customer, we have the due time, the total demand, and the number of orders (type of concrete) received. For each order, we have its demand and associated production plant. Finally, we have the loading capacity for each plant. The name of an instance has the format $C\_k\_n\_o\_z$, where $k$ is the number of available drivers, $n$ is the number of customers, $o$ is the total number of daily orders, and $z$ is the number of plants. The dataset is divided into small, medium, and large sets according to the total number of daily orders. We have summarized the dataset in Table~\ref{tab:instances}.
+The dataset used in this section was obtained from our partner and contains records representing delivery operations from up to 8 production centers over a period of $\nbInstance$ days. From this historical data, we extract information such as daily orders delivered, plant assignments to orders, and the number of available drivers. We created $\nbInstance$ instances from this data, where each instance corresponds to a daily operation. To maintain confidentiality, we have removed the GPS coordinates of customers and plants, but have included two matrices containing the distances and driving times between all plants and customers. An instance contains information such as each driver's capacity, associated batch plant, and shift start time (which we generate). For each customer, we have the due time, the total demand, the number of orders (type of concrete) received, and its index in the time (distance) matrix. For each order, we have its demand and the corresponding production plant. Finally, we have the loading capacity for each plant, and also its index in the time matrix. The name of an instance has the format $C\_k\_n\_o\_z$, where $k$ is the number of available drivers, $n$ is the number of customers, $o$ is the total number of daily orders, and $z$ is the number of plants. The dataset is divided into small, medium, and large sets according to the total number of daily orders.  We have summarized the dataset in Table~\ref{tab:instances}. The dataset is available upon request as a contribution to the CDP literature.
 
 \begin{table}[htpb]
     \centering
@@ -1056,10 +1056,35 @@ The medium instance $C\_104\_42\_47\_8$ has an unserved customer with a demand o
     \end{tabular}
     }
 \end{table}
+
+
+\subsubsection{Comparisons with the industry partner historical operations}
+
+\begin{table}[htb]
+    \centering
+    \caption{Comparaison with historical operations}
+    \label{tab:comp_unibeton}
+    \begin{tabular}{lccccccc}
+    \toprule
+     & & & \multicolumn{5}{c}{Distance} \\
+     \cmidrule(l){3-3} \cmidrule(l){4-8}
+     & Demand & Distance &  $\gamma^1=5$&  $\gamma^1=10$ & $\gamma^1=15$ & $\gamma^1=20$& $\gamma^1=25$ \\
+     & ($m^3$) & ($Km$)  &($Km$)  & ($Km$) & ($Km$) &($Km$)  &($Km$)  \\
+    \midrule
+    C_13_5_8_1 & 267.0 & 543.1 & 523.5 & 523.5 & 523.5 & 523.5 & 523.5 \\
+    C_76_40_43_6 & 1,160.5 & 5,244.7 & 5,101.2 & 4,706.1 & 4,673.3 & 4,645.6 & 4,732.4 \\
+    C_116_67_78_8 & 1,839.5 & 11,664.8 & 11,895.8 & 11,035.3 & 11,064.2 & 10,928.9 & 10,823.4 \\
+    C_15_4_7_2 & 375.0 & 789.3 & 702.3 & 702.9 & 702.3 & 703.5 & 702.3 \\
+    C_18_6_11_2 & 333.5 & 555.1 & 491.7 & 471.5 & 471.5 & 471.5 & 471.5 \\
+    C_94_63_70_7 & 1,746.5 & 12,011.2 & 12,957.1 & 11,965.5 & 11,915.6 & 11,657.1 & 11,475.7 \\
+    \bottomrule
+    \end{tabular}
+    \end{table}
+    
     
 \subsection{Sensitivity analyses}
 
-In this section, we analyse the impact on the solution when we change some parameters of our problem, and run the GRASP algorithm with the local search step. 
+In this section, we analyse the impact on the solution when we change some parameters of our problem, and how some components of the objective function are influencing each other.
 
  % That's because the goals of minimizing travel cost and not delaying the first delivery are sometimes in conflict: to ensure that the first delivery is not late, drivers assigned to one plant often have to travel to another. And since all plants are used in large cases, this can increase travel times.
 
@@ -1078,37 +1103,14 @@ We conducted some tests with different values $\gamma^1$ varying between 5 and 2
     \label{fig:gamma1_influence}
 \end{figure}
 
-\subsubsection{Influence of the local search step}
-We checked how well the local search part of the GRASP algorithm works by running tests using only constructive heuristics. The results are presented in Table~\ref*{tab:grasp_ls_nols}. For medium and large instances, the use of local search was necessary to service all customers within 60 minutes. And without local search, most objective metrics experienced a significant increase, except for travel costs.
 
+\subsubsection{Trade-off of the objective function components}
 
-\begin{table}[htbp]
-    \centering
-    \caption{Influence of the local search step on the  GRASP algorithm}
-    \label{tab:grasp_ls_nols}
-    \resizebox*{1\textwidth}{!}{
-        \begin{tabular}{lccccccccccccc}
-            \toprule
-                   &         & \multicolumn{5}{c}{GRASP$\backslash$LS} & \multicolumn{5}{c}{GRASP}                                                                                                  \\
-            \cmidrule(l){2-14}
-            {size} & Load    &                                         & $TC$                      & $FDD$   & $DUC$   & $DOC$   & Time  &          & $TC$     & $FDD$  & $DUC$   & $DOC$   & Time  \\
-            {}     & (m$^3$) & \%Served                                & (min)                     & (min)   & (min)   & (min)   & (min) & \%Served & (min)    & (min)  & (min)   & (min)   & (min) \\
-            \cmidrule(l){2-2} \cmidrule(l){3-8} \cmidrule(l){9-14}
-            Small  & 3917.0  & 100                                     & 1998.75                   & 64.60   & 231.63  & 215.43  & 21.24 & 100      & 1946.06  & 1.55   & 229.40  & 298.74  & 50.34 \\
-            Medium & 32394.0 & 99.6                                    & 13144.05                  & 2528.33 & 2496.47 & 1086.12 & 49.41 & 100      & 13564.08 & 75.77  & 2250.66 & 1347.59 & 50.6  \\
-            Large  & 49516.0 & 99.2                                    & 21395.23                  & 4885.11 & 1250.14 & 3543.16 & 50.20 & 100      & 21784.95 & 471.62 & 1168.73 & 3640.04 & 50.74 \\
-            \bottomrule
-        \end{tabular}
-    }
-\end{table}
-
-
-\subsubsection{Objectives}
-
-Nous avons vérifié l'impact des objectifs de minimisation de la distance et de la première livraison. Ces deux objectives sont contradictoires. Si on fait diminuer un, l'autre augmente. Il faudrait trouver avec le décideur qu'il y ait un trade-off.
+We ran 5 tests on our data and obtained two solutions: one with the shortest travel time and another with the smallest first delivery delay. Figures 1 and 2 illustrate the comparisons between travel times and first delivery delays for these solutions. It's clear that as the first delivery delay decreases, the travel time increases, and vice versa. This highlights a trade-off between minimizing travel time and minimizing first delivery delay and leads the decision maker to find a balance between reducing operating costs and compromising customer satisfaction.
 
 \begin{figure}[!ht]
     \centering
+    \resizebox{1.25\textwidth}{!}{
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\linewidth]{travel.pdf}
         \vspace*{-2em}
@@ -1123,41 +1125,9 @@ Nous avons vérifié l'impact des objectifs de minimisation de la distance et de
         \label{fig:fdd}
     \end{subfigure}
     \vspace*{-1mm}
-
+    }
 \end{figure}
 
-\subsubsection{Comparisons with the real operations}
-
-- resultats avec les instances (8 au total) où uniquement la flotte de Unibéton a éét utilisée.
-enlver les contraintes de temps. reduire le gamma1
-
-\begin{table}[!ht]
-    \centering
-    \caption{Comparaison with partner operations}
-    \label{tab:comp_unibeton}
-    \begin{tabular}{lrrrrrrr}
-        \toprule
-                      & \multicolumn{7}{c}{$\gamma^1$}                                                                                                                               \\
-                      & Demand                         & D         & ('distanceCost', 5) & ('distanceCost', 10) & ('distanceCost', 15) & ('distanceCost', 20) & ('distanceCost', 25) \\
-                      & (min)                          & (min)     & (min)               & (min)                & (min)                & (min)                & (min)                \\
-        Instance      &                                &           &                     &                      &                      &                      &                      \\
-        \midrule
-        C_13_5_8_1    & 267.00                         & 543.05    & 523.46              & 523.46               & 523.46               & 523.46               & 523.46               \\
-        C_76_40_43_6  & 1,160.50                       & 5,244.68  & 4,917.41            & 4,726.81             & 4,662.97             & 4,644.56             & 4,704.28             \\
-        C_116_67_78_8 & 1,839.50                       & 11,664.77 & 12,220.90           & 11,084.60            & 11,019.80            & 10,856.90            & 10,760.60            \\
-        C_15_4_7_2    & 375.00                         & 789.28    & 702.88              & 702.88               & 703.46               & 702.31               & 702.88               \\
-        C_18_6_11_2   & 333.50                         & 555.13    & 471.47              & 471.47               & 471.47               & 471.47               & 471.47               \\
-        C_94_63_70_7  & 1,746.50                       & 12,011.22 & 12,776.30           & 12,201.20            & 11,895.40            & 11,469.30            & 11,440.40            \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-(utiliser les mêmes pour la comparaison avec les données réelles )
-distance, demande servie, first, underwork, overtime.
-- resultats avec les autres instances
-- distance, demande servie, first delivery.
-- rouler les instances sans shift des livreurs. comparer la distance parcourue, et demande livrée.
-- rouler sans les livreurs externes. regarder la demande servie par jour.
 
 \section{Conclusion}
 \label{concl}
