@@ -1,13 +1,16 @@
+\begin{table}[htb]
+\centering
+\caption{RMC delivered within different runtimes}
+\label{tab:runtime}
 \begin{tabular}{llrrrrr}
 \toprule
-      & TIME\_LIMIT &     1  &      5  &      10 &      30 &      60 \\
-size & {} &        &         &         &         &         \\
+ &  & \multicolumn{5}{c}{Runtime (min)} \\
+ & TIME_LIMIT & 1 & 5 & 10 & 30 & 60 \\
+size &  &  &  &  &  &  \\
 \midrule
-Small & \%Load &  100.0 &  100.00 &  100.00 &  100.00 &  100.00 \\
-      & \#Instance &    8.0 &    8.00 &    8.00 &    8.00 &    8.00 \\
-Medium & \%Load &   99.0 &   99.29 &   99.29 &   99.43 &   99.57 \\
-      & \#Instance &    5.0 &    8.00 &    8.00 &    9.00 &   10.00 \\
-Large & \%Load &   99.0 &   99.21 &   99.36 &   99.43 &   99.50 \\
-      & \#Instance &    5.0 &    7.00 &    8.00 &    8.00 &    7.00 \\
+Small & \%Load & 100.00 & 100.00 & 100.00 & 100.00 & 100.00 \\
+Medium & \%Load & 99.00 & 99.29 & 99.29 & 99.43 & 99.57 \\
+Large & \%Load & 99.00 & 99.21 & 99.36 & 99.43 & 99.50 \\
 \bottomrule
 \end{tabular}
+\end{table}
