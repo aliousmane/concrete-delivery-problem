@@ -1,6 +1,4 @@
-Article/article.*
-!Article/article.tex
-!Article/article.pdf
+
 Data/instances/imad/*.txt
 Data/instances/script/*.swp
 Data/instances/imad/*
