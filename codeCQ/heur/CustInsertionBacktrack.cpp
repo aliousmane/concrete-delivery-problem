@@ -50,7 +50,7 @@ void CustInsertionBacktrack::Insert(Sol &s) {
 }
 
 void CustInsertionBacktrack::Insert(Sol &s, std::vector<Customer *> &list,
-                           std::vector<int> &list_ID) {
+                                    std::vector<int> &list_ID) {
     if (list.size() > 1) {
         Sort(s, list, list_ID, CustInsertionBacktrack::_k);
 //        Prompt::print(list,",");
@@ -64,7 +64,7 @@ void CustInsertionBacktrack::Insert(Sol &s, std::vector<Customer *> &list,
     std::shuffle(driversList.begin(), driversList.end(), Parameters::RANDOM_GEN);
     Customer *c = list[0];
 //    c->early_tw=144;
-     for (int i = 0; i < list.size();) {
+    for (int i = 0; i < list.size();) {
 //        cout << *c << "--" << std::endl;
         bool custom_client = false;
         if (s.isClientSatisfied(c)) {
@@ -75,13 +75,13 @@ void CustInsertionBacktrack::Insert(Sol &s, std::vector<Customer *> &list,
         }
         Order *cur_order = s.GetRandomOrder(c);
 
-         int iter_count = 0;
+        int iter_count = 0;
 //        if (cur_order->custID == 18)
 //         Parameters::SHOW = true;
-         for (int j = 0; j < s.GetDeliveryCount(cur_order);) {
-             iter_count++;
+        for (int j = 0; j < s.GetDeliveryCount(cur_order);) {
+            iter_count++;
 
-             if (iter_count >= 100 and j == 0) {
+            if (iter_count >= 100 and j == 0) {
 //                 cout << iter_count << endl;
 //                 s.ShowSchedule(c);
 //                 cout << *c << endl;
@@ -89,7 +89,7 @@ void CustInsertionBacktrack::Insert(Sol &s, std::vector<Customer *> &list,
 
 //                exit(1);
 
-             }
+            }
             Delivery *del = s.GetDelivery(cur_order, j);
             if (Parameters::SHOW) {
                 Prompt::print(
@@ -105,7 +105,7 @@ void CustInsertionBacktrack::Insert(Sol &s, std::vector<Customer *> &list,
                         Prompt::print({"Push", to_string(del->id), "by", to_string(Sol::minDelay[del->id])});
                     }
                     ListMoveVrp temp_moves;
-                    if(del->rank==0){
+                    if (del->rank == 0) {
 //                        cout<< "Push "<<del->id<<" "<< s.updateCost<<endl;
 //                        s.ShowSchedule(c);
 
@@ -113,26 +113,26 @@ void CustInsertionBacktrack::Insert(Sol &s, std::vector<Customer *> &list,
                     _insrmv.GetBestInsertion(s, listId, driversList, &temp_moves);
                     if (temp_moves.Count() > 0) {
                         listMoves[del->delID].Insert(temp_moves);
-                        if(listMoves[del->delID].Count() >8){
+                        if (listMoves[del->delID].Count() > 8) {
                             Prompt::print({"Push", to_string(del->id), "by", to_string(Sol::minDelay[del->id])});
                         }
                     }
                     Sol::minDelay[del->id] = 0;
                 }
             } else if (listMoves[del->delID].Count() == 0) {
-                if(del->rank==0){
+                if (del->rank == 0) {
 //                    cout<<"new "<<del->id<<" "<< s.updateCost<<endl;
 //                    s.ShowSchedule(c);
                 }
                 _insrmv.GetBestInsertion(s, listId, driversList, &listMoves[del->delID]);
             }
-             if(listMoves[del->delID].Count() >8){
+            if (listMoves[del->delID].Count() > 8) {
 //                 Parameters::SHOW=true;
-             }
-             if (Parameters::SHOW) {
-                 Prompt::print({to_string(listMoves[del->delID].Count()), "moves for del", to_string(del->id)});
-                 listMoves[del->delID].Show();
-             }
+            }
+            if (Parameters::SHOW) {
+                Prompt::print({to_string(listMoves[del->delID].Count()), "moves for del", to_string(del->id)});
+                listMoves[del->delID].Show();
+            }
 
             Move<Delivery, Driver, MoveVrp> best;
             if (listMoves[del->delID].Count() > 0) {
@@ -188,13 +188,12 @@ void CustInsertionBacktrack::Insert(Sol &s, std::vector<Customer *> &list,
                                 if (std::min(delay, Parameters::INTRA_ORDER_DELIVERY) - s.WaitingTime[prec_del->id] >
                                     Parameters::INTRA_ORDER_DELIVERY) {
 //                                    backtrackOrder=false;
-                                        count--;
+                                    count--;
                                     if (prec_del->rank > 0) {
 //                                        s.UnassignDelivery({prec_del});
                                         prec_del = s.GetDelivery(cur_order, prec_del->rank - 1);
                                         continue;
-                                    } else
-                                    {
+                                    } else {
                                         break;
                                     }
                                 }
@@ -219,7 +218,7 @@ void CustInsertionBacktrack::Insert(Sol &s, std::vector<Customer *> &list,
 
                         if (backtrackOrder) {
                             int waste = s.updateCost.waste;
-                            s.UnassignDelivery(s.GetDeliveries(cur_order,count,del->rank-1));
+                            s.UnassignDelivery(s.GetDeliveries(cur_order, count, del->rank - 1));
                             assert(waste > s.updateCost.waste);
                             j = count;
 //                            if(j==0)cout<<"Retour au debut\n";
@@ -342,12 +341,12 @@ void CustInsertionBacktrack::Insert(Sol &s, std::vector<Customer *> &list,
 }
 
 void CustInsertionBacktrack::Sort(Sol &s, std::vector<Customer *> &list,
-                         std::vector<int> &list_ID, int k) {
+                                  std::vector<int> &list_ID, int k) {
     switch (k) {
         case -1: {
 //            std::vector<int> vec{18, 19, 12, 16, 17, 1, 0, 4, 3, 2, 5, 6, 9, 10, 7, 8, 11, 14, 15, 13};
 //            std::vector<int> vec{0,1,2,3,4,8,9};
-            std::vector<int> vec{18,19};
+            std::vector<int> vec{18, 19};
             list.clear();
             for (auto id: vec) {
                 list.emplace_back(s.GetCustomer(id));

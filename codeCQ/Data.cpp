@@ -14,8 +14,8 @@ Data::Data()
           maxDriverCap(0), minDriverCap(0), _deliveries(0), _drivers(0), _orders_deliveries(0), _distances(0),
           _times(0), _docks(0),
           _index_orders(0),
-//          path(std::filesystem::current_path().parent_path().parent_path()),
-          path(std::filesystem::current_path().parent_path()),
+          path(std::filesystem::current_path().parent_path().parent_path()),
+//          path(std::filesystem::current_path().parent_path()),
           instance_name(),
           problem_name(), sol_output(), result_file() {
     time_mat_file = path + "/matrices/Matrice_de_temps_all.csv";

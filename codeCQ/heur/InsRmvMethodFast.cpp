@@ -373,8 +373,6 @@ Move<Delivery, Driver, MoveVrp> InsRmvMethodFast::GetCost(Sol &s, Delivery *n, D
         TimeSlot intv = TimeSlot(loadSlot.lower, node_arr);
         auto it = s.driverWorkingIntervals[d->id].find(intv);
         if (it != s.driverWorkingIntervals[d->id].end()) {
-            Depot *temp_dep = s.GetDepot(it->n.depotID);
-
             Customer *it_cust = s.GetCustomer(dynamic_cast<Delivery *>(s.GetNode(it->n.id))->custID);
             if (Parameters::PENALTY_COST) {
                 newcost.lateDeliveryCost +=
@@ -512,9 +510,7 @@ void InsRmvMethodFast::repairSolution(Sol &s, Order *o) {
     s.Update(o);
 }
 
-void InsRmvMethodFast::repairSolution(Sol &s, Customer *c) {
-
-}
+void InsRmvMethodFast::repairSolution(Sol &s, Customer *c) {}
 
 void InsRmvMethodFast::FillStructures(Sol &s, std::vector<Customer *> &customersList,
                                       std::vector<Driver *> &driversList) {

@@ -5,6 +5,7 @@
 #include "CDPSolver.h"
 #include <vector>
 #include <iostream>
+#include <iterator>
 #include<set>
 
 class RechercheLocale {

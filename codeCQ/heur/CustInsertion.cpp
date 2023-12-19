@@ -69,9 +69,7 @@ void CustInsertion::InsertWithBactrack(Sol &s, std::vector<Customer *> &list) {
 
 bool CustInsertion::Insert(Sol &s, Customer *c, Order *cur_order) {
     bool nextCustomer = false;
-    int depth = 0;
-//    if (c->custID == 57)
-//        Parameters::SHOW = true;
+    int depth = 0; // backtracking depth
     for (int j = 0; j < s.GetDeliveryCount(cur_order);) {
         Delivery *del = s.GetDelivery(cur_order, j);
         if (del == nullptr) break;

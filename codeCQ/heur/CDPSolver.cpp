@@ -79,7 +79,7 @@ void CDPSolver::SolveCDP(Sol &s, Data &dat, int iter, bool restart) {
     vector<AllInsertionOperator> AllInsertionOp;
     AllInsertionOp.reserve(3 * (custInfo.size() + priorityInfo.size() + driverInfo.size()));
     for (const auto &val: custInfo) {
-       AllInsertionOp.emplace_back(&custIns1, val.first, "Builder 1 " + val.second);
+        AllInsertionOp.emplace_back(&custIns1, val.first, "Builder 1 " + val.second);
         AllInsertionOp.emplace_back(&custIns3, val.first, "Builder 3 " + val.second);
     }
     for (const auto &val: priorityInfo) {
@@ -210,7 +210,7 @@ void CDPSolver::RecursiveSols(Sol &s, Delivery *del, std::unordered_map<std::str
 void CDPSolver::LearnParameters(Sol &s, std::set<int> const &customer) {
     for (auto i: customer) {
         Customer *c = s.GetCustomer(i);
-        unordered_map<string, Sol, MyHashFunction> myMap;
+        unordered_map < string, Sol, MyHashFunction > myMap;
         Sol cur1(s.GetData());
         find_all_routes(cur1, c, &myMap);
         int count = 0;

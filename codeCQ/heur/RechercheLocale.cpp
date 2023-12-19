@@ -49,10 +49,10 @@ void RechercheLocale::Run(Sol &s) {
 				entree = true;
 				continue;
 			}
-			if (RelocateDriver(s)) {
-				entree = true;
-				continue;
-			}
+//			if (RelocateDriver(s)) {
+//				entree = true;
+//				continue;
+//			}
 		}
 	}
 	RunAllFeasible(s);

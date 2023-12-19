@@ -147,6 +147,7 @@ void Solver::SolveGrasp(Sol &s, Data &dat, vector<set<int>> const &linkedClientS
     loc_search.LinkedClientSlot = linkedClientSlot;
     if (Parameters::LOCAL_SEARCH) {
         grasp.Optimize(s, nullptr, nullptr, &loc_search, false);
+//        grasp.Optimize(s, nullptr, nullptr, nullptr, false);
     } else {
         grasp.Optimize(s, nullptr, nullptr, nullptr, false);
     }

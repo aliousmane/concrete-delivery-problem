@@ -7,6 +7,7 @@
 #include "Parameters.h"
 #include <unordered_map>
 #include <tuple>
+#include <algorithm>
 
 class Combinatorial {
 public:

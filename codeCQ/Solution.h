@@ -12,6 +12,7 @@
 #include "Node.h"
 #include <utility>
 #include <vector>
+#include <algorithm>
 #include <set>
 #include <cassert>
 #include <iostream>
