@@ -40,3 +40,5 @@ solution/.DS_Store
 result/cq/~$instances.xlsx
 solution/cq/__pycache__/
 codeCQ/__pycache__/
+ArticleCDP/articleCDP.bbl
+ArticleCDP/articleCDP.synctex.gz
