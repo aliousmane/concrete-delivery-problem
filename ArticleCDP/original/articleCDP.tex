@@ -1,5 +1,4 @@
 \documentclass{article}
-% \documentclass[review]{elsarticle}
 \usepackage{epsfig}
 \usepackage{amsmath}
 \usepackage{mathtools}
@@ -164,18 +163,20 @@ Let the binary variable $x^{k}_{ij}$ be $1$ if driver $k$ travels from node $i$ 
 
 The objective function minimizes total travel cost ($TC$), penalties associated with unfulfilled orders, first delivery delays ($FDD$), driver underutilization costs ($DUC$), and driver overtime costs ($DOC$). Together, these components drive the optimization process to find a solution that efficiently balances travel costs, customer satisfaction, on-time delivery, driver utilization, and scheduling constraints.
 
+{
+\small
 \begin{alignat}{3}
-    \label{mod:obj}   \min & \sum_{k \in K}{{ \sum_{ \substack{(i,j) \in A} }} {t_{ij}x^{k}_{ij}}} + \beta_1\smashoperator{\sum_{ o \in O}}{  \left(1-y_o\right)} \hspace{-0mm}  + \beta_2 \smashoperator{ \sum_{i \in C } } { g_i  } +  \sum_{k \in K}\left({\beta_3 w^{1}_k  + \beta_4  w^{2}_k}\right) &                                                                                                  \\
-    \label{mod:c1}         & \sum_{j \in \delta^{+}(i) }{x^k_{ij}} =1     & \forall i \in S, k \in K                                                                      \\
-    \label{mod:c2}         & \sum_{j \in \delta^{-}(i)}{x^k_{ji}} = 1     & \forall i \in E, k \in K                                                                         \\
-    \label{mod:c03}        & v_j \geq  w_i  - M\left(1-x^{k}_{ij}\right)   & \hspace{-20mm}  i \in S, j \in \delta^{+}(i),  k \in K      \\
-    \label{mod:c3}         & v_j \geq  w_i + \alpha_{b} + t_{ij} - M\left(1-x^{k}_{ij}\right) & \hspace{-25mm} \forall b \in B, i \in L_b, j \in \delta^{+}(i),  k \in K     \\
-    \label{mod:c4}         & v_j \geq  w_i + \rho + t_{ij} - M\left(1-x^{k}_{ij}\right)                                                                       & \hspace{-20mm} \forall i \in D  , j \in \delta^{+}(i), k \in K                         \\
-    \label{mod:c5}         & w_{i} \geq v_{i}  + \frac{q^k_j}{\tau^l_b} -M\left(1- x^{k}_{ij}\right)   & \hspace{-25mm} \forall  b \in B,  i \in L_{b},  j \in \delta^{+}(i), k \in K \\
-    \label{mod:c6}         & w_{j} \geq v_{j}  + {  \frac{q^k_j}{\tau^u_c} -M\left(1- x^{k}_{ij}\right) }     & \hspace{-25mm}  \forall c \in  C, j \in D_{c}, i \in \delta^{-}(j),  k \in K \\
-    \label{mod:c7}         & w_{j} \leq v_{i}  + \Delta + M\left(1- x^{k}_{ij}\right)  & \hspace*{-40mm} j \in D,  i \in \delta^{-}(j),  k \in K \text{ }  \\
-    \label{mod:c8}         & v_{d^0_{o}} \geq a_c    & \hspace{-40mm} \forall  c \in C, \forall o \in O_c \text{ }                           \\
-    \label{mod:c9}          & g_{c} \geq v_{d^0_{o_1}} - a_c - M\left(  \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})  }{u_{jd^0_{o_1}}}\right)  & \hspace{-40mm}  \forall  c \in C, \forall o_1 \in O_c \text{ }  \\
+    \label{mod:obj}   \min & \sum_{k \in K}{{ \sum_{ \substack{(i,j) \in A} }} {t_{ij}x^{k}_{ij}}} + \beta_1\smashoperator{\sum_{ o \in O}}{  \left(1-y_o\right)} \hspace{-0mm}  + \beta_2 \smashoperator{ \sum_{i \in C } } { g_i  } +  \sum_{k \in K}\left({\beta_3 w^{1}_k  + \beta_4  w^{2}_k}\right) &                             \\
+    \label{mod:c1}         & \sum_{j \in \delta^{+}(i) }{x^k_{ij}} =1   & \hspace{-10mm}  \forall i \in S, k \in K   \\
+    \label{mod:c2}         & \sum_{j \in \delta^{-}(i)}{x^k_{ji}} = 1     & \hspace{-10mm} \forall i \in E, k \in K\\
+    \label{mod:c03}        & v_j \geq  w_i  - M\left(1-x^{k}_{ij}\right)   & \hspace{-30mm}  i \in S, j \in \delta^{+}(i),  k \in K      \\
+    \label{mod:c3}         & v_j \geq  w_i + \alpha_{b} + t_{ij} - M\left(1-x^{k}_{ij}\right) & \hspace{-40mm} \forall b \in B, i \in L_b, j \in \delta^{+}(i),  k \in K     \\
+    \label{mod:c4}         & v_j \geq  w_i + \rho + t_{ij} - M\left(1-x^{k}_{ij}\right)                                                                       & \hspace{-40mm} \forall i \in D  , j \in \delta^{+}(i), k \in K                         \\
+    \label{mod:c5}         & w_{i} \geq v_{i}  + \frac{q^k_j}{\tau^l_b} -M\left(1- x^{k}_{ij}\right)   & \hspace{-40mm} \forall  b \in B,  i \in L_{b},  j \in \delta^{+}(i), k \in K \\
+    \label{mod:c6}         & w_{j} \geq v_{j}  + {  \frac{q^k_j}{\tau^u_c} -M\left(1- x^{k}_{ij}\right) }     & \hspace{-40mm}  \forall c \in  C, j \in D_{c}, i \in \delta^{-}(j),  k \in K \\
+    \label{mod:c7}         & w_{j} \leq v_{i}  + \Delta + M\left(1- x^{k}_{ij}\right)  & \hspace*{-50mm} j \in D,  i \in \delta^{-}(j),  k \in K \text{ }  \\
+    \label{mod:c8}         & v_{d^0_{o}} \geq a_c    & \hspace{-50mm} \forall  c \in C, \forall o \in O_c \text{ }                           \\
+    \label{mod:c9}          & g_{c} \geq v_{d^0_{o_1}} - a_c - M\left(  \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})  }{u_{jd^0_{o_1}}}\right)  & \hspace{-50mm}  \forall  c \in C, \forall o_1 \in O_c \text{ }  \\
     \label{mod:c91}  & g_{c} - a_c \leq \tau^w_c  & \hspace{-20mm}  \forall  c \in C \text{ }   \\
     \label{mod:c101}       & v_{d^0_{o_1}} \geq w_j - M\left(1- u_{jd^0_{o_1}}\right)   & \hspace{-50mm}    \forall o_1 \in O_i,  j \in \delta_{D}^{-}(d^0_{o_1}) \text{ }                \\
     \label{mod:c10}        & v_{d^0_{o_1}}  \leq  w_j + \gamma^2 + M\left(1- u_{j,d^0_{o_1}}\right)     & \hspace{-40mm}  \forall  o_1 \in O,  j \in \delta_{D}^{-}(d^0_{o_1}) \text{ }                    \\
@@ -183,11 +184,11 @@ The objective function minimizes total travel cost ($TC$), penalties associated 
     \label{mod:c12}        & \sum_{ \substack{o_1 \in O_c }}\sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}{u_{d^0_{o_1},j } } = |O_c|-1      & \hspace{-40mm} \forall  c \in C, |O_c| > 1  \text{ }          \\
     \label{mod:c13}    & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } \leq 1    & \hspace{-20mm}  \forall o_1 \in O \text{ }         \\
     \label{mod:c14}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \leq 1      & \hspace{-20mm} \forall o_1 \in O \text{ }        \\
-    \label{mod:c15}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } +\smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \geq 1    & \hspace{-20mm} \forall o_1 \in O \text{ }    \\
-    \label{mod:c16}        & v_{j} \geq w_{j-1} - M\left(1- u_{j-1,j}\right)   & \hspace{-40mm}  \forall o \in O, j \in D_{o}, j \geq 1  \text{ }    \\
-    \label{mod:c17}        & v_{j}  \leq  w_{j-1} + \gamma^1 + M\left(1- u_{j-1,j}\right)    & \hspace{-50mm} \forall c \in C, \forall o \in O_c, j \in D_{o}, j \geq 1 \text{ }     \\
-    \label{mod:c18}        & u_{j-1,j} \geq u_{j,j+1}      & \hspace{-60mm} \forall o_1 \in O,  j \in D_{o_1}, 1 \leq j \leq n_{o_{1}}-1 \text{ }   \\
-    \label{mod:c19}        & u_{j-1,j} \geq \sum_{l \in L}{x_{lj}}   & \hspace{-40mm}  \forall o_1 \in O, j \in D_{o_1}, j \geq 1 \text{ }                   \\
+    \label{mod:c15}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } +\smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \geq 1    & \hspace{-50mm} \forall o_1 \in O \text{ }    \\
+    \label{mod:c16}        & v_{j+1} \geq w_{j} - M\left(1- u_{j,j+1}\right)   & \hspace{-50mm}  \forall o \in O, j \in D_{o}, j \geq 1  \text{ }    \\
+    \label{mod:c17}        & v_{j+1}  \leq  w_{j} + \gamma^1 + M\left(1- u_{j,j+1}\right)    & \hspace{-60mm} \forall c \in C, \forall o \in O_c, j \in D_{o}, j \geq 1 \text{ }     \\
+    \label{mod:c18}        & u_{j,j+1} \geq u_{j+1,j+2}      & \hspace{-70mm} \forall o_1 \in O,  j \in D_{o_1}, 1 \leq j \leq n_{o_{1}}-2 \text{ }   \\
+    \label{mod:c19}        & u_{j,j+1} \geq \sum_{l \in L}{x_{lj}}   & \hspace{-60mm}  \forall o_1 \in O, j \in D_{o_1}, j \geq 1 \text{ }                   \\
     \label{mod:c20}        & v_{j} \geq w_{i} - M\left(1- u_{i,j}\right)   & \hspace{-40mm}  \forall i \in L, j \in \delta^{+}_{L}(i) \text{ }  \\
     \label{mod:c21}        & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{L}(i)}}{u_{i,j } } \leq 1     & \hspace{-40mm}  \forall i \in L \text{ }         \\
     \label{mod:c22}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } \leq 1                                      & \hspace{-40mm} \forall i \in L           \text{ }       \\
@@ -209,6 +210,7 @@ The objective function minimizes total travel cost ($TC$), penalties associated 
     \label{mod:c38}        & w^1_{k} \geq 0,  w^2_k \geq 0  & \hspace{-20mm}  i \in V         \text{ }        \\
     \label{mod:cend}       & g_c \geq 0    & \hspace{-20mm}  c \in C.  \text{ }
 \end{alignat}
+}
 
 $\beta_1$ to $\beta_4$ are the penalty coefficients of each component of the objective function (\ref{mod:obj}). Constraints (\ref{mod:c1}) and (\ref{mod:c2}) state that driver $k$ leaves his start node exactly once a day and returns to his end node. A driver cannot serve a node before the start of his shift with constraints (\ref{mod:c03}). Constraints (\ref{mod:c3}) and (\ref{mod:c4}) set a driver to take some time after loading or unloading to adjust the concrete or clean the truck before moving on to the next node. The duration of the loading operation depends on the plant's loading rate and the amount $q^k_j$ of RMC loaded (\ref{mod:c5}). Similarly, the unloading service depends on the site's rate and $q^k_j$ (\ref{mod:c6}). Unloading operations must end at most $\Delta$ minutes after loading begins (\ref{mod:c7}).
 
