@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[]{article}
 \usepackage{epsfig}
 \usepackage{amsmath}
 \usepackage{mathtools}
@@ -116,9 +116,9 @@ The rest of the paper is organized as follows: Section \ref{sec:cdp_lit_review} 
 \section{Literature review}
 \label{sec:cdp_lit_review}
 
-Academic research on concrete batch and delivery began in the late 1990s. \cite{tommelein1999just} described RMC as a prototypical example of a JIT production system in construction and identified two practices for delivering it. One approach is for the customer to haul the product from the batch plant with their concrete mixer, while the other is for the batch plant to deliver the concrete directly to the customer's location. This latter approach is the one that has been studied in all related papers found in the literature. Several works to schedule and dispatch concrete production and delivery have mainly focused on simulation-related methods. These methods can be standalone, such as those used by \cite{zayed2001simulation, wang2001scheduling} and  \cite{panas_simulation_based_2013}, among others. Alternatively, these methods can be hybridized with optimization techniques, such as those used by \cite{feng2004optimizing} and \cite{lu2005optimized}. \cite{wang2001scheduling} developed a simulation model to reveal the effect and value of the concrete mixers' inter-arrival time on the productivity of hired unloading equipment on site. \cite{feng2004optimizing} used a combination of genetic algorithm (GA) and simulation process to minimize the total waiting time for trucks at a customer site. The study focused on loading homogeneous trucks at the same batch plant, with fixed loading and unloading durations. The GA was used to find the best loading sequence of RMC trucks to be assigned to different construction sites. The simulation process determined the loading, arrival, departure, and waiting time of trucks and thus evaluated the cost of each dispatching sequence. They evaluated their method using data from a batch plant in Taiwan with up to nine customers served. \cite{lu2005optimized} used the same combination of GA and simulation to determine the optimal number of concrete mixers to be deployed and an optimal schedule for batching and delivering concrete. Their objective was to minimize the idle time of the site crew due to late concrete deliveries and truck queuing time. In this setting, it was also necessary to deliver a batch of mortar on-site to lubricate the unloading pump before the concrete delivery. As such, the simulation model also included the batch and delivery of mortar. Finding the best RMC fleet size was also the purpose of the discrete-event simulation model proposed by \cite{panas_simulation_based_2013}.
+Academic research on concrete batch and delivery began in the late 1990s. \cite{tommelein1999just} described RMC as a prototypical example of a JIT production system in construction and identified two practices for delivering it. One approach is for the customer to haul the product from the batch plant with their concrete mixer, while the other is for the batch plant to deliver the concrete directly to the customer's location. This latter approach is the one that has been studied in all related papers found in the literature. Several works to schedule and dispatch concrete production and delivery have mainly focused on simulation-related methods. These methods can be standalone, such as those used by \cite{zayed2001simulation} and \cite{wang2001scheduling}, among others. Alternatively, these methods can be hybridized with optimization techniques, such as those used by \cite{feng2004optimizing} and \cite{lu2005optimized}. \cite{wang2001scheduling} developed a simulation model to reveal the effect and value of the concrete mixers' inter-arrival time on the productivity of hired unloading equipment on site. \cite{feng2004optimizing} used a combination of genetic algorithm (GA) and simulation process to minimize the total waiting time for trucks at a customer site. The study focused on loading homogeneous trucks at the same batch plant, with fixed loading and unloading durations. The GA was used to find the best loading sequence of RMC trucks to be assigned to different construction sites. The simulation process determined the loading, arrival, departure, and waiting time of trucks and thus evaluated the cost of each dispatching sequence. They evaluated their method using data from a batch plant in Taiwan with up to nine customers served. \cite{lu2005optimized} used the same combination of GA and simulation to determine the optimal number of concrete mixers to be deployed and an optimal schedule for batching and delivering concrete. Their objective was to minimize the idle time of the site crew due to late concrete deliveries and truck queuing time. In this setting, it was also necessary to deliver a batch of mortar on-site to lubricate the unloading pump before the concrete delivery. As such, the simulation model also included the batch and delivery of mortar.
 
-In addition to simulation-based methods, several other approaches have been used in the literature to solve the CDP. These include metaheuristics \citep{misir2011selection, maghrebi2016sequential, yang2022concrete}, exact methods \citep{asbach2009analysis, kinable2014concrete}, matheuristics \citep{schmid2009hybrid, schmid2010hybridization}, Benders decomposition \citep{maghrebi2014benders}, column generation (CG) \citep{maghrebi2014solving}, Lagrangian relaxation \citep{narayanan2015using}, and machine learning approaches \citep{graham2006modeling}. \cite{matsatsinis2004towards} designed a decision support system (DSS) for the dynamic routing of both concrete and pumps that may be necessary for some construction sites to aid in the unloading of concrete. The DSS considered the availability of three plants but stipulated that vehicles fulfilling the same order must all load at the same plant. Orders that could not be executed immediately could be postponed for the next day. The routing of the pumps was modeled as a multi-depot vehicle routing problem with time windows. \cite{naso2007genetic} proposed a sequential GA method combined with constructive heuristics to solve another variant of the CDP. In this problem, the plant's production schedule must consider orders that must be delivered to a customer's site as well as orders that must be picked up by the customer. The algorithm schedules the plant loading operations first before scheduling the truck deliveries. The authors also developed a non-linear model that minimizes transportation costs, waiting times, outsourced costs, and overtime work. They ran experiments using real-world instances of a concrete supply chain in the Netherlands and found a reduction in the number of outsourced requests. \cite{yan2007optimal} also considered overtime considerations in their paper, which focused on scheduling RMC for one batch plant with two loading docks. The study took into account that overtime wages are paid for factory and construction site operations after 4 PM. They developed a mixed-integer programming (MIP) model on a time-space network to minimize travel times and operating costs at both normal and overtime working hours at the plant and the construction sites. They tested the model using real data consisting of three days of operation using a two-stage algorithm. First, they solved the MIP relaxation with CPLEX. Then, they simplified the original model by fixing some decision variables before solving it. The algorithm was found to improve the actual plant operation by 10\%. A time-space network is the key component of the real-time DSS developed by \cite{durbin2008or} to solve a dynamic CDP every five minutes. The DSS can receive new orders, schedule them on the fly, and handle unexpected events such as plant closures, truck breakdowns, and delays in transportation times. The authors combined the DSS with a tabu search (TS) heuristic to warm start CPLEX, which made the model performant enough to solve instances with up to 1,500 loads per day with up to 250 trucks. The DSS also considers the case of a customer who places two orders, with the first being completed before the second starts. Further insights on the real-time planning and monitoring of CDP are available in \cite{garza2021dynamic}. Another variant of the CDP is modeled by \cite{schmid2009hybrid} as an integer multicommodity network flow (MCNF) problem on a time-space network. In this paper, concrete is delivered using a heterogeneous fleet of vehicles, and each plant can load an unlimited number of trucks simultaneously. Some of the trucks have specialized equipment and must arrive first at certain construction sites to assist in unloading the concrete. The objective is to fulfill all orders, minimize the travel cost, and avoid delays between two consecutive unloading operations for an order. The model is typically solved using a matheuristic algorithm that combines the MCNF with a variable neighborhood search (VNS) heuristic. The method can quickly solve large problem instances with more than 60 orders per day. The same problem is addressed by \cite{schmid2010hybridization}, who proposed a MIP model combined with a VNS and a very large neighborhood search (VLNS) to develop two matheuristics approaches. Comparisons between both matheuristics and a standalone VNS show that the former methods are much better and suitable for solving larger problem instances. These methods also provide better solutions for small to medium instances than the matheuristic used in \cite{schmid2009hybrid}. A pure VNS approach with the same problem but without the use of instrumentation has been applied by \cite{payr2009optimizing}.
+In addition to simulation-based methods, several other approaches have been used in the literature to solve the CDP. These include metaheuristics \citep{ maghrebi2016sequential, yang2022concrete}, exact methods \citep{asbach2009analysis, kinable2014concrete}, matheuristics \citep{schmid2009hybrid, schmid2010hybridization}, Benders decomposition \citep{maghrebi2014benders}, column generation (CG) \citep{maghrebi2014solving}, Lagrangian relaxation \citep{narayanan2015using}, and machine learning approaches \citep{graham2006modeling}. \cite{matsatsinis2004towards} designed a decision support system (DSS) for the dynamic routing of both concrete and pumps that may be necessary for some construction sites to aid in the unloading of concrete. The DSS considered the availability of three plants but stipulated that vehicles fulfilling the same order must all load at the same plant. Orders that could not be executed immediately could be postponed for the next day. The routing of the pumps was modeled as a multi-depot vehicle routing problem with time windows. \cite{naso2007genetic} proposed a sequential GA method combined with constructive heuristics to solve another variant of the CDP. In this problem, the plant's production schedule must consider orders that must be delivered to a customer's site as well as orders that must be picked up by the customer. The algorithm schedules the plant loading operations first before scheduling the truck deliveries. The authors also developed a non-linear model that minimizes transportation costs, waiting times, outsourced costs, and overtime work. They ran experiments using real-world instances of a concrete supply chain in the Netherlands and found a reduction in the number of outsourced requests. \cite{yan2007optimal} also considered overtime considerations in their paper, which focused on scheduling RMC for one batch plant with two loading docks. The study took into account that overtime wages are paid for factory and construction site operations after 4 PM. They developed a mixed-integer programming (MIP) model on a time-space network to minimize travel times and operating costs at both normal and overtime working hours at the plant and the construction sites. They tested the model using real data consisting of three days of operation using a two-stage algorithm. First, they solved the MIP relaxation with CPLEX. Then, they simplified the original model by fixing some decision variables before solving it. The algorithm was found to improve the actual plant operation by 10\%. A time-space network is the key component of the real-time DSS developed by \cite{durbin2008or} to solve a dynamic CDP every five minutes. The DSS can receive new orders, schedule them on the fly, and handle unexpected events such as plant closures, truck breakdowns, and delays in transportation times. The authors combined the DSS with a tabu search (TS) heuristic to warm start CPLEX, which made the model performant enough to solve instances with up to 1,500 loads per day with up to 250 trucks. The DSS also considers the case of a customer who places two orders, with the first being completed before the second starts. Further insights on the real-time planning and monitoring of CDP are available in \cite{garza2021dynamic}. Another variant of the CDP is modeled by \cite{schmid2009hybrid} as an integer multicommodity network flow (MCNF) problem on a time-space network. In this paper, concrete is delivered using a heterogeneous fleet of vehicles, and each plant can load an unlimited number of trucks simultaneously. Some of the trucks have specialized equipment and must arrive first at certain construction sites to assist in unloading the concrete. The objective is to fulfill all orders, minimize the travel cost, and avoid delays between two consecutive unloading operations for an order. The model is typically solved using a matheuristic algorithm that combines the MCNF with a variable neighborhood search (VNS) heuristic. The method can quickly solve large problem instances with more than 60 orders per day. The same problem is addressed by \cite{schmid2010hybridization}, who proposed a MIP model combined with a VNS and a very large neighborhood search (VLNS) to develop two matheuristics approaches. Comparisons between both matheuristics and a standalone VNS show that the former methods are much better and suitable for solving larger problem instances. These methods also provide better solutions for small to medium instances than the matheuristic used in \cite{schmid2009hybrid}. A pure VNS approach with the same problem but without the use of instrumentation has been applied by \cite{payr2009optimizing}.
 
 Regarding objectives, most authors have focused on minimizing travel time and delays between consecutive deliveries. However, some authors have been more interested in maximizing customer satisfaction alone. We find these situations in the works of \cite{durbin2008or} and \cite{kinable2014concrete}. \cite{kinable2014concrete} introduce a general MIP and constraint programming (CP) models of the CDP reflecting the main constraints commonly found in all CDP works: time lag and no overlapping between consecutive deliveries, covering of all customers' demands, delivery time window, and heterogeneous fleet. However, the model did not include constraints limiting the time that concrete may stay on a truck. The authors propose a constructive heuristic that schedules the visits to the customers one by one according to the start time of the visit and the truck capacity. The procedure is invoked multiple times for different permutations of the customer's order which is determined using the steepest descent local search procedure. One of the paper's main contributions is the creation of the first public test instances for the CDP with up to 50 customers, four batch plants, and 20 concrete mixers. They found the CP model to be highly effective in finding high-quality solutions in a relatively short time or improving existing schedules, while the MIP model can be used to compute bounds, as it seems ineffective in solving large problem instances. Finally, the heuristic often yields good solutions in less than a second. A generalization of the MIP model of \cite{kinable2014concrete} is addressed in \cite{asbach2009analysis}. This model simultaneously minimizes the total sum of travel costs and the penalty costs for customers with unfulfilled demand. A customer can request that all concrete deliveries come from the same plant or a subset of plants and that a delivery truck belongs to a subset of the vehicle fleet. The MIP model is used in a local search scheme as a black-box solver to reoptimize an incumbent solution in which a neighborhood operator has unfixed some variables. \cite{tzanetos2023systematic} provide an overview of the various methods used in the literature to address the CDP and categorizes the problem formulations based on the different concepts used in the literature. They also discussed the consistency between industry needs and existing constraints and provided insights into the datasets corresponding to real-world cases, identifying the necessary data for practitioners.
 
@@ -145,7 +145,7 @@ Let $n_o$ be the number of deliveries needed to fulfill the order $o$. $n_o$ is 
 
 Let $d^j_{o}$ be the $j^{th}$ visit with load $q^j_{o}$ for order $o$. We represent the fulfillment of order $o$ by the visits to the ordered set of delivery nodes $D_o= \left(d^1_{o},d^2_{o},\cdots, d^{n_o}_{o}\right)$. The deliveries of customer $c$ are the ordered set $D_c= (D_{o_1}, D_{o_2},\cdots,D_{o_{|O_c|}})$, where $o_r$ is the $r^{th}$ delivered order. We will refer to $d \in D_c$ ($d \in D_o$) as the $d^{th}$ potential delivery of customer $c$ (order $o$). $D=\bigcup_{c\in C} D_c$ is the union of all delivery nodes.
 
-A solution to the problem involves decisions about truck loading schedules, driver assignments to different deliveries, and truck arrival times at construction sites for unloading. For a batch plant, the decision involves choosing which driver to load, when to load them, how much to load, and which construction site to deliver. For a driver, the decision is to determine the sequence of loading depots and delivery sites. And for a construction site, the decision involves determining the arrival times of all scheduled deliveries for the day.
+A solution to the problem involves decisions about truck loading schedules, driver assignments to different deliveries, and truck arrival times at construction sites for unloading. For a batch plant, the decision involves choosing which driver to load, when to load them, how much to load, and which construction site to deliver. For a driver, the decision is to determine the sequence of loading depots and delivery sites. For a construction site, the decision involves determining the arrival times of all scheduled deliveries for the day.
 
 Each driver leaves and returns to their home plant every day. We represent the home plant of a driver $k$ with a starting depot $s_k$ and an ending depot $e_k$. Let $S$ and $E$ be the sets of starting and ending depots, respectively.
 
@@ -162,7 +162,6 @@ We define $\delta^{+}(i) = \{(i, j) \in A \}$ and $\delta^{-}(i) = \{(j, i) \in 
 Let the binary variable $x^{k}_{ij}$ be $1$ if driver $k$ travels from node $i$ to $j$. Binary variable $y_o$ is $1$ when order $o$ is completely served; $v_i$ and $w_i$ are the start and end of the loading (unloading) operation at node $i \in L\cup D$. Binary variable $u_{ij}$ is $1$ if node $j$ is served just after $i$, the service being either an unloading or a loading operation. Variable $q^k_j$ is the quantity to be loaded towards $j$ with vehicle $k$. Let $w^1_k$ be a continuous variable indicating the difference between the driver's work time and the minimum number of hours to be worked in a day, and $w^2_k$ indicating the difference between the driver's work time and the normal work time. Let $g_i$ be the time between the due date and the first service start for customer $i$.
 
 The objective function minimizes total travel cost ($TC$), penalties associated with unfulfilled orders, first delivery delays ($FDD$), driver underutilization costs ($DUC$), and driver overtime costs ($DOC$). Together, these components drive the optimization process to find a solution that efficiently balances travel costs, customer satisfaction, on-time delivery, driver utilization, and scheduling constraints.
-
 {
 \small
 \begin{alignat}{3}
@@ -211,13 +210,14 @@ The objective function minimizes total travel cost ($TC$), penalties associated 
     \label{mod:cend}       & g_c \geq 0    & \hspace{-20mm}  c \in C.  \text{ }
 \end{alignat}
 }
-
 $\beta_1$ to $\beta_4$ are the penalty coefficients of each component of the objective function (\ref{mod:obj}). Constraints (\ref{mod:c1}) and (\ref{mod:c2}) state that driver $k$ leaves his start node exactly once a day and returns to his end node. A driver cannot serve a node before the start of his shift with constraints (\ref{mod:c03}). Constraints (\ref{mod:c3}) and (\ref{mod:c4}) set a driver to take some time after loading or unloading to adjust the concrete or clean the truck before moving on to the next node. The duration of the loading operation depends on the plant's loading rate and the amount $q^k_j$ of RMC loaded (\ref{mod:c5}). Similarly, the unloading service depends on the site's rate and $q^k_j$ (\ref{mod:c6}). Unloading operations must end at most $\Delta$ minutes after loading begins (\ref{mod:c7}).
 
 Constraints (\ref{mod:c8}) to (\ref{mod:c10}) ensure that the first service of any customer $c$ must start after the due time $a_c$. This first service may be performed at the first delivery node of any order, and one order must be completed before another is started. It also enforces the precedence constraints between the last delivery of an order and the first delivery of the following order. Constraints (\ref{mod:c11}) to (\ref{mod:c15}) find the delivery sequence of all orders. With constraints (\ref{mod:c16})--(\ref{mod:c19}), two trucks cannot unload at the same time for consecutive deliveries of the same order. Additionally, these constraints impose a maximum time delay between the two trucks. Similarly, constraints (\ref{mod:c20})--(\ref{mod:c23}) ensure that two trucks cannot be loaded at the same time at a plant. Constraints (\ref{mod:c24}) require that the cumulative load of all concrete mixers serving an order must equal the required quantities, and (\ref{mod:c240}) bound a driver load. Constraints (\ref{mod:c25}) require a driver to only visit a loading/delivery node once. Constraints (\ref{mod:c26}) are degree constraints. Constraints (\ref{mod:c29})--(\ref{mod:c30}) calculate the difference between a driver's hours of service and the minimum and normal hours of service. Finally, constraints (\ref{mod:c31}) to (\ref{mod:cend}) define the nature and bounds of the variables.
 
 Figure~\ref{fig:plants_schedules} presents a solution for an instance. The instance has two plants, nine drivers, and five customers, with two customers having multiple orders. Customer $4$ has two orders ($o_4$--$o_5$) assigned to plant $1$, and customer $5$ has three orders ($o_{6}$--$o_{8}$) assigned to plant $2$. All the order requirements are in the Table~\ref{tab:instance_detail}. Figure \ref{fig:plants_schedules} provides a visual representation using a Gantt chart of the loading and unloading operations performed by the drivers at each plant. The light gray, dark gray and black colors represent a customer's first, second and third order. We can see that the loading operations for each plant do not overlap, and the unloading operations occur sequentially, one after the other, at each worksite. At plant $1$, loading operations for $C3$ are performed first by drivers $3,5,4,2$ followed by loadings for  $C1$. The second order of $C5$ is delivered, followed by the second, and finally, the first order. All first deliveries start at their due time, except for $C2$, which is 20 minutes late. There is a delay between each delivery of $C2$. However, it is less than the maximal time delay of 25 minutes defined for this example. We can see that some drivers load at both plants. For example, driver $5$ loads at plant $1$ to perform the second delivery of $C3$ then drives to plant $2$ for the first delivery of $C2$. Driver $1$ is originally assigned to plant $1$ but starts his first service at $2$ before returning to his home plant. The loadings at plant $2$ show how the loading dock is alternately assigned for orders of customers $2,4$ and $5$ between $06\text{:}25$ and $10\text{:}00$. We obtain this solution using a heuristic solution approach that we describe next.
 
+{
+    % \small
 \begin{table}[!ht]
     \centering
     \caption{Information of the illustration instance}
@@ -236,22 +236,22 @@ Figure~\ref{fig:plants_schedules} presents a solution for an instance. The insta
         \end{tabular}
     }
 \end{table}
-
+}
 \begin{figure}[htb]
     \centering
     \caption{Gantt chart of the loading and unloading operations of the illustration instance}
     \label{fig:plants_schedules}
-        \includegraphics[width=\linewidth]{exemple.pdf}
+        \includegraphics[width=\linewidth]{gantt_example.pdf}
 \end{figure}
 
 \section{Constructive heuristics and GRASP}
 \label{sec:cdp_grasp_method}
 
-This section presents the heuristic approach to solving the Concrete Delivery Problem. Our method consists of constructing feasible solutions of the CDP with randomized greedy heuristics and iteratively invoking these heuristics in the GRASP metaheuristic. From now on, we represent the scheduling of a delivery node $d$ as the pair ($L^k_{d}$,$U^k_{d}$) of loading and unloading tasks. $L^k_{d} = \left(b,q_d,v_b,w_b\right)$ indicates that driver $k$ will load $q_d$ $m^3$ of RMC at plant $b$ between timeslots $\left[v_b,w_b\right]$ to serve $d$. $U^k_{d} = \left(k,v_d, w_d\right)$ indicates that driver $k$ will start unloading at time $v_d$ and finish at time $w_d$. We then call a solution $Sol =\left\lbrace \cup _{1 \leq j \leq |D|} (L^k_{j}, U^k_{j}), k \in K \right\rbrace$ the set of all pairs of loading and unloading tasks performed on a given day.
+This section presents the heuristic approach to solving the Concrete Delivery Problem. Our method consists of constructing feasible solutions of the CDP with randomized greedy heuristics and iteratively invoking these heuristics in the GRASP metaheuristic. From now on, we represent the scheduling of a delivery node $d$ as the pair ($L^k_{d}$,$U^k_{d}$) of loading and unloading tasks. $L^k_{d} = \left(b,q_d,v_b,w_b\right)$ indicates that driver $k$ will load $q_d$ $m^3$ of RMC at plant $b$ between timeslots $\left[v_b,w_b\right]$ to serve $d$. $U^k_{d} = \left(k,v_d, w_d\right)$ indicates that driver $k$ will start unloading at time $v_d$ and finish at time $w_d$. We then call a solution $Sol =\left\lbrace \cup _{1 \leq j \leq |D|} (L^k_{j}, U^k_{j}), k \in K \right\rbrace$ the set of all pairs of loading and unloading tasks performed.
 
 \subsection{GRASP algorithm}
 
-The Greedy Randomized Search Procedure (GRASP) algorithm is a multi-start metaheuristic for combinatorial optimization problems proposed by \cite{feo1989probabilistic}. It is a two-phase iterative sequence of constructive and local search algorithms. A feasible solution is generated in the construction phase using a greedy randomized algorithm. Then, a local search phase tries to improve it. Algorithm~\ref{alg_grasp} outlines the GRASP algorithm. We start with a list of greedy randomized heuristics and iterate on each to construct an incumbent solution $Sol$ on which we apply a local search procedure to explore its neighborhood. The best solution found so far is then stored. To avoid redundant computations, a hash table $T$ ensures that the local search is not applied twice to the same solution. The procedure stops and returns the best overall solution when certain stopping conditions are met, such as reaching a time limit or a maximum number of iterations. 
+The Greedy Randomized Search Procedure (GRASP) algorithm is a multi-start metaheuristic for combinatorial optimization problems proposed by \cite{feo1989probabilistic}. It has been successfully applied to solving scheduling problems \citep{bamoumen2023efficient,yepes2023flowshop} and transportation-related problems such as the prisoner transportation problem \citep{ferone2023efficient} and the truck and trailer routing problem \citep{villegas2011grasp}. The GRASP is a two-phase iterative sequence of constructive and local search algorithms. A feasible solution is generated in the construction phase using a greedy randomized algorithm. Then, a local search phase tries to improve it. Algorithm~\ref{alg_grasp} outlines the GRASP algorithm. We start with a list of greedy randomized heuristics and iterate on each to construct an incumbent solution $Sol$ on which we apply a local search procedure to explore its neighborhood. The best solution found so far is then stored. To avoid redundant computations, a hash table $T$ ensures that the local search is not applied twice to the same solution. The procedure stops and returns the best overall solution when certain stopping conditions are met, such as reaching a time limit or a maximum number of iterations. 
     \begin{algorithm}[hbpt]
         \caption{Pseudo-code of the GRASP algorithm }
         \label{alg_grasp}
@@ -309,6 +309,8 @@ The $SimulateVisit$ procedure takes a partial solution, a delivery node $d$, a d
 Let $\bar{q}_o$ be the remaining demand of order $o$. Driver $k$ can supply $d$ with the quantity $q^k_d= \min(\bar{q}_o,Q^k)$. We determine the loading start time $v_l$ of the corresponding dock node $l$ by subtracting the travel time, adjustment time, and loading duration from $v_d$: $w_l = v_d - t_{dl} - \alpha_b - q^k_{d}/\tau^l{_b} $. If $j$ is the last node where $k$ was unloading with a service duration $s_j$, then $w_l= \max(w_l, v_j + s_{j} + t_{jl})$. Now, we have the earliest time $k$ can start loading at plant $b$, but if the loading dock is occupied at that time, $k$ will have to wait. To find the real loading time, we use a data structure that stores all timeslots when a plant is occupied. Then, starting from $w_l$, we search forward for the first timeslot with duration $q^k_{d}/\tau^l{_b}$ where we can insert this loading operation and update $w_l$ accordingly. Changing $w_l$ can cause violations of the time window or cold-joint constraints, especially for an order's subsequent deliveries, and thus make the schedule infeasible. So with this new value of $w_l$, we recompute $v_l$ and check for constraint violations.
 
 Algorithm~\ref{alg:greedyCustIns} is designed with a list of customers as input. Initial experimentation has revealed that the sequence of this list affects the final solution. Within the GRASP framework, we invoke the customer-based heuristic multiple times with various customer orderings. These include sorting by decreasing demand and time window, sorting by increasing demand and time window, and finally, with a randomized list.
+{
+\footnotesize
     \begin{algorithm}[!ht]
         \caption{Customer-based insertion algorithm }
         \label{alg:greedyCustIns}
@@ -317,7 +319,7 @@ Algorithm~\ref{alg:greedyCustIns} is designed with a list of customers as input.
         \setcounter{AlgoLine}{0}
         \KwIn{  $Sol$: empty solution, $K$: vehicles set, $\Pi$: list of customers }
 
-        $M \leftarrow \emptyset $ \tcp{List of pairs of loading -- unloading tasks for each delivery node}
+        $M \leftarrow \emptyset $ \small \tcp{List of pairs of loading -- unloading tasks for each delivery node}
 
         \ForEach{$c \in \Pi$}{
 
@@ -347,7 +349,7 @@ Algorithm~\ref{alg:greedyCustIns} is designed with a list of customers as input.
 
     $c_{min} \leftarrow \min\left\{ cost \ | \ (L^k_{d}, U^k_{d},cost,k) \in M[d]   \right\} $
 
-    $c_{max} \leftarrow \max\left\{ cost \ | \ (L^k_{d}, U^k_{d},cost,k) \in M[d]   \right\} $
+$c_{max} \leftarrow \max\left\{ cost \ | \ (L^k_{d}, U^k_{d},cost,k) \in M[d]   \right\} $
     
     Randomly choose $(L^k_{d}, U^k_{d},cost,k)$ in $M[d]$ such that $cost \leq c_{min} + \theta (c_{max}-c_{min}) $
 
@@ -375,7 +377,7 @@ Update $\bar{q}_o$
 
 $j \leftarrow j'$, $\lambda \leftarrow delay$
 
-    Go to line 6 \tcp{backtrack to $j'$ position and retry to insert $D^{j'}_{o}$}
+    Go to line 6 \small \tcp{backtrack and retry to insert $D^{j'}_{o}$}
     }
     \uElse{
      Search for a precedent delivery node $D^{j'}_o, j'<j$ with $M[D^{j'}_o]\neq \emptyset$
@@ -403,20 +405,17 @@ $j \leftarrow j'$, $\lambda \leftarrow delay$
         }
         \KwRet{$Sol$}
     \end{algorithm}
-
-When confronted with scenarios where several customers require their services to start simultaneously or within the same time window, we observed that with Algorithm~\ref{alg:greedyCustIns}, some customers remain unscheduled when resources are limited. To address this limitation, we introduce the delivery-based insertion heuristic.
+}
+When confronted with scenarios where several customers require their services to start simultaneously or within the same time window, we observed that with Algorithm~\ref{alg:greedyCustIns}, some customers remain unscheduled when resources are limited. To address this limitation, we introduce the delivery-based insertion heuristic, which allows each customer to have one of its delivery nodes considered for scheduling at each iteration.
 
 \subsection{Delivery-based insertion heuristic}
 
 The delivery-based insertion heuristic (Algorithm~\ref{alg:delbasedIns}) iteratively constructs a solution from scratch by scheduling one delivery node at a time. The algorithm starts with an empty solution $Sol$ and initially fills a candidate list $CL$ with the first node of a randomly selected order for each customer. Within each iteration of the $while$ loop, the algorithm filters $CL$ to obtain a reduced candidate list $CL'$ of deliveries based on a specified criterion, such as prioritizing deliveries with the highest (lowest) demands, earliest (latest) due dates, or lowest order numbers. This filtering is performed by the $Filter$ procedure, allowing the algorithm to explore different neighborhoods. Thus, within the GRASP framework, we can invoke the delivery-based heuristic multiple times with different filtering procedures which evaluate different neighborhoods. 
 
 Between lines $14$ and $18$, for each delivery $d$ in $CL'$, the algorithm determines the best available driver $k$ who can visit it. Then, the corresponding pair of loading and unloading tasks $(L^k_d, U^k_d)$, along with its costs, are stored in $M[d]$. This is done using the $SimulateVisit$ procedure described earlier. Then, the algorithm constructs at line $20$ a list $T$ containing all pairs of loading and unloading tasks for the delivery nodes in $CL'$.
-
 If $T$ is empty, the algorithm assumes that the customers associated with the nodes in $CL'$ cannot be scheduled, and it removes those customers' existing schedules from the solution. It then excludes $CL'$ from $CL$ at line $25$ and proceeds to the next iteration.
 
 Otherwise, from line $26$ to line $29$, the algorithm randomly selects from $T$ a pair of loading and unloading tasks whose cost falls within a specified range determined by the parameter $\theta$ and inserts this pair into $Sol$. The algorithm then updates the remaining orders and customer quantities and excludes the scheduled delivery node from $CL$. If an order $o$ is not completely fulfilled after visiting $d^j_{o}$, the next delivery node $d^{j+1}_{o}$ is added to $CL$.  Otherwise, if the customer has remaining orders, the first delivery node $d^{1}_{o'}$ of another randomly selected order $o'$ is added to $CL$.
-
-Unlike the customer-based insertion, the delivery-based insertion allows each customer to have one of its delivery nodes considered for scheduling at each iteration.
 %In these two heuristics, the greedy aspect of GRASP refers to the creation of the set $RCL$, the probabilistic aspect is the random selection in $RCL$, and the adaptive part is the updating of $CL$ and the re-evaluation of the costs.
  
 \begin{algorithm}[!ht]
@@ -429,7 +428,7 @@ Unlike the customer-based insertion, the delivery-based insertion allows each cu
 
     $CL \leftarrow \emptyset$
 
-    $M \leftarrow \emptyset $ \tcp{List of pairs of loading -- unloading tasks for each delivery node}
+    $M \hspace{-2mm} \leftarrow \emptyset $ \small \tcp{List of pairs of loading -- unloading tasks for each delivery node}
 
     $\bar{q} \leftarrow \emptyset$ \tcp{List of remaining demands}
 
@@ -460,7 +459,7 @@ Unlike the customer-based insertion, the delivery-based insertion allows each cu
                 \uIf{f=1 and $cost <       best\_cost$}{
                     $M[d] \leftarrow \{(L^k_{d}, U^k_{d},cost,k)\}$ 
 
-                    $best\_cost \leftarrow c$
+                    $best\_cost \leftarrow cost$
                 }
             }
 
@@ -478,9 +477,7 @@ Unlike the customer-based insertion, the delivery-based insertion allows each cu
            $CL \leftarrow CL\backslash CL'$ 
         }
         \uElse{
-            $c_{min} \leftarrow \min\left\{ cost \ | \ (L^k_{d}, U^k_{d},cost,k) \in T   \right\} $
-
-            $c_{max} \leftarrow \max\left\{ cost \ | \ (L^k_{d}, U^k_{d},cost,k) \in T   \right\} $
+            $c_{min} \leftarrow \min\left\{ cost \ | \ (L^k_{d}, U^k_{d},cost,k) \in T   \right\} $, $c_{max} \leftarrow \max\left\{ cost \ | \ (L^k_{d}, U^k_{d},cost,k) \in T   \right\} $
     
             Randomly choose $(L^k_{d^j_o}, U^k_{d^j_o},cost,k) \in T$ such that $cost \leq c_{min} + \theta (c_{max}-c_{min}) $
             
@@ -521,7 +518,7 @@ The first improvement or Load Backward operator is used when dealing with soluti
 We have implemented two moves based on the swap operator. The Swap Driver operator explores alternative driver assignments by swapping drivers assigned to two delivery nodes. This allows for the assessment of different driver configurations, potentially leading to improvements in solution quality. The Swap Load operator exchanges loads between a delivery node and the last delivery node of the same order. In our greedy randomized heuristics, all deliveries of an order are typically filled to capacity, except for the last one.  This operator investigates the effect of delivering this last load much earlier in the delivery sequence. Delivering the final load earlier in the sequence can improve the loading operations, as it may be easier to find an empty timeslot for inserting a loading task with a smaller load. 
 
 We also implemented two moves based on the relocate operator. The Consolidate Load operator is applied on an order with a remaining demand between $]Q_{min},Q_{max}]$. If this remaining demand is served with two drivers with capacity $Q_{min}$, then the operator tries to consolidate it to be served by a single driver with a capacity of $Q_{max}$. Next, the Relocate Driver operator removes a delivery node from its current route and inserts it in another driver's route. This enables the redistribution of delivery nodes among drivers, potentially reducing drivers underutilization and overtime costs.
-
+% \clearpage
 \section{Computational experiments}
 \label{sec:cdp_comp_exp}
 
@@ -666,15 +663,15 @@ $FDD$ represents the sum of the delays of the first deliveries. In the case of s
     \bottomrule
     \end{tabular}
     }
-    \begin{minipage}{12cm}
+    \begin{minipage}{\textwidth}
     \vspace{0.1cm}
-    {\footnotesize $TC$: travel cost, $UQ$: undelivered quantity, $FDD$: first delivery delay, $mFDD$: maximum of first delivery delays, $DUC$: driver underutilization cost, $DOC$: driver overtime cost.}        
+    {\scriptsize \hspace*{-5mm} $TC$: travel cost, $UQ$: undelivered quantity, $FDD$: first delivery delay, $mFDD$: maximum of first delivery delays, $DUC$: driver underutilization cost, $DOC$: driver overtime cost.}        
     \end{minipage}
 \end{table}
 
 Table \ref{tab_cdp_runtime} shows that a higher percentage of deliveries are completed as the algorithm runtime increases. For small instances, all requests are scheduled in less than a minute of runtime, while for medium and large instances, 99\% of requests are scheduled to be delivered with only a minute of runtime. 
 
-\begin{table}[htb]
+\begin{table}[ht!]
     \centering
     \caption{RMC delivery completion within different runtimes of the GRASP}
     \label{tab_cdp_runtime}
@@ -682,9 +679,9 @@ Table \ref{tab_cdp_runtime} shows that a higher percentage of deliveries are com
     \resizebox*{0.7\textwidth}{!}{
     \begin{tabular}{llrrrrr}
     \toprule
-     &  & \multicolumn{5}{c}{Runtime (min)} \\
-     \cmidrule{3-7}
-     &  & 1 & 5 & 10 & 30 & 60 \\
+    %  &  & \multicolumn{5}{c}{Runtime (min)} \\
+    %  \cmidrule{3-7}
+     &  & \multicolumn{1}{c}{1 min} & \multicolumn{1}{c}{5 min} & \multicolumn{1}{c}{10 min} & \multicolumn{1}{c}{30 min} &\multicolumn{1}{c}{60 min} \\
     \midrule
     Small & \%Load & 100.0 & 100.0 & 100.0 & 100.0 & 100.0 \\
 Medium & \%Load & 98.9 & 99.3 & 99.4 & 99.5 & 99.5 \\
@@ -694,7 +691,7 @@ Large & \%Load & 98.8 & 99.3 & 99.4 & 99.6 & 99.6 \\
     }
 \end{table}
 
-The medium instance $C\_42\_47\_104\_8$ has an unserved customer with a demand of 12 $m^3$ and a due time of $07\text{:}00$. Upon investigation, we find that even though we have $104$ drivers in this instance, the number of drivers who start their shift before $07\text{:}00$ is insufficient to serve this customer within the 60-minute window we defined. Thus, the value of $UQ$ that we report in Table~\ref{tab:cdp_all_instances} appears optimal given the driver shift schedule given as input to our algorithm. We confirmed this observation by removing the driver start shift and overtime constraints and resolving our instances five more times. All orders are now fully serviced on each run, as shown in Table~\ref{tab:cdp_all_instances_no_shift}. Table~\ref{tab:cdp_lift_shift_constraints} compares the averages of the results from Tables \ref{tab:cdp_all_instances} and \ref{tab:cdp_all_instances_no_shift}. We found that the maximum delay dropped to zero for small instances, and for medium (large) instances, it was reduced by almost 60\% (40\%) on average. This suggests that when we input a good work schedule, our algorithm works effectively to ensure that all orders are filled and that delays for first deliveries and travel costs are minimized. We can see that the average travel time decreases in all cases except the large one, where the difference is not significant.
+The medium instance $C\_42\_47\_104\_8$ has an unserved customer with a demand of 12 $m^3$ and a due time of $07\text{:}00$. Upon investigation, we find that even though we have $104$ drivers in this instance, the number of drivers who start their shift before $07\text{:}00$ is insufficient to serve this customer within the 60-minute window we defined. Thus, the value of $UQ$ that we report in Table~\ref{tab:cdp_all_instances} appears optimal given the driver shift schedule provided as input to our algorithm. We confirmed this observation by removing the driver start shift and overtime constraints and resolving our instances five more times. All orders are now fully serviced on each run, as shown in Table~\ref{tab:cdp_all_instances_no_shift}. Table~\ref{tab:cdp_lift_shift_constraints} compares the averages of the results from Tables \ref{tab:cdp_all_instances} and \ref{tab:cdp_all_instances_no_shift}. We found that the maximum delay dropped to zero for small instances, and for medium (large) instances, it was reduced by almost 60\% (40\%) on average. This suggests that when we input a good work schedule, our algorithm works effectively to ensure that all orders are filled and that delays for first deliveries and travel costs are minimized. We can see that the average travel time decreases in all cases except the large one, where the difference is not significant.
 
 \begin{table}[ht!]
     \centering
@@ -754,9 +751,9 @@ The medium instance $C\_42\_47\_104\_8$ has an unserved customer with a demand o
     \bottomrule
     \end{tabular}
     }
-    \begin{minipage}{12cm}
+    \begin{minipage}{\textwidth}
         \vspace{0.1cm}
-        {\footnotesize $TC$: travel cost, $UQ$: undelivered quantity, $FDD$: first delivery delay, $mFDD$: maximum of first delivery delays.}        
+        {\scriptsize $TC$: travel cost, $UQ$: undelivered quantity, $FDD$: first delivery delay, $mFDD$: maximum of first delivery delays.}        
         \end{minipage}
 \end{table}
 
@@ -779,9 +776,9 @@ Large & 21,810.5 & 14.7 & 945.0 & 56.4 & 22,283.6 & 0.0 & 168.7 & 31.0 \\
     \bottomrule
     \end{tabular}
     }
-    \begin{minipage}{12cm}
+    \begin{minipage}{\textwidth}
         \vspace{0.1cm}
-        {\footnotesize $TC$: travel cost, $UQ$: undelivered quantity, $FDD$: first delivery delay, $mFDD$: maximum of first delivery delays.}        
+        {\scriptsize $TC$: travel cost, $UQ$: undelivered quantity, $FDD$: first delivery delay, $mFDD$: maximum of first delivery delays.}        
         \end{minipage}
 \end{table}
 
@@ -809,13 +806,13 @@ We ran five tests on our dataset and obtained two solutions per instance: one th
     \centering
     \caption{Trade-off between travel cost and first delivery delay}
     \label{tab:cdp_tradeoff}
-    \begin{adjustbox}{max width=0.8\textwidth}
+    \begin{adjustbox}{max width=0.9\textwidth}
     \begin{tabular}{lcccccc}
     \toprule
      & \multicolumn{3}{c}{Minimize TC} & \multicolumn{3}{c}{Minimize $FDD$} \\
      \cmidrule(l){2-4} \cmidrule(l){5-7}
-     & $TC$ & $FDD$ & $mFDD$ & $TC$ & $FDD$ & $mFDD$ \\
-     & (min) & (min) & (min) & (min) & (min) & (min) \\
+     & \multicolumn{1}{c}{$TC$ (min)} & \multicolumn{1}{c}{$FDD$ (min)} & \multicolumn{1}{c}{$mFDD$ (min)} & \multicolumn{1}{c}{$TC$ (min)} & \multicolumn{1}{c}{$FDD$ (min)} & \multicolumn{1}{c}{$mFDD$ (min)}\\
+    %  & \multicolumn{1}{c}{(min)} & \multicolumn{1}{c}{(min)}  & \multicolumn{1}{c}{(min)} & \multicolumn{1}{c}{(min)}  & \multicolumn{1}{c}{(min)} & \multicolumn{1}{c}{(min)}  \\
     \midrule
     Small & 1,821.3 & 0.0 & 0.0 & 1,831.6 & 0.0 & 0.0 \\
     Medium & 14,311.5 & 89.6 & 23.0 & 14,679.3 & 46.9 & 13.4 \\
@@ -832,11 +829,11 @@ We ran five tests on our dataset and obtained two solutions per instance: one th
 In this paper, we investigated a variant of the concrete delivery problem, where customers can order different types of concrete from different production centers, which must be delivered during the same time window. To solve this problem, we introduced a mathematical model and a heuristic solution based on Greedy Randomized Adaptive Search. Our analysis, using a dataset derived from our partner's historical data, demonstrated the effectiveness of our algorithm in providing good solutions within a reasonable time. Furthermore, our model incorporates constraints related to working hours, making our heuristic a valuable tool for designing weekly schedules for company drivers. It can also better reassign drivers to their home plants, as these assignments affect travel costs to ensure timely deliveries. Our GRASP algorithm performed exceptionally well on the \cite{kinable2014concrete} datasets, indicating its reliability. For future work, it would be interesting to address datasets with different unloading times at construction sites or to explore different scenarios regarding the number of simultaneous deliveries and the maximum time between two consecutive orders at a construction site. One can also study the problem using a stochastic or robust methodology to account for the uncertainty of the parameters in a real-world setting. As a contribution to the literature on CDP, we provide a mathematical formulation for our variant, contribute with a dataset, and demonstrate the application of GRASP to solve both our real problem and the one studied by \cite{kinable2014concrete}.
 
 
-\vspace{1.5cm} \noindent \textbf{Acknowledgments}
+\vspace{1.cm} \noindent \textbf{Acknowledgments}
 
 Financial support for this work was provided by the Canadian Natural Sciences and Engineering Research Council (NSERC) under grants 2019-00094 and 2021-04037. This support is gratefully acknowledged. We thank the Digital Research Alliance of Canada for providing high-performance computing facilities.
 
-\bibliographystyle{plainnat}
-\bibliography{references} 
+ \bibliographystyle{plainnat} 
+ \bibliography{References}
 
 \end{document}
