@@ -59,3 +59,4 @@ articleCDP/original/*.bbl
 articleCDP/original/*.gz
 articleCDP/original/*.fdb_latexmk
 data/__pycache__/
+ArticleCDP/journals/elsevier/articleCDP.bbl
