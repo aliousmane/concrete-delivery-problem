@@ -116,9 +116,9 @@
 \author[inst1]{Ousmane Ali}
 
 \affiliation[inst1]{organization={CIRRELT, Université LAVAL},%Department and Organization
-            % addressline={Address One}, 
+            % addressline={Address One},
             % city={Québec},
-            % postcode={00000}, 
+            % postcode={00000},
             % state={Qu\'ebec},
             country={Canada}}
 
@@ -126,9 +126,9 @@
 \author[inst1,inst2]{Leandro C.~Coelho}
 
 \affiliation[inst2]{organization={Canada research chair in integrated logistics},%Department and Organization
-            % addressline={Address Two}, 
+            % addressline={Address Two},
             % city={City Two},
-            % postcode={22222}, 
+            % postcode={22222},
             % state={Québec},
             country={Canada}}
 
@@ -160,7 +160,7 @@ The rest of the paper is organized as follows: Section \ref{sec:cdp_lit_review} 
 \section{Literature review}
 \label{sec:cdp_lit_review}
 
-Academic research on concrete batch and delivery began in the late 1990s. \cite{tommelein1999just} described RMC as a prototypical example of a JIT production system in construction and identified two practices for delivering it. One approach is for the customer to haul the product from the batch plant with their concrete mixer, while the other is for the batch plant to deliver the concrete directly to the customer's location. This latter approach is the one that has been studied in all related papers found in the literature. Several works to schedule and dispatch concrete production and delivery have mainly focused on simulation-related methods. These methods can be standalone, such as those used by \cite{zayed2001simulation} and \cite{wang2001scheduling}, among others. Alternatively, these methods can be hybridized with optimization techniques, such as those used by \cite{feng2004optimizing} and \cite{lu2005optimized}. \cite{wang2001scheduling} developed a simulation model to reveal the effect and value of the concrete mixers' inter-arrival time on the productivity of hired unloading equipment on site. \cite{feng2004optimizing} used a combination of genetic algorithm (GA) and simulation process to minimize the total waiting time for trucks at a customer site. The study focused on loading homogeneous trucks at the same batch plant, with fixed loading and unloading durations. The GA was used to find the best loading sequence of RMC trucks to be assigned to different construction sites. The simulation process determined the loading, arrival, departure, and waiting time of trucks and thus evaluated the cost of each dispatching sequence. They evaluated their method using data from a batch plant in Taiwan with up to nine customers served. \cite{lu2005optimized} used the same combination of GA and simulation to determine the optimal number of concrete mixers to be deployed and an optimal schedule for batching and delivering concrete. Their objective was to minimize the idle time of the site crew due to late concrete deliveries and truck queuing time. In this setting, it was also necessary to deliver a batch of mortar on-site to lubricate the unloading pump before the concrete delivery. As such, the simulation model also included the batch and delivery of mortar.
+Academic research on concrete batch and delivery began in the late 1990s. \cite{tommelein1999just} described RMC as a prototypical example of a JIT production system in construction and identified two practices for delivering it. One approach is for the customer to haul the product from the batch plant with their concrete mixer, while the other is for the batch plant to deliver the concrete directly to the customer's location. This latter approach is the one that has been studied in all related papers found in the literature. Several works to schedule and dispatch concrete production and delivery have mainly focused on simulation-related methods. These methods can be standalone \citep{zayed2001simulation} or can be hybridized with optimization techniques, such as those used by \cite{feng2004optimizing} and \cite{lu2005optimized}. \cite{feng2004optimizing} used a combination of genetic algorithm (GA) and simulation process to minimize the total waiting time for trucks at a customer site. The study focused on loading homogeneous trucks at the same batch plant, with fixed loading and unloading durations. The GA was used to find the best loading sequence of RMC trucks to be assigned to different construction sites. The simulation process determined the loading, arrival, departure, and waiting time of trucks and thus evaluated the cost of each dispatching sequence. They evaluated their method using data from a batch plant in Taiwan with up to nine customers served. \cite{lu2005optimized} used the same combination of GA and simulation to determine the optimal number of concrete mixers to be deployed and an optimal schedule for batching and delivering concrete. Their objective was to minimize the idle time of the site crew due to late concrete deliveries and truck queuing time. In this setting, it was also necessary to deliver a batch of mortar on-site to lubricate the unloading pump before the concrete delivery. As such, the simulation model also included the batch and delivery of mortar.
 
 In addition to simulation-based methods, several other approaches have been used in the literature to solve the CDP. These include metaheuristics \citep{ maghrebi2016sequential, yang2022concrete}, exact methods \citep{asbach2009analysis, kinable2014concrete}, matheuristics \citep{schmid2009hybrid, schmid2010hybridization}, Benders decomposition \citep{maghrebi2014benders}, column generation (CG) \citep{maghrebi2014solving}, Lagrangian relaxation \citep{narayanan2015using}, and machine learning approaches \citep{graham2006modeling}. \cite{matsatsinis2004towards} designed a decision support system (DSS) for the dynamic routing of both concrete and pumps that may be necessary for some construction sites to aid in the unloading of concrete. The DSS considered the availability of three plants but stipulated that vehicles fulfilling the same order must all load at the same plant. Orders that could not be executed immediately could be postponed for the next day. The routing of the pumps was modeled as a multi-depot vehicle routing problem with time windows. \cite{naso2007genetic} proposed a sequential GA method combined with constructive heuristics to solve another variant of the CDP. In this problem, the plant's production schedule must consider orders that must be delivered to a customer's site as well as orders that must be picked up by the customer. The algorithm schedules the plant loading operations first before scheduling the truck deliveries. The authors also developed a non-linear model that minimizes transportation costs, waiting times, outsourced costs, and overtime work. They ran experiments using real-world instances of a concrete supply chain in the Netherlands and found a reduction in the number of outsourced requests. \cite{yan2007optimal} also considered overtime considerations in their paper, which focused on scheduling RMC for one batch plant with two loading docks. The study took into account that overtime wages are paid for factory and construction site operations after 4 PM. They developed a mixed-integer programming (MIP) model on a time-space network to minimize travel times and operating costs at both normal and overtime working hours at the plant and the construction sites. They tested the model using real data consisting of three days of operation using a two-stage algorithm. First, they solved the MIP relaxation with CPLEX. Then, they simplified the original model by fixing some decision variables before solving it. The algorithm was found to improve the actual plant operation by 10\%. A time-space network is the key component of the real-time DSS developed by \cite{durbin2008or} to solve a dynamic CDP every five minutes. The DSS can receive new orders, schedule them on the fly, and handle unexpected events such as plant closures, truck breakdowns, and delays in transportation times. The authors combined the DSS with a tabu search (TS) heuristic to warm start CPLEX, which made the model performant enough to solve instances with up to 1,500 loads per day with up to 250 trucks. The DSS also considers the case of a customer who places two orders, with the first being completed before the second starts. Further insights on the real-time planning and monitoring of CDP are available in \cite{garza2021dynamic}. Another variant of the CDP is modeled by \cite{schmid2009hybrid} as an integer multicommodity network flow (MCNF) problem on a time-space network. In this paper, concrete is delivered using a heterogeneous fleet of vehicles, and each plant can load an unlimited number of trucks simultaneously. Some of the trucks have specialized equipment and must arrive first at certain construction sites to assist in unloading the concrete. The objective is to fulfill all orders, minimize the travel cost, and avoid delays between two consecutive unloading operations for an order. The model is typically solved using a matheuristic algorithm that combines the MCNF with a variable neighborhood search (VNS) heuristic. The method can quickly solve large problem instances with more than 60 orders per day. The same problem is addressed by \cite{schmid2010hybridization}, who proposed a MIP model combined with a VNS and a very large neighborhood search (VLNS) to develop two matheuristics approaches. Comparisons between both matheuristics and a standalone VNS show that the former methods are much better and suitable for solving larger problem instances. These methods also provide better solutions for small to medium instances than the matheuristic used in \cite{schmid2009hybrid}. A pure VNS approach with the same problem but without the use of instrumentation has been applied by \cite{payr2009optimizing}.
 
@@ -183,8 +183,7 @@ Each element of $O_c$ must be entirely delivered before moving on to another ord
 Let $n_o$ be the number of deliveries needed to fulfill the order $o$. $n_o$ is not known in advance because the trucks have different capacities. However, we can compute lower $n_o^{min}$ and upper $n_o^{max}$ bounds using the capacities of the largest $Q_{max}$ and smallest $Q_{min}$ available trucks.
 \begin{alignat}{3}
     \label{mod:c0}
-    n_o^{min} = \left\lceil \frac{q_o}{Q_{max}} \right\rceil \leq n_o \leq n_o^{max} = \left\lceil \frac{q_o}{Q_{min}} \right\rceil & \text{ } &
-    \forall  o \in O.
+    n_o^{min} = \left\lceil \frac{q_o}{Q_{max}} \right\rceil \leq n_o \leq n_o^{max} = \left\lceil \frac{q_o}{Q_{min}} \right\rceil.
 \end{alignat}
 
 Let $d^j_{o}$ be the $j^{th}$ visit with load $q^j_{o}$ for order $o$. We represent the fulfillment of order $o$ by the visits to the ordered set of delivery nodes $D_o= \left(d^1_{o},d^2_{o},\cdots, d^{n_o}_{o}\right)$. The deliveries of customer $c$ are the ordered set $D_c= (D_{o_1}, D_{o_2},\cdots,D_{o_{|O_c|}})$, where $o_r$ is the $r^{th}$ delivered order. We will refer to $d \in D_c$ ($d \in D_o$) as the $d^{th}$ potential delivery of customer $c$ (order $o$). $D=\bigcup_{c\in C} D_c$ is the union of all delivery nodes.
@@ -210,40 +209,40 @@ The objective function minimizes total travel cost ($TC$), penalties associated 
 \small
 \begin{alignat}{3}
     \label{mod:obj}   \min & \sum_{k \in K}{{ \sum_{ \substack{(i,j) \in A} }} {t_{ij}x^{k}_{ij}}} + \beta_1\smashoperator{\sum_{ o \in O}}{  \left(1-y_o\right)} \hspace{-0mm}  + \beta_2 \smashoperator{ \sum_{i \in C } } { g_i  } +  \sum_{k \in K}\left({\beta_3 w^{1}_k  + \beta_4  w^{2}_k}\right) &                             \\
-    \label{mod:c1}         & \sum_{j \in \delta^{+}(i) }{x^k_{ij}} =1   & \hspace{-10mm}  \forall i \in S, k \in K   \\
-    \label{mod:c2}         & \sum_{j \in \delta^{-}(i)}{x^k_{ji}} = 1     & \hspace{-10mm} \forall i \in E, k \in K\\
+    \label{mod:c1}         & \sum_{j \in \delta^{+}(i) }{x^k_{ij}} =1   & \hspace{-10mm}  i \in S, k \in K   \\
+    \label{mod:c2}         & \sum_{j \in \delta^{-}(i)}{x^k_{ji}} = 1     & \hspace{-10mm} i \in E, k \in K\\
     \label{mod:c03}        & v_j \geq  w_i  - M\left(1-x^{k}_{ij}\right)   & \hspace{-30mm}  i \in S, j \in \delta^{+}(i),  k \in K      \\
-    \label{mod:c3}         & v_j \geq  w_i + \alpha_{b} + t_{ij} - M\left(1-x^{k}_{ij}\right) & \hspace{-40mm} \forall b \in B, i \in L_b, j \in \delta^{+}(i),  k \in K     \\
-    \label{mod:c4}         & v_j \geq  w_i + \rho + t_{ij} - M\left(1-x^{k}_{ij}\right)                                                                       & \hspace{-40mm} \forall i \in D  , j \in \delta^{+}(i), k \in K                         \\
-    \label{mod:c5}         & w_{i} \geq v_{i}  + \frac{q^k_j}{\tau^l_b} -M\left(1- x^{k}_{ij}\right)   & \hspace{-40mm} \forall  b \in B,  i \in L_{b},  j \in \delta^{+}(i), k \in K \\
-    \label{mod:c6}         & w_{j} \geq v_{j}  + {  \frac{q^k_j}{\tau^u_c} -M\left(1- x^{k}_{ij}\right) }     & \hspace{-40mm}  \forall c \in  C, j \in D_{c}, i \in \delta^{-}(j),  k \in K \\
+    \label{mod:c3}         & v_j \geq  w_i + \alpha_{b} + t_{ij} - M\left(1-x^{k}_{ij}\right) & \hspace{-40mm} b \in B, i \in L_b, j \in \delta^{+}(i),  k \in K     \\
+    \label{mod:c4}         & v_j \geq  w_i + \rho + t_{ij} - M\left(1-x^{k}_{ij}\right)                                                                       & \hspace{-40mm} i \in D  , j \in \delta^{+}(i), k \in K                         \\
+    \label{mod:c5}         & w_{i} \geq v_{i}  + \frac{q^k_j}{\tau^l_b} -M\left(1- x^{k}_{ij}\right)   & \hspace{-40mm}  b \in B,  i \in L_{b},  j \in \delta^{+}(i), k \in K \\
+    \label{mod:c6}         & w_{j} \geq v_{j}  + {  \frac{q^k_j}{\tau^u_c} -M\left(1- x^{k}_{ij}\right) }     & \hspace{-40mm}  c \in  C, j \in D_{c}, i \in \delta^{-}(j),  k \in K \\
     \label{mod:c7}         & w_{j} \leq v_{i}  + \Delta + M\left(1- x^{k}_{ij}\right)  & \hspace*{-50mm} j \in D,  i \in \delta^{-}(j),  k \in K \text{ }  \\
-    \label{mod:c8}         & v_{d^0_{o}} \geq a_c    & \hspace{-50mm} \forall  c \in C, \forall o \in O_c \text{ }                           \\
-    \label{mod:c9}          & g_{c} \geq v_{d^0_{o_1}} - a_c - M\left(  \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})  }{u_{jd^0_{o_1}}}\right)  & \hspace{-50mm}  \forall  c \in C, \forall o_1 \in O_c \text{ }  \\
-    \label{mod:c91}  & g_{c} - a_c \leq \tau^w_c  & \hspace{-20mm}  \forall  c \in C \text{ }   \\
-    \label{mod:c101}       & v_{d^0_{o_1}} \geq w_j - M\left(1- u_{jd^0_{o_1}}\right)   & \hspace{-50mm}    \forall o_1 \in O_i,  j \in \delta_{D}^{-}(d^0_{o_1}) \text{ }                \\
-    \label{mod:c10}        & v_{d^0_{o_1}}  \leq  w_j + \gamma^2 + M\left(1- u_{j,d^0_{o_1}}\right)     & \hspace{-40mm}  \forall  o_1 \in O,  j \in \delta_{D}^{-}(d^0_{o_1}) \text{ }                    \\
-    \label{mod:c11}        & \sum_{ \substack{o_1 \in O_c }}{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } = |O_c|-1      & \hspace{-40mm} \forall  c \in C,|O_c| > 1   \text{ }   \\
-    \label{mod:c12}        & \sum_{ \substack{o_1 \in O_c }}\sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}{u_{d^0_{o_1},j } } = |O_c|-1      & \hspace{-40mm} \forall  c \in C, |O_c| > 1  \text{ }          \\
-    \label{mod:c13}    & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } \leq 1    & \hspace{-20mm}  \forall o_1 \in O \text{ }         \\
-    \label{mod:c14}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \leq 1      & \hspace{-20mm} \forall o_1 \in O \text{ }        \\
-    \label{mod:c15}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } +\smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \geq 1    & \hspace{-50mm} \forall o_1 \in O \text{ }    \\
-    \label{mod:c16}        & v_{j+1} \geq w_{j} - M\left(1- u_{j,j+1}\right)   & \hspace{-50mm}  \forall o \in O, j \in D_{o}, j \geq 1  \text{ }    \\
-    \label{mod:c17}        & v_{j+1}  \leq  w_{j} + \gamma^1 + M\left(1- u_{j,j+1}\right)    & \hspace{-60mm} \forall c \in C, \forall o \in O_c, j \in D_{o}, j \geq 1 \text{ }     \\
-    \label{mod:c18}        & u_{j,j+1} \geq u_{j+1,j+2}      & \hspace{-70mm} \forall o_1 \in O,  j \in D_{o_1}, 1 \leq j \leq n_{o_{1}}-2 \text{ }   \\
-    \label{mod:c19}        & u_{j,j+1} \geq \sum_{l \in L}{x_{lj}}   & \hspace{-60mm}  \forall o_1 \in O, j \in D_{o_1}, j \geq 1 \text{ }                   \\
-    \label{mod:c20}        & v_{j} \geq w_{i} - M\left(1- u_{i,j}\right)   & \hspace{-40mm}  \forall i \in L, j \in \delta^{+}_{L}(i) \text{ }  \\
-    \label{mod:c21}        & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{L}(i)}}{u_{i,j } } \leq 1     & \hspace{-40mm}  \forall i \in L \text{ }         \\
-    \label{mod:c22}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } \leq 1                                      & \hspace{-40mm} \forall i \in L           \text{ }       \\
-    \label{mod:c230}       & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } }  \geq \sum_{k \in K}\sum_{j \in  \delta^{-}(i) }{x^k_{ji}}    & \hspace{-40mm} \forall i \in L \text{ }                                                      \\
-    \label{mod:c231}       & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } \geq \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i+1)}}{u_{j,i+1 } }   & \hspace{-20mm} \forall i \in L  \text{ }                                                        \\
-    \label{mod:c23}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } + \smashoperator{ \sum_{ j \in \delta^{+}_{L}(i)}}{u_{i,j } } \geq \sum_{k \in K}\sum_{j \in  \delta^{-}(i) }{x^k_{ji}}    & \hspace{-20mm} \forall i \in L  \text{ }                                                        \\
-    \label{mod:c24}        & \sum_{k \in K}\sum_{j \in D_o}{q^k_j} = q_o            & \hspace{-40mm}  \forall o \in O  \text{ }           \\
-    \label{mod:c240}       & q^k_j \leq \sum_{i \in  \delta^{-}(j)}{Q^k x^k_{ij}}   & \hspace{-40mm}  \forall j \in D, k \in K  \text{ }                                              \\
+    \label{mod:c8}         & v_{d^0_{o}} \geq a_c    & \hspace{-50mm}  c \in C, o \in O_c \text{ }                           \\
+    \label{mod:c9}          & g_{c} \geq v_{d^0_{o_1}} - a_c - M\left(  \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})  }{u_{jd^0_{o_1}}}\right)  & \hspace{-50mm}   c \in C, o_1 \in O_c \text{ }  \\
+    \label{mod:c91}  & g_{c} - a_c \leq \tau^w_c  & \hspace{-20mm}   c \in C \text{ }   \\
+    \label{mod:c101}       & v_{d^0_{o_1}} \geq w_j - M\left(1- u_{jd^0_{o_1}}\right)   & \hspace{-50mm}    o_1 \in O_i,  j \in \delta_{D}^{-}(d^0_{o_1}) \text{ }                \\
+    \label{mod:c10}        & v_{d^0_{o_1}}  \leq  w_j + \gamma^2 + M\left(1- u_{j,d^0_{o_1}}\right)     & \hspace{-40mm}   o_1 \in O,  j \in \delta_{D}^{-}(d^0_{o_1}) \text{ }                    \\
+    \label{mod:c11}        & \sum_{ \substack{o_1 \in O_c }}{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } = |O_c|-1      & \hspace{-40mm}  c \in C,|O_c| > 1   \text{ }   \\
+    \label{mod:c12}        & \sum_{ \substack{o_1 \in O_c }}\sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}{u_{d^0_{o_1},j } } = |O_c|-1      & \hspace{-40mm}  c \in C, |O_c| > 1  \text{ }          \\
+    \label{mod:c13}    & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } \leq 1    & \hspace{-20mm}  o_1 \in O \text{ }         \\
+    \label{mod:c14}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \leq 1      & \hspace{-20mm} o_1 \in O \text{ }        \\
+    \label{mod:c15}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{+}_{D}(d^0_{o_1})}}{u_{d^0_{o_1},j } } +\smashoperator{ \sum_{ j \in \delta^{-}_{D}(d^0_{o_1})}}{u_{j,d^0_{o_1} } } \geq 1    & \hspace{-50mm} o_1 \in O \text{ }    \\
+    \label{mod:c16}        & v_{j+1} \geq w_{j} - M\left(1- u_{j,j+1}\right)   & \hspace{-50mm}  o \in O, j \in D_{o}, j \geq 1  \text{ }    \\
+    \label{mod:c17}        & v_{j+1}  \leq  w_{j} + \gamma^1 + M\left(1- u_{j,j+1}\right)    & \hspace{-60mm} c \in C, o \in O_c, j \in D_{o}, j \geq 1 \text{ }     \\
+    \label{mod:c18}        & u_{j,j+1} \geq u_{j+1,j+2}      & \hspace{-70mm} o_1 \in O,  j \in D_{o_1}, 1 \leq j \leq n_{o_{1}}-2 \text{ }   \\
+    \label{mod:c19}        & u_{j,j+1} \geq \sum_{l \in L}{x_{lj}}   & \hspace{-60mm}  o_1 \in O, j \in D_{o_1}, j \geq 1 \text{ }                   \\
+    \label{mod:c20}        & v_{j} \geq w_{i} - M\left(1- u_{i,j}\right)   & \hspace{-40mm}  i \in L, j \in \delta^{+}_{L}(i) \text{ }  \\
+    \label{mod:c21}        & \hspace{3mm} \smashoperator{ \sum_{ j \in \delta^{+}_{L}(i)}}{u_{i,j } } \leq 1     & \hspace{-40mm}  i \in L \text{ }         \\
+    \label{mod:c22}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } \leq 1                                      & \hspace{-40mm} i \in L           \text{ }       \\
+    \label{mod:c230}       & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } }  \geq \sum_{k \in K}\sum_{j \in  \delta^{-}(i) }{x^k_{ji}}    & \hspace{-40mm} i \in L \text{ }                                                      \\
+    \label{mod:c231}       & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } \geq \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i+1)}}{u_{j,i+1 } }   & \hspace{-20mm} i \in L  \text{ }                                                        \\
+    \label{mod:c23}        & \hspace{2mm} \smashoperator{ \sum_{ j \in \delta^{-}_{L}(i)}}{u_{j,i } } + \smashoperator{ \sum_{ j \in \delta^{+}_{L}(i)}}{u_{i,j } } \geq \sum_{k \in K}\sum_{j \in  \delta^{-}(i) }{x^k_{ji}}    & \hspace{-20mm} i \in L  \text{ }                                                        \\
+    \label{mod:c24}        & \sum_{k \in K}\sum_{j \in D_o}{q^k_j} = q_o            & \hspace{-40mm}  o \in O  \text{ }           \\
+    \label{mod:c240}       & q^k_j \leq \sum_{i \in  \delta^{-}(j)}{Q^k x^k_{ij}}   & \hspace{-40mm}  j \in D, k \in K  \text{ }                                              \\
     \label{mod:c25}        & \sum_{k \in K}\sum_{j \in \delta^{+}(i)}{x^{k}_{ij} \leq 1}     & \hspace{-40mm} i \in L \cup D       \text{ }          \\
     \label{mod:c26}        & \sum_{k \in K}\sum_{j \in \delta^{+}(i)} {x^{k}_{ij} } =  \sum_{k \in K}\sum_{j \in \delta^{-}(i)}{x^{k}_{ji} }        & \hspace{-40mm}  i \in L \cup D  \text{ }       \\
-    \label{mod:c29}        & w^1_k \geq  \mu + h_k - v_{e_k}            & \hspace{-40mm} \forall k \in K   \text{ }         \\
-    \label{mod:c30}        & w^2_k \geq (v_{e_k} - h_k) - \eta   & \hspace{-40mm} \forall k \in K         \text{ }         \\
+    \label{mod:c29}        & w^1_k \geq  \mu + h_k - v_{e_k}            & \hspace{-40mm} k \in K   \text{ }         \\
+    \label{mod:c30}        & w^2_k \geq (v_{e_k} - h_k) - \eta   & \hspace{-40mm} k \in K         \text{ }         \\
     \label{mod:c31}   & w_{e_k} \leq h_k + \varLambda  & \hspace{-20mm}  k \in K \hspace{0mm}       \text{ }                                            \\
     \label{mod:c32}        & 0 \leq q^k_j \leq Q^k   & \hspace{-40mm}  j \in D, k \in K      \text{ }                                                   \\
     \label{mod:c33}        & x^k_{ij} \in \{0,1\}      & \hspace{-40mm}  (i,j) \in A , k \in K   \text{ }                                            \\
@@ -295,7 +294,7 @@ This section presents the heuristic approach to solving the Concrete Delivery Pr
 
 \subsection{GRASP algorithm}
 
-The Greedy Randomized Search Procedure (GRASP) algorithm is a multi-start metaheuristic for combinatorial optimization problems proposed by \cite{feo1989probabilistic}. It has been successfully applied to solving scheduling problems \citep{bamoumen2023efficient,yepes2023flowshop} and transportation-related problems such as the prisoner transportation problem \citep{ferone2023efficient} and the truck and trailer routing problem \citep{villegas2011grasp}. The GRASP is a two-phase iterative sequence of constructive and local search algorithms. A feasible solution is generated in the construction phase using a greedy randomized algorithm. Then, a local search phase tries to improve it. Algorithm~\ref{alg_grasp} outlines the GRASP algorithm. We start with a list of greedy randomized heuristics and iterate on each to construct an incumbent solution $Sol$ on which we apply a local search procedure to explore its neighborhood. The best solution found so far is then stored. To avoid redundant computations, a hash table $T$ ensures that the local search is not applied twice to the same solution. The procedure stops and returns the best overall solution when certain stopping conditions are met, such as reaching a time limit or a maximum number of iterations. 
+The Greedy Randomized Search Procedure (GRASP) algorithm is a multi-start metaheuristic for combinatorial optimization problems proposed by \cite{feo1989probabilistic}. It has been successfully applied to solving scheduling problems \citep{bamoumen2023efficient,yepes2023flowshop} and transportation-related problems such as the prisoner transportation problem \citep{ferone2023efficient} and the truck and trailer routing problem \citep{villegas2011grasp}. The GRASP is a two-phase iterative sequence of constructive and local search algorithms. A feasible solution is generated in the construction phase using a greedy randomized algorithm. Then, a local search phase tries to improve it. Algorithm~\ref{alg_grasp} outlines the GRASP algorithm. We start with a list of greedy randomized heuristics and iterate on each to construct an incumbent solution $Sol$ on which we apply a local search procedure to explore its neighborhood. The best solution found so far is then stored. To avoid redundant computations, a hash table $T$ ensures that the local search is not applied twice to the same solution. The procedure stops and returns the best overall solution when certain stopping conditions are met, such as reaching a time limit or a maximum number of iterations.
     \begin{algorithm}[hbpt]
         \caption{Pseudo-code of the GRASP algorithm }
         \label{alg_grasp}
@@ -328,7 +327,7 @@ The Greedy Randomized Search Procedure (GRASP) algorithm is a multi-start metahe
 
         \KwRet{$S^{*}$}
     \end{algorithm}
-            
+
 For the construction phase, we developed two greedy randomized heuristics: the customer-based insertion with backtracking, which schedules customers one at a time, and the delivery-based insertion.%, which does not necessarily complete the scheduling of one customer before starting to schedule another.
 % The greedy aspect of GRASP is the creation of the set $RCL$, the probabilistic aspect is the random selection in $RCL$, and the adaptive aspect is the updating of $CL$ and the re-evaluation of the incremental costs.
 
@@ -338,9 +337,9 @@ The customer-based insertion heuristic builds a solution from scratch by iterati
 
 To schedule an order $o$, we begin with its first delivery node. Once this node is scheduled, we proceed to schedule the subsequent delivery nodes until $o$ is completely served. For each delivery node $d$, the algorithm identifies between lines $9$ and $12$ each driver capable of visiting this node using the $SimulateVisit$ procedure. For all drivers able to serve $d$, at line $12$ we store the details about the pair of loading and unloading tasks and its cost in $M[d]$.
 
-If at least one driver can serve the node (line $13$), we randomly select at line $16$  a pair of loading and unloading tasks whose cost falls within a specified range based on a parameter $\theta$ and insert this pair into $Sol$ at line $18$. Then we update the order remaining demand and proceed with the next delivery node at line $19$. 
+If at least one driver can serve the node (line $13$), we randomly select at line $16$  a pair of loading and unloading tasks whose cost falls within a specified range based on a parameter $\theta$ and insert this pair into $Sol$ at line $18$. Then we update the order remaining demand and proceed with the next delivery node at line $19$.
 
-In cases where no driver can visit the node $d$, the algorithm employs a backtracking scheme to address two distinct scenarios. First, if the visit to $d$ cannot be scheduled due to cold-joint constraints (i.e., the time between consecutive deliveries exceeds $\gamma^1$), the $DelayPreviousDelivery$ procedure is employed. This procedure determines if a previous delivery $D^{j'}_o$ of the same order exists such that $d$ can be successfully scheduled in the current solution by delaying the start of service of $D^{j'}_o$ by $\lambda$. If $D^{j'}_o$ exists, the schedules of all delivery nodes between $D^{j'}_o$ and $d$ are removed, and the scheduling of order $o$ resumes from $D^{j'}_o$. 
+In cases where no driver can visit the node $d$, the algorithm employs a backtracking scheme to address two distinct scenarios. First, if the visit to $d$ cannot be scheduled due to cold-joint constraints (i.e., the time between consecutive deliveries exceeds $\gamma^1$), the $DelayPreviousDelivery$ procedure is employed. This procedure determines if a previous delivery $D^{j'}_o$ of the same order exists such that $d$ can be successfully scheduled in the current solution by delaying the start of service of $D^{j'}_o$ by $\lambda$. If $D^{j'}_o$ exists, the schedules of all delivery nodes between $D^{j'}_o$ and $d$ are removed, and the scheduling of order $o$ resumes from $D^{j'}_o$.
 
 The procedure $DelayPreviousDelivery$ computes the difference $\lambda$ between the earliest time a driver can visit $D^{j}_o$ and the end of service of its immediate predecessor node $D^{j-1}_o$. Then, it tries to find one of the precedent nodes of $D^{j}_o$ for which we can delay the start of service of at least $\lambda = min(\lambda,\gamma^1)$. If such a node exists, the procedure returns it and the value of the delay. Then we backtrack to this node and restart the scheduling process.
 
@@ -384,7 +383,7 @@ Algorithm~\ref{alg:greedyCustIns} is designed with a list of customers as input.
                         $(L^k_{d}$, $U^k_{d},cost,f)$ $\leftarrow $ SimulateVisit($Sol$,$d$,$k$,$\lambda$)
 
                         \uIf{f=1}{
-                                $M[d] \leftarrow M[d] \cup \{(L^k_{d}, U^k_{d},cost,k)\}$ 
+                                $M[d] \leftarrow M[d] \cup \{(L^k_{d}, U^k_{d},cost,k)\}$
                             }
                     }
                 }
@@ -394,11 +393,11 @@ Algorithm~\ref{alg:greedyCustIns} is designed with a list of customers as input.
     $c_{min} \leftarrow \min\left\{ cost \ | \ (L^k_{d}, U^k_{d},cost,k) \in M[d]   \right\} $
 
 $c_{max} \leftarrow \max\left\{ cost \ | \ (L^k_{d}, U^k_{d},cost,k) \in M[d]   \right\} $
-    
+
     Randomly choose $(L^k_{d}, U^k_{d},cost,k)$ in $M[d]$ such that $cost \leq c_{min} + \theta (c_{max}-c_{min}) $
 
     $M[d]\leftarrow M[d] \backslash \{(L^k_{d}, U^k_{d},cost,k)\} $
-    
+
     $Sol \leftarrow Sol \cup \{(L^k_{d}$, $U^k_{d})\}  $
 
         $\bar{q}_o \leftarrow \bar{q}_o-q^k_{d}$, $\lambda \leftarrow 0$, $j \leftarrow j+1$
@@ -410,12 +409,12 @@ $c_{max} \leftarrow \max\left\{ cost \ | \ (L^k_{d}, U^k_{d},cost,k) \in M[d]   
 
         \uIf{no $D^{j'}_o$ exists}{
 
-            $Sol \leftarrow Sol \backslash \{(L^k_{i}, U^k_{i}), \forall i \in D_c\}$
+            $Sol \leftarrow Sol \backslash \{(L^k_{i}, U^k_{i}), i \in D_c\}$
 
             Go to line 2 \tcp{continue with next customer}
 }
 
-$Sol \leftarrow Sol \backslash \{(L^k_{i}, U^k_{i}), \forall i \in (D^{j'}_{o},..,D^{j-1}_{o})  \}$
+$Sol \leftarrow Sol \backslash \{(L^k_{i}, U^k_{i}), i \in (D^{j'}_{o},..,D^{j-1}_{o})  \}$
 
 Update $\bar{q}_o$
 
@@ -428,12 +427,12 @@ $j \leftarrow j'$, $\lambda \leftarrow delay$
 
     \uIf{ no $D^{j'}_o$ exists}{
 
-    $Sol \leftarrow Sol \backslash \{(L^k_{i}, U^k_{i}), \forall i \in D_c\}$
+    $Sol \leftarrow Sol \backslash \{(L^k_{i}, U^k_{i}), i \in D_c\}$
 
     Go to line 2 \tcp{continue with next customer}
     }
 
-    $Sol \leftarrow Sol \backslash \{(L^k_{i}, U^k_{i}), \forall i \in (D^{j'}_{o},..,D^{j-1}_{o})  \}$
+    $Sol \leftarrow Sol \backslash \{(L^k_{i}, U^k_{i}), i \in (D^{j'}_{o},..,D^{j-1}_{o})  \}$
 
     Update $\bar{q}_o$
 
@@ -443,7 +442,7 @@ $j \leftarrow j'$, $\lambda \leftarrow delay$
                         }
 
                     }
-                    
+
                 }
             }
         }
@@ -454,14 +453,14 @@ When confronted with scenarios where several customers require their services to
 
 \subsection{Delivery-based insertion heuristic}
 
-The delivery-based insertion heuristic (Algorithm~\ref{alg:delbasedIns}) iteratively constructs a solution from scratch by scheduling one delivery node at a time. The algorithm starts with an empty solution $Sol$ and initially fills a candidate list $CL$ with the first node of a randomly selected order for each customer. Within each iteration of the $while$ loop, the algorithm filters $CL$ to obtain a reduced candidate list $CL'$ of deliveries based on a specified criterion, such as prioritizing deliveries with the highest (lowest) demands, earliest (latest) due dates, or lowest order numbers. This filtering is performed by the $Filter$ procedure, allowing the algorithm to explore different neighborhoods. Thus, within the GRASP framework, we can invoke the delivery-based heuristic multiple times with different filtering procedures which evaluate different neighborhoods. 
+The delivery-based insertion heuristic (Algorithm~\ref{alg:delbasedIns}) iteratively constructs a solution from scratch by scheduling one delivery node at a time. The algorithm starts with an empty solution $Sol$ and initially fills a candidate list $CL$ with the first node of a randomly selected order for each customer. Within each iteration of the $while$ loop, the algorithm filters $CL$ to obtain a reduced candidate list $CL'$ of deliveries based on a specified criterion, such as prioritizing deliveries with the highest (lowest) demands, earliest (latest) due dates, or lowest order numbers. This filtering is performed by the $Filter$ procedure, allowing the algorithm to explore different neighborhoods. Thus, within the GRASP framework, we can invoke the delivery-based heuristic multiple times with different filtering procedures which evaluate different neighborhoods.
 
 Between lines $14$ and $18$, for each delivery $d$ in $CL'$, the algorithm determines the best available driver $k$ who can visit it. Then, the corresponding pair of loading and unloading tasks $(L^k_d, U^k_d)$, along with its costs, are stored in $M[d]$. This is done using the $SimulateVisit$ procedure described earlier. Then, the algorithm constructs at line $20$ a list $T$ containing all pairs of loading and unloading tasks for the delivery nodes in $CL'$.
 If $T$ is empty, the algorithm assumes that the customers associated with the nodes in $CL'$ cannot be scheduled, and it removes those customers' existing schedules from the solution. It then excludes $CL'$ from $CL$ at line $25$ and proceeds to the next iteration.
 
 Otherwise, from line $26$ to line $29$, the algorithm randomly selects from $T$ a pair of loading and unloading tasks whose cost falls within a specified range determined by the parameter $\theta$ and inserts this pair into $Sol$. The algorithm then updates the remaining orders and customer quantities and excludes the scheduled delivery node from $CL$. If an order $o$ is not completely fulfilled after visiting $d^j_{o}$, the next delivery node $d^{j+1}_{o}$ is added to $CL$.  Otherwise, if the customer has remaining orders, the first delivery node $d^{1}_{o'}$ of another randomly selected order $o'$ is added to $CL$.
 %In these two heuristics, the greedy aspect of GRASP refers to the creation of the set $RCL$, the probabilistic aspect is the random selection in $RCL$, and the adaptive part is the updating of $CL$ and the re-evaluation of the costs.
- 
+
 \begin{algorithm}[!ht]
     \caption{Delivery-based insertion algorithm }
     \label{alg:delbasedIns}
@@ -501,30 +500,30 @@ Otherwise, from line $26$ to line $29$, the algorithm randomly selects from $T$ 
                 $(L^k_{d}$, $U^k_{d},cost,f)$ $\leftarrow $ SimulateVisit($Sol$,$d$,$k$,$\lambda$)
 
                 \uIf{f=1 and $cost <       best\_cost$}{
-                    $M[d] \leftarrow \{(L^k_{d}, U^k_{d},cost,k)\}$ 
+                    $M[d] \leftarrow \{(L^k_{d}, U^k_{d},cost,k)\}$
 
                     $best\_cost \leftarrow cost$
                 }
             }
 
             \uIf{$M[d]\neq \emptyset$}{
-                $T \leftarrow T \cup M[d]$    
+                $T \leftarrow T \cup M[d]$
             }
         }
         \uIf{$T = \emptyset$}{
             \ForEach{$d \in CL'$}{
-            
+
            $c \leftarrow $ customer associated with $d$
 
-            $Sol \leftarrow Sol \backslash \{(L^k_j,U^k_j), \forall j \in D_c \}$
+            $Sol \leftarrow Sol \backslash \{(L^k_j,U^k_j), j \in D_c \}$
            }
-           $CL \leftarrow CL\backslash CL'$ 
+           $CL \leftarrow CL\backslash CL'$
         }
         \uElse{
             $c_{min} \leftarrow \min\left\{ cost \ | \ (L^k_{d}, U^k_{d},cost,k) \in T   \right\} $, $c_{max} \leftarrow \max\left\{ cost \ | \ (L^k_{d}, U^k_{d},cost,k) \in T   \right\} $
-    
+
             Randomly choose $(L^k_{d^j_o}, U^k_{d^j_o},cost,k) \in T$ such that $cost \leq c_{min} + \theta (c_{max}-c_{min}) $
-            
+
             $Sol \leftarrow Sol \cup \{(L^k_{d^j_o}$, $U^k_{d^j_o})\} $
 
             $\bar{q}_o \leftarrow \bar{q}_o-q^k_{d^j_o}$, $\bar{q}_c \leftarrow \bar{q}_c-q^k_{d^j_o}$ \tcp{$o \in O_c$}
@@ -542,27 +541,28 @@ Otherwise, from line $26$ to line $29$, the algorithm randomly selects from $T$ 
                 $CL \leftarrow CL \cup \{d^{1}_{o'}\} $
             }
 
-        }      
+        }
     }
         \KwRet{$Sol$}
 \end{algorithm}
 
 \subsection{Local Search}
 
-After the construction phase, the local search phase invokes local search operators to either repair or improve the incumbent. One operator is used to repair a solution where not all customers are scheduled. Then four operators are used to improve the incumbent using a first-improvement strategy. The local search continues until no more improvements can be made or a timeout is reached. 
+After the construction phase, the local search phase invokes local search operators to either repair or improve the incumbent. One operator is used to repair a solution where not all customers are scheduled. Then four operators are used to improve the incumbent using a first-improvement strategy. The local search continues until no more improvements can be made or a timeout is reached.
 
 \subsubsection{Repair operator}
 
-The Remove and Reschedule operator is used to address situations where a solution contains unscheduled customers. This operator first selects an unscheduled customer $c$ from the solution and identifies a set $\Pi_c$ containing scheduled customers sharing the same time slot with $c$. The schedules of all elements of $\Pi_c$ are then removed from the solution and retried to be scheduled again along with $c$. 
+The Remove and Reschedule operator is used to address situations where a solution contains unscheduled customers. This operator first selects an unscheduled customer $c$ from the solution and identifies a set $\Pi_c$ containing scheduled customers sharing the same time slot with $c$. The schedules of all elements of $\Pi_c$ are then removed from the solution and retried to be scheduled again along with $c$.
 
 \subsubsection{Improvement operators}
 
-The first improvement or Load Backward operator is used when dealing with solutions containing customers whose first delivery is late. In such cases, the goal is to schedule the loading start time for the first delivery node for these customers as early as possible. This operator is implemented by iterating backward through the timeslots data structure when calculating the loading start time within the $SimulateVisit$ procedure. By doing so, the operator aims to find a loading start time that allows for earlier delivery, thus reducing the late first delivery cost. The other improvement operators are based on the swap and relocate moves. 
+The first improvement or Load Backward operator is used when dealing with solutions containing customers whose first delivery is late. In such cases, the goal is to schedule the loading start time for the first delivery node for these customers as early as possible. This operator is implemented by iterating backward through the timeslots data structure when calculating the loading start time within the $SimulateVisit$ procedure. By doing so, the operator aims to find a loading start time that allows for earlier delivery, thus reducing the late first delivery cost. The other improvement operators are based on the swap and relocate moves.
 
-We have implemented two moves based on the swap operator. The Swap Driver operator explores alternative driver assignments by swapping drivers assigned to two delivery nodes. This allows for the assessment of different driver configurations, potentially leading to improvements in solution quality. The Swap Load operator exchanges loads between a delivery node and the last delivery node of the same order. In our greedy randomized heuristics, all deliveries of an order are typically filled to capacity, except for the last one.  This operator investigates the effect of delivering this last load much earlier in the delivery sequence. Delivering the final load earlier in the sequence can improve the loading operations, as it may be easier to find an empty timeslot for inserting a loading task with a smaller load. 
+We have implemented two moves based on the swap operator. The Swap Driver operator explores alternative driver assignments by swapping drivers assigned to two delivery nodes. This allows for the assessment of different driver configurations, potentially leading to improvements in solution quality. The Swap Load operator exchanges loads between a delivery node and the last delivery node of the same order. In our greedy randomized heuristics, all deliveries of an order are typically filled to capacity, except for the last one.  This operator investigates the effect of delivering this last load much earlier in the delivery sequence. Delivering the final load earlier in the sequence can improve the loading operations, as it may be easier to find an empty timeslot for inserting a loading task with a smaller load.
 
 We also implemented two moves based on the relocate operator. The Consolidate Load operator is applied on an order with a remaining demand between $]Q_{min},Q_{max}]$. If this remaining demand is served with two drivers with capacity $Q_{min}$, then the operator tries to consolidate it to be served by a single driver with a capacity of $Q_{max}$. Next, the Relocate Driver operator removes a delivery node from its current route and inserts it in another driver's route. This enables the redistribution of delivery nodes among drivers, potentially reducing drivers underutilization and overtime costs.
 % \clearpage
+
 \section{Computational experiments}
 \label{sec:cdp_comp_exp}
 
@@ -709,11 +709,11 @@ $FDD$ represents the sum of the delays of the first deliveries. In the case of s
     }
     \begin{minipage}{\textwidth}
     \vspace{0.1cm}
-    {\scriptsize \hspace*{-5mm} $TC$: travel cost, $UQ$: undelivered quantity, $FDD$: first delivery delay, $mFDD$: maximum of first delivery delays, $DUC$: driver underutilization cost, $DOC$: driver overtime cost.}        
+    {\scriptsize \hspace*{-5mm} $TC$: travel cost, $UQ$: undelivered quantity, $FDD$: first delivery delay, $mFDD$: maximum of first delivery delays, $DUC$: driver underutilization cost, $DOC$: driver overtime cost.}
     \end{minipage}
 \end{table}
 
-Table \ref{tab_cdp_runtime} shows that a higher percentage of deliveries are completed as the algorithm runtime increases. For small instances, all requests are scheduled in less than a minute of runtime, while for medium and large instances, 99\% of requests are scheduled to be delivered with only a minute of runtime. 
+Table \ref{tab_cdp_runtime} shows that a higher percentage of deliveries are completed as the algorithm runtime increases. For small instances, all requests are scheduled in less than a minute of runtime, while for medium and large instances, 99\% of requests are scheduled to be delivered with only a minute of runtime.
 
 \begin{table}[ht!]
     \centering
@@ -797,7 +797,7 @@ The medium instance $C\_42\_47\_104\_8$ has an unserved customer with a demand o
     }
     \begin{minipage}{\textwidth}
         \vspace{0.1cm}
-        {\scriptsize $TC$: travel cost, $UQ$: undelivered quantity, $FDD$: first delivery delay, $mFDD$: maximum of first delivery delays.}        
+        {\scriptsize $TC$: travel cost, $UQ$: undelivered quantity, $FDD$: first delivery delay, $mFDD$: maximum of first delivery delays.}
         \end{minipage}
 \end{table}
 
@@ -822,7 +822,7 @@ Large & 21,810.5 & 14.7 & 945.0 & 56.4 & 22,283.6 & 0.0 & 168.7 & 31.0 \\
     }
     \begin{minipage}{\textwidth}
         \vspace{0.1cm}
-        {\scriptsize $TC$: travel cost, $UQ$: undelivered quantity, $FDD$: first delivery delay, $mFDD$: maximum of first delivery delays.}        
+        {\scriptsize $TC$: travel cost, $UQ$: undelivered quantity, $FDD$: first delivery delay, $mFDD$: maximum of first delivery delays.}
         \end{minipage}
 \end{table}
 
@@ -864,7 +864,7 @@ We ran five tests on our dataset and obtained two solutions per instance: one th
     \bottomrule
     \end{tabular}
 \end{adjustbox}
-    
+
 \end{table}
 
 \section{Conclusion}
@@ -872,12 +872,11 @@ We ran five tests on our dataset and obtained two solutions per instance: one th
 
 In this paper, we investigated a variant of the concrete delivery problem, where customers can order different types of concrete from different production centers, which must be delivered during the same time window. To solve this problem, we introduced a mathematical model and a heuristic solution based on Greedy Randomized Adaptive Search. Our analysis, using a dataset derived from our partner's historical data, demonstrated the effectiveness of our algorithm in providing good solutions within a reasonable time. Furthermore, our model incorporates constraints related to working hours, making our heuristic a valuable tool for designing weekly schedules for company drivers. It can also better reassign drivers to their home plants, as these assignments affect travel costs to ensure timely deliveries. Our GRASP algorithm performed exceptionally well on the \cite{kinable2014concrete} datasets, indicating its reliability. For future work, it would be interesting to address datasets with different unloading times at construction sites or to explore different scenarios regarding the number of simultaneous deliveries and the maximum time between two consecutive orders at a construction site. One can also study the problem using a stochastic or robust methodology to account for the uncertainty of the parameters in a real-world setting. As a contribution to the literature on CDP, we provide a mathematical formulation for our variant, contribute with a dataset, and demonstrate the application of GRASP to solve both our real problem and the one studied by \cite{kinable2014concrete}.
 
-
 \vspace{1.cm} \noindent \textbf{Acknowledgments}
 
 Financial support for this work was provided by the Canadian Natural Sciences and Engineering Research Council (NSERC) under grants 2019-00094 and 2021-04037. This support is gratefully acknowledged. We thank the Digital Research Alliance of Canada for providing high-performance computing facilities.
 
- \bibliographystyle{elsarticle-num-names} 
+ \bibliographystyle{elsarticle-num-names}
  \bibliography{References}
 
 \end{document}
